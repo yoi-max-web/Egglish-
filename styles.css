@@ -708,12 +708,28 @@ ul {
         width: 100%;
     }
 
+    .hero__illustration {
+        width: 100%;
+        margin-top: 60px; 
+    }
+
     .speech-bubble {
         right: auto;
         left: 50%;
         transform: translateX(-50%);
         top: -60px;
-        width: 250px;
+        width: max-content;
+        max-width: 280px;
+    }
+
+    .character-circle {
+        width: 280px;
+        height: 280px;
+        margin: 0 auto;
+    }
+
+    .character {
+        font-size: 120px;
     }
 
     .features__grid {
