@@ -428,3 +428,83 @@ body {
         justify-content: center;
     }
 }
+/* --- Footer Corregido (Diseño Final) --- */
+.site-footer {
+    background-color: var(--bg-main); /* Usa el beige clarito de tus variables */
+    padding: 60px 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    text-decoration: none;
+}
+
+.footer-egg {
+    font-size: 2rem;
+}
+
+.footer-brand {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.footer-tagline {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 30px;
+    max-width: 500px;
+}
+
+.footer-socials {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.social-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background-color: #EAF2F8; /* Azul muy pálido de tus variables */
+    color: #5C93C4; /* Color del icono */
+    border-radius: 50%;
+    text-decoration: none;
+    font-size: 1.4rem;
+    transition: var(--transition);
+}
+
+/* El Hover amarillo que luce como la Imagen 2 */
+.social-item:hover, .active-social {
+    transform: translateY(-3px);
+}
+
+.footer-copyright {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #A0B2C1;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 10px;
+}
+
+/* Reset de posibles conflictos con links globales */
+.footer-socials a, .footer-logo a {
+    border-bottom: none !important;
+}
