@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
             menuIcon.classList.add('ph-list');
         }
     });
+    
 
     const observerOptions = {
         root: null,
