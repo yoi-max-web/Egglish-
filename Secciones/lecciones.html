@@ -6,35 +6,39 @@
   <title>Egglish – Lecciones</title>
   <link rel="stylesheet" href="/Secciones/Css/lecciones.css">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
- <!-- NAVBAR -->
-    <nav class="navbar">
-  <a href="/index.html" class="navbar-logo">
-    <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="logo-img"/>
-    <span class="logo-text">Egglish</span>
-  </a>
+  <script src="/Secciones/Js/env-config.js"></script>
+  <script type="module" src="/Secciones/Js/eggy-widget.js"></script>
+</head>
+<body>
 
-  <button class="hamburger" id="hamburger-btn">
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
-   
-  <div class="nav-menu" id="nav-menu">
-    <ul class="navbar-links">
-      <li><a href="/index.html">🏠 Inicio</a></li>
-      <li><a href="/Secciones/lecciones.html" class="active">📖 Lecciones</a></li>
-      <li><a href="/Secciones/Escucha.html">🎯 Escucha</a></li>
-      <li><a href="/Secciones/juegos.html">🎮 Juegos</a></li>
-      <li><a href="/Secciones/perfil.html">👤 Perfil</a></li>
-      <li><a href="/Secciones/eggy.html">🤖 Eggy IA</a></li>
-    </ul>
+  <!-- NAVBAR (no modificar) -->
+  <nav class="navbar">
+    <a href="/index.html" class="navbar-logo">
+      <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="logo-img"/>
+      <span class="logo-text">Egglish</span>
+    </a>
 
-    <div class="navbar-auth">
-      <a href="/entrar.html" class="btn-entrar">→ Entrar</a>
-      <a href="/Secciones/Registro.html" class="btn-registrarse">Registrarse</a>
+    <button class="hamburger" id="hamburger-btn">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="nav-menu" id="nav-menu">
+      <ul class="navbar-links">
+        <li><a href="/index.html">🏠 Inicio</a></li>
+        <li><a href="/Secciones/lecciones.html" class="active">📖 Lecciones</a></li>
+        <li><a href="/Secciones/Escucha.html">🎯 Escucha</a></li>
+        <li><a href="/Secciones/juegos.html">🎮 Juegos</a></li>
+        <li><a href="/Secciones/perfil.html">👤 Perfil</a></li>
+      </ul>
+
+      <div class="navbar-auth">
+        <a href="/entrar.html" class="btn-entrar">→ Entrar</a>
+        <a href="/Secciones/Registro.html" class="btn-registrarse">Registrarse</a>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
 
   <!-- LEVEL TABS -->
   <div class="level-tabs-wrapper">
@@ -49,226 +53,29 @@
     </button>
   </div>
 
-  <!-- PATH -->
-  <main class="path-main">
+  <!-- HEADER DE RACHA / RESUMEN -->
+  <div class="path-stats-bar" id="path-stats-bar">
+    <div class="path-stat"><span class="path-stat-icon">🔥</span><span id="stat-streak">0</span></div>
+    <div class="path-stat"><span class="path-stat-icon">⭐</span><span id="stat-total-xp">0</span></div>
+    <div class="path-stat"><span class="path-stat-icon">🏆</span><span id="stat-lessons-done">0</span><span class="path-stat-sub">/12</span></div>
+  </div>
 
-    <!-- ═══ A1 ═══ -->
-    <div class="level-panel active" id="panel-a1">
-
-      <div class="unit-header" style="background: linear-gradient(135deg, #58cc02, #46a302);">
-        <div class="unit-header-left">
-          <div class="unit-label">Sección 1</div>
-          <div class="unit-title">Pide en un café</div>
-        </div>
-        <button class="unit-header-btn">📖 GUÍA</button>
-      </div>
-
-      <div class="path-track" data-level="a1" data-unit="1" data-unit-size="5" data-lesson-key="cafe">
-        <div class="node-row" style="margin-top:20px;">
-          <button class="lesson-node" data-lesson-id="a1-0" data-lesson-key="cafe" data-label="Saludos" data-xp="10">
-            <span class="node-icon node-star">⭐</span>
-            <span class="node-tooltip">Saludos</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-1" data-lesson-key="cafe" data-label="Colores" data-xp="10" style="margin-left:80px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Colores</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-2" data-lesson-key="cafe" data-label="Números" data-xp="10" style="margin-right:80px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Números</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-3" data-lesson-key="cafe" data-label="Animales" data-xp="10" style="margin-left:80px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Animales</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-4" data-lesson-key="cafe" data-label="Familia" data-xp="10" style="margin-right:60px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Familia</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="unit-header" style="background: linear-gradient(135deg, #ffc800, #d4a700);">
-        <div class="unit-header-left">
-          <div class="unit-label">Sección 2</div>
-          <div class="unit-title">Saluda y preséntate</div>
-        </div>
-        <button class="unit-header-btn">📖 GUÍA</button>
-      </div>
-
-      <div class="path-track" data-level="a1" data-unit="2" data-unit-size="4" data-lesson-key="presentacion">
-        <div class="node-row" style="margin-top:20px;">
-          <button class="lesson-node" data-lesson-id="a1-5" data-lesson-key="presentacion" data-label="Comida" data-xp="15" style="margin-right:80px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Comida</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-6" data-lesson-key="presentacion" data-label="Ropa" data-xp="15" style="margin-left:80px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Ropa</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-7" data-lesson-key="presentacion" data-label="Casa" data-xp="15" style="margin-right:60px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Casa</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-8" data-lesson-key="presentacion" data-label="Ciudad" data-xp="15" style="margin-left:60px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Ciudad</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="unit-header" style="background: linear-gradient(135deg, #1cb0f6, #0090d9);">
-        <div class="unit-header-left">
-          <div class="unit-label">Sección 3</div>
-          <div class="unit-title">Mis primeras oraciones</div>
-        </div>
-        <button class="unit-header-btn">📖 GUÍA</button>
-      </div>
-
-      <div class="path-track" data-level="a1" data-unit="3" data-unit-size="4" data-lesson-key="oraciones">
-        <div class="node-row" style="margin-top:20px;">
-          <button class="lesson-node" data-lesson-id="a1-9" data-lesson-key="oraciones" data-label="Yo soy" data-xp="20" style="margin-right:80px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Yo soy</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-10" data-lesson-key="oraciones" data-label="Tengo" data-xp="20" style="margin-left:80px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Tengo</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-11" data-lesson-key="oraciones" data-label="Me gusta" data-xp="20" style="margin-right:60px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">Me gusta</span>
-          </button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a1-12" data-lesson-key="oraciones" data-label="¿Dónde?" data-xp="20" style="margin-left:60px">
-            <span class="node-icon">⭐</span>
-            <span class="node-tooltip">¿Dónde?</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ A2 ═══ -->
-    <div class="level-panel" id="panel-a2">
-      <div class="unit-header" style="background: linear-gradient(135deg, #58cc02, #46a302);">
-        <div class="unit-header-left">
-          <div class="unit-label">Sección 1</div>
-          <div class="unit-title">Rutinas y Vida Diaria</div>
-        </div>
-        <button class="unit-header-btn">📖 GUÍA</button>
-      </div>
-      <div class="path-track" data-level="a2" data-unit="1" data-unit-size="5" data-lesson-key="rutinas">
-        <div class="node-row" style="margin-top:20px;">
-          <button class="lesson-node" data-lesson-id="a2-0" data-lesson-key="rutinas" data-label="Tiempo" data-xp="20"><span class="node-icon">⭐</span><span class="node-tooltip">Tiempo</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a2-1" data-lesson-key="rutinas" data-label="Trabajo" data-xp="20" style="margin-left:80px"><span class="node-icon">⭐</span><span class="node-tooltip">Trabajo</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a2-2" data-lesson-key="rutinas" data-label="Clima" data-xp="20" style="margin-right:80px"><span class="node-icon">⭐</span><span class="node-tooltip">Clima</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a2-3" data-lesson-key="rutinas" data-label="Compras" data-xp="20" style="margin-left:70px"><span class="node-icon">⭐</span><span class="node-tooltip">Compras</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a2-4" data-lesson-key="rutinas" data-label="Viajes" data-xp="20" style="margin-right:60px"><span class="node-icon">⭐</span><span class="node-tooltip">Viajes</span></button>
-        </div>
-      </div>
-      <div class="unit-header" style="background: linear-gradient(135deg, #ce82ff, #a855f7);">
-        <div class="unit-header-left">
-          <div class="unit-label">Sección 2</div>
-          <div class="unit-title">Conversación Real</div>
-        </div>
-        <button class="unit-header-btn">📖 GUÍA</button>
-      </div>
-      <div class="path-track" data-level="a2" data-unit="2" data-unit-size="4" data-lesson-key="conversacion">
-        <div class="node-row" style="margin-top:20px;">
-          <button class="lesson-node" data-lesson-id="a2-5" data-lesson-key="conversacion" data-label="Opiniones" data-xp="25" style="margin-left:80px"><span class="node-icon">⭐</span><span class="node-tooltip">Opiniones</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a2-6" data-lesson-key="conversacion" data-label="Pasado" data-xp="25" style="margin-right:80px"><span class="node-icon">⭐</span><span class="node-tooltip">Pasado</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a2-7" data-lesson-key="conversacion" data-label="Futuro" data-xp="25" style="margin-left:70px"><span class="node-icon">⭐</span><span class="node-tooltip">Futuro</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="a2-8" data-lesson-key="conversacion" data-label="Debates" data-xp="25" style="margin-right:60px"><span class="node-icon">⭐</span><span class="node-tooltip">Debates</span></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ B1 ═══ -->
-    <div class="level-panel" id="panel-b1">
-      <div class="unit-header" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-        <div class="unit-header-left">
-          <div class="unit-label">Sección 1</div>
-          <div class="unit-title">Pensamiento Complejo</div>
-        </div>
-        <button class="unit-header-btn">📖 GUÍA</button>
-      </div>
-      <div class="path-track" data-level="b1" data-unit="1" data-unit-size="5" data-lesson-key="complejo">
-        <div class="node-row" style="margin-top:20px;">
-          <button class="lesson-node" data-lesson-id="b1-0" data-lesson-key="complejo" data-label="Subjuntivo" data-xp="30"><span class="node-icon">⭐</span><span class="node-tooltip">Subjuntivo</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="b1-1" data-lesson-key="complejo" data-label="Condicional" data-xp="30" style="margin-left:80px"><span class="node-icon">⭐</span><span class="node-tooltip">Condicional</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="b1-2" data-lesson-key="complejo" data-label="Voz Pasiva" data-xp="30" style="margin-right:80px"><span class="node-icon">⭐</span><span class="node-tooltip">Voz Pasiva</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="b1-3" data-lesson-key="complejo" data-label="Modales" data-xp="30" style="margin-left:70px"><span class="node-icon">⭐</span><span class="node-tooltip">Modales</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="b1-4" data-lesson-key="complejo" data-label="Phrasal V." data-xp="30" style="margin-right:60px"><span class="node-icon">⭐</span><span class="node-tooltip">Phrasal Verbs</span></button>
-        </div>
-      </div>
-      <div class="unit-header" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-        <div class="unit-header-left">
-          <div class="unit-label">Sección 2</div>
-          <div class="unit-title">Fluidez y Expresión</div>
-        </div>
-        <button class="unit-header-btn">📖 GUÍA</button>
-      </div>
-      <div class="path-track" data-level="b1" data-unit="2" data-unit-size="4" data-lesson-key="fluidez">
-        <div class="node-row" style="margin-top:20px;">
-          <button class="lesson-node" data-lesson-id="b1-5" data-lesson-key="fluidez" data-label="Idioms" data-xp="35" style="margin-left:80px"><span class="node-icon">⭐</span><span class="node-tooltip">Idioms</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="b1-6" data-lesson-key="fluidez" data-label="Slang" data-xp="35" style="margin-right:80px"><span class="node-icon">⭐</span><span class="node-tooltip">Slang</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="b1-7" data-lesson-key="fluidez" data-label="Negocios" data-xp="35" style="margin-left:70px"><span class="node-icon">⭐</span><span class="node-tooltip">Negocios</span></button>
-        </div>
-        <div class="node-row">
-          <button class="lesson-node" data-lesson-id="b1-8" data-lesson-key="fluidez" data-label="Debate Pro" data-xp="35" style="margin-right:60px"><span class="node-icon">⭐</span><span class="node-tooltip">Debate Pro</span></button>
-        </div>
-      </div>
-    </div>
-
-  </main>
+  <!-- PATH: se genera dinámicamente vía JS -->
+  <main class="path-main" id="path-main"></main>
 
   <!-- ═══════════════════════════════════════════
-       LESSON MODAL — Full-screen lesson engine
+       GUÍA MODAL
+       ═══════════════════════════════════════════ -->
+  <div class="guide-modal-backdrop" id="guide-modal">
+    <div class="guide-card">
+      <button class="guide-close" id="guide-close">✕</button>
+      <div class="guide-tabs" id="guide-tabs"></div>
+      <div class="guide-content" id="guide-content"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       LESSON MODAL — Motor de ejercicios
        ═══════════════════════════════════════════ -->
   <div class="lesson-modal-backdrop" id="lesson-modal">
 
@@ -278,14 +85,17 @@
         <div class="lesson-progress-bar">
           <div class="lesson-progress-fill" id="lesson-progress-fill"></div>
         </div>
+        <div class="lesson-progress-label" id="lesson-progress-label">1 / 10</div>
       </div>
-      <div class="lesson-hearts" id="lesson-hearts">❤️ 5</div>
+      <div class="lesson-hearts" id="lesson-hearts">
+        <span class="heart" data-i="0">❤️</span><span class="heart" data-i="1">❤️</span><span class="heart" data-i="2">❤️</span>
+      </div>
     </div>
 
     <div class="lesson-body" id="lesson-body">
       <div class="lesson-instruction" id="lesson-instruction">Escribe esto en español</div>
 
-      <div class="lesson-character-row">
+      <div class="lesson-character-row" id="lesson-character-row">
         <div class="lesson-char-avatar" id="lesson-avatar">🐣</div>
         <div class="lesson-speech-bubble" id="lesson-audio-btn" title="Escuchar">
           <div class="audio-btn-inner">
@@ -297,16 +107,19 @@
         </div>
       </div>
 
-      <p class="phrase-hint-label">💡 Pasa el cursor sobre las <span>palabras subrayadas</span> para ver su traducción</p>
+      <p class="phrase-hint-label" id="phrase-hint-label">💡 Pasa el cursor sobre las <span>palabras subrayadas</span> para ver su traducción</p>
 
-      <div class="lesson-answer-zone" id="lesson-answer-zone"></div>
-      <div class="lesson-wordbank" id="lesson-wordbank"></div>
+      <!-- Zona dinámica según tipo de ejercicio -->
+      <div class="exercise-area" id="exercise-area"></div>
     </div>
 
     <div class="lesson-feedback" id="lesson-feedback">
       <div class="feedback-inner">
-        <div class="feedback-title" id="feedback-title"></div>
-        <div class="feedback-answer" id="feedback-answer"></div>
+        <div class="feedback-icon" id="feedback-icon"></div>
+        <div class="feedback-text">
+          <div class="feedback-title" id="feedback-title"></div>
+          <div class="feedback-answer" id="feedback-answer"></div>
+        </div>
       </div>
     </div>
 
@@ -324,31 +137,51 @@
     <div class="completion-card">
       <div class="completion-chick">🐣</div>
       <div class="completion-title">¡Lección Completada!</div>
-      <div class="completion-sub">Has dominado esta lección. ¡Increíble trabajo!</div>
+      <div class="completion-sub" id="completion-sub">Has dominado esta lección. ¡Increíble trabajo!</div>
       <div class="completion-stats">
         <div class="stat-box">
           <div class="stat-value" id="stat-xp">+0</div>
           <div class="stat-label">XP ganado</div>
         </div>
         <div class="stat-box">
-          <div class="stat-value" id="stat-correct">0/15</div>
-          <div class="stat-label">Correctas</div>
+          <div class="stat-value" id="stat-correct">0/10</div>
+          <div class="stat-label">Aciertos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-time">0:00</div>
+          <div class="stat-label">Tiempo</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-hearts">❤️❤️❤️</div>
+          <div class="stat-label">Vidas</div>
         </div>
       </div>
       <button class="completion-btn" id="completion-continue">¡CONTINUAR!</button>
     </div>
   </div>
 
+  <!-- LOSE MODAL (sin corazones) -->
+  <div class="lose-modal" id="lose-modal">
+    <div class="lose-card">
+      <div class="lose-chick">🥚</div>
+      <div class="lose-title">¡Sin vidas!</div>
+      <div class="lose-sub">Te quedaste sin corazones. No te preocupes, puedes reiniciar esta lección e intentarlo de nuevo.</div>
+      <button class="lose-btn" id="lose-retry">🔄 INTENTAR DE NUEVO</button>
+      <button class="lose-btn-secondary" id="lose-exit">Salir de la lección</button>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <!-- FOOTER -->
- <footer class="footer">
+  <!-- FOOTER (no modificar) -->
+  <footer class="footer">
     <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="footer-logo" alt="logo"/>
     <div class="footer-title">Egglish</div>
     <p class="footer-tagline">El pollito que te acompaña desde tu primer "Hello" hasta que hables con total fluidez.</p>
     <p class="footer-copy">© 2026 Egglish. Todos los derechos reservados.</p>
   </footer>
+
   <script src="/Secciones/Js/lecciones.js"></script>
   <!-- ★ EGGLISH AUTH ★ -->
   <script type="module">

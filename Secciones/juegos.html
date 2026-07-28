@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="/Secciones/Css/Juegos.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
 </head>
+<script src="/Secciones/Js/env-config.js"></script>
+<script type="module" src="/Secciones/Js/eggy-widget.js"></script>
 <body>
 
 <nav class="navbar">
@@ -28,7 +30,6 @@
       <li><a href="/Secciones/Escucha.html">🎯 Escucha</a></li>
       <li><a href="/Secciones/juegos.html" class="active">🎮 Juegos</a></li>
       <li><a href="/Secciones/perfil.html">👤 Perfil</a></li>
-      <li><a href="/Secciones/eggy.html">🤖 Eggy IA</a></li>
     </ul>
 
     <div class="navbar-auth">
@@ -96,6 +97,12 @@
       <div class="options-grid" id="mc-options">
         <!-- injected -->
       </div>
+
+      <div class="explain-box" id="mc-explain">
+        <p class="explain-result" id="mc-explain-result"></p>
+        <p class="explain-text" id="mc-explain-text"></p>
+        <button class="btn-next" id="mc-next-btn" onclick="nextMC()">Siguiente →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -145,6 +152,12 @@
       <div class="word-bank" id="fill-bank"></div>
       <div class="fill-answer-row" id="fill-answer-row"></div>
       <button class="btn-check" id="fill-check-btn" onclick="checkFill()">Verificar ✓</button>
+
+      <div class="explain-box" id="fill-explain">
+        <p class="explain-result" id="fill-explain-result"></p>
+        <p class="explain-text" id="fill-explain-text"></p>
+        <button class="btn-next" id="fill-next-btn" onclick="nextFill()">Siguiente →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -172,6 +185,12 @@
         <p class="listen-hint">Presiona el botón y escucha la palabra</p>
       </div>
       <div class="options-grid" id="listen-options"></div>
+
+      <div class="explain-box" id="listen-explain">
+        <p class="explain-result" id="listen-explain-result"></p>
+        <p class="explain-text" id="listen-explain-text"></p>
+        <button class="btn-next" id="listen-next-btn" onclick="nextListen()">Siguiente →</button>
+      </div>
     </div>
   </div>
 </div>
@@ -199,6 +218,12 @@
       <div class="word-bank" id="translate-bank"></div>
       <div class="fill-answer-row" id="translate-answer-row"></div>
       <button class="btn-check" id="translate-check-btn" onclick="checkTranslate()">Verificar ✓</button>
+
+      <div class="explain-box" id="translate-explain">
+        <p class="explain-result" id="translate-explain-result"></p>
+        <p class="explain-text" id="translate-explain-text"></p>
+        <button class="btn-next" id="translate-next-btn" onclick="nextTranslate()">Siguiente →</button>
+      </div>
     </div>
   </div>
 </div>

@@ -9,11 +9,11 @@
 const DATA = {
   A1: {
     mc: [
-      { q: "¿Cómo se dice 'Huevo' en inglés?",       opts: ["Chicken","Egg","Bird","Feather"],       ans: 1 },
-      { q: "¿Cómo se dice 'Perro' en inglés?",       opts: ["Cat","Horse","Dog","Rabbit"],           ans: 2 },
-      { q: "¿Cómo se dice 'Casa' en inglés?",        opts: ["Car","House","Tree","Door"],            ans: 1 },
-      { q: "¿Cómo se dice 'Agua' en inglés?",        opts: ["Milk","Juice","Fire","Water"],          ans: 3 },
-      { q: "¿Cómo se dice 'Manzana' en inglés?",     opts: ["Banana","Orange","Apple","Mango"],      ans: 2 },
+      { q: "¿Cómo se dice 'Huevo' en inglés?",       opts: ["Chicken","Egg","Bird","Feather"],       ans: 1, expl: "'Egg' significa 'huevo' en inglés." },
+      { q: "¿Cómo se dice 'Perro' en inglés?",       opts: ["Cat","Horse","Dog","Rabbit"],           ans: 2, expl: "'Dog' es la palabra en inglés para 'perro'." },
+      { q: "¿Cómo se dice 'Casa' en inglés?",        opts: ["Car","House","Tree","Door"],            ans: 1, expl: "'House' significa 'casa' en inglés." },
+      { q: "¿Cómo se dice 'Agua' en inglés?",        opts: ["Milk","Juice","Fire","Water"],          ans: 3, expl: "'Water' es la traducción de 'agua'." },
+      { q: "¿Cómo se dice 'Manzana' en inglés?",     opts: ["Banana","Orange","Apple","Mango"],      ans: 2, expl: "'Apple' significa 'manzana' en inglés." },
     ],
     match: [
       { es:"Gato",   en:"Cat"   },
@@ -23,57 +23,57 @@ const DATA = {
       { es:"Luna",   en:"Moon"  },
     ],
     listen: [
-      { word:"Apple",   opts:["Manzana","Naranja","Uva","Pera"],         ans:0 },
-      { word:"Dog",     opts:["Gato","Perro","Pájaro","Pez"],            ans:1 },
-      { word:"House",   opts:["Carro","Árbol","Casa","Puerta"],          ans:2 },
-      { word:"Water",   opts:["Leche","Jugo","Fuego","Agua"],            ans:3 },
-      { word:"Red",     opts:["Azul","Verde","Rojo","Amarillo"],         ans:2 },
+      { word:"Apple",   opts:["Manzana","Naranja","Uva","Pera"],         ans:0, expl: "'Apple' significa 'manzana'." },
+      { word:"Dog",     opts:["Gato","Perro","Pájaro","Pez"],            ans:1, expl: "'Dog' significa 'perro'." },
+      { word:"House",   opts:["Carro","Árbol","Casa","Puerta"],          ans:2, expl: "'House' significa 'casa'." },
+      { word:"Water",   opts:["Leche","Jugo","Fuego","Agua"],            ans:3, expl: "'Water' significa 'agua'." },
+      { word:"Red",     opts:["Azul","Verde","Rojo","Amarillo"],         ans:2, expl: "'Red' significa 'rojo'." },
     ],
   },
   A2: {
     mc: [
-      { q: "¿Qué significa 'I am hungry'?",           opts: ["Tengo sueño","Tengo frío","Tengo hambre","Estoy cansado"],  ans: 2 },
-      { q: "¿Qué significa 'She likes music'?",       opts: ["Él toca música","A ella le gusta la música","Ella odia música","Ella escucha música"], ans: 1 },
-      { q: "¿Cuál es el plural de 'child'?",          opts: ["Childs","Childes","Children","Child's"],                    ans: 2 },
-      { q: "¿Qué significa 'We are going to school'?",opts: ["Venimos de la escuela","Vamos a la escuela","Estamos en la escuela","Nos gusta la escuela"], ans: 1 },
-      { q: "¿Cuál es el pasado de 'go'?",             opts: ["Goed","Goes","Going","Went"],                               ans: 3 },
+      { q: "¿Qué significa 'I am hungry'?",           opts: ["Tengo sueño","Tengo frío","Tengo hambre","Estoy cansado"],  ans: 2, expl: "'Hungry' significa 'con hambre', por eso 'I am hungry' es 'Tengo hambre'." },
+      { q: "¿Qué significa 'She likes music'?",       opts: ["Él toca música","A ella le gusta la música","Ella odia música","Ella escucha música"], ans: 1, expl: "'She' es 'ella' y 'likes' expresa que le gusta algo." },
+      { q: "¿Cuál es el plural de 'child'?",          opts: ["Childs","Childes","Children","Child's"],                    ans: 2, expl: "'Child' tiene un plural irregular: 'children'." },
+      { q: "¿Qué significa 'We are going to school'?",opts: ["Venimos de la escuela","Vamos a la escuela","Estamos en la escuela","Nos gusta la escuela"], ans: 1, expl: "'Going to' indica que se dirigen hacia un lugar: 'vamos a'." },
+      { q: "¿Cuál es el pasado de 'go'?",             opts: ["Goed","Goes","Going","Went"],                               ans: 3, expl: "'Go' es un verbo irregular; su pasado es 'went'." },
     ],
     fill: [
-      { sentence: "She ___ a doctor.", bank: ["am","is","are","be"],    ans: ["is"],   full: "She is a doctor." },
-      { sentence: "They ___ soccer every day.", bank: ["plays","playing","play","played"], ans: ["play"], full: "They play soccer every day." },
-      { sentence: "I ___ like coffee.", bank: ["doesn't","don't","not","no"],  ans: ["don't"], full: "I don't like coffee." },
-      { sentence: "He ___ to school by bus.", bank: ["go","goes","going","went"], ans: ["goes"], full: "He goes to school by bus." },
-      { sentence: "We ___ happy today.", bank: ["is","am","be","are"],   ans: ["are"],  full: "We are happy today." },
+      { sentence: "She ___ a doctor.", bank: ["am","is","are","be"],    ans: ["is"],   full: "She is a doctor.", expl: "Con 'she' (tercera persona singular) se usa 'is'." },
+      { sentence: "They ___ soccer every day.", bank: ["plays","playing","play","played"], ans: ["play"], full: "They play soccer every day.", expl: "Con 'they' (plural) se usa la forma base del verbo: 'play'." },
+      { sentence: "I ___ like coffee.", bank: ["doesn't","don't","not","no"],  ans: ["don't"], full: "I don't like coffee.", expl: "Con 'I' se usa 'don't' para negar en presente simple." },
+      { sentence: "He ___ to school by bus.", bank: ["go","goes","going","went"], ans: ["goes"], full: "He goes to school by bus.", expl: "Con 'he' se agrega '-es' al verbo: 'goes'." },
+      { sentence: "We ___ happy today.", bank: ["is","am","be","are"],   ans: ["are"],  full: "We are happy today.", expl: "Con 'we' (plural) se usa 'are'." },
     ],
     listen: [
-      { word:"Breakfast", opts:["Almuerzo","Cena","Desayuno","Merienda"],          ans:2 },
-      { word:"Library",   opts:["Banco","Hospital","Parque","Biblioteca"],         ans:3 },
-      { word:"Cloudy",    opts:["Soleado","Nublado","Lluvioso","Nevado"],          ans:1 },
-      { word:"Bicycle",   opts:["Carro","Moto","Bicicleta","Camión"],              ans:2 },
-      { word:"Yesterday", opts:["Mañana","Hoy","Ayer","Ahora"],                   ans:2 },
+      { word:"Breakfast", opts:["Almuerzo","Cena","Desayuno","Merienda"],          ans:2, expl: "'Breakfast' significa 'desayuno'." },
+      { word:"Library",   opts:["Banco","Hospital","Parque","Biblioteca"],         ans:3, expl: "'Library' significa 'biblioteca'." },
+      { word:"Cloudy",    opts:["Soleado","Nublado","Lluvioso","Nevado"],          ans:1, expl: "'Cloudy' significa 'nublado'." },
+      { word:"Bicycle",   opts:["Carro","Moto","Bicicleta","Camión"],              ans:2, expl: "'Bicycle' significa 'bicicleta'." },
+      { word:"Yesterday", opts:["Mañana","Hoy","Ayer","Ahora"],                   ans:2, expl: "'Yesterday' significa 'ayer'." },
     ],
   },
   B1: {
     mc: [
-      { q: "Choose the correct sentence:",            opts: ["He don't know the answer","He doesn't knows the answer","He doesn't know the answer","He not know the answer"], ans: 2 },
-      { q: "¿Cuál es el condicional de: 'If it rains...'?", opts: ["...I go home","...I will go home","...I went home","...I going home"],  ans: 1 },
-      { q: "What does 'Although' mean?",              opts: ["Además","Por lo tanto","Aunque","Sin embargo"],            ans: 2 },
-      { q: "Choose the correct passive voice:",       opts: ["The cake was ate by him","The cake was eaten by him","The cake is ate by him","The cake were eaten by him"], ans: 1 },
-      { q: "What does 'Nevertheless' mean?",         opts: ["Además","Sin embargo","Por eso","Al mismo tiempo"],        ans: 1 },
+      { q: "Choose the correct sentence:",            opts: ["He don't know the answer","He doesn't knows the answer","He doesn't know the answer","He not know the answer"], ans: 2, expl: "Con 'he' (tercera persona) se usa 'doesn't' + verbo base: 'doesn't know'." },
+      { q: "¿Cuál es el condicional de: 'If it rains...'?", opts: ["...I go home","...I will go home","...I went home","...I going home"],  ans: 1, expl: "El primer condicional usa 'will' en la consecuencia: 'if + presente, will + infinitivo'." },
+      { q: "What does 'Although' mean?",              opts: ["Además","Por lo tanto","Aunque","Sin embargo"],            ans: 2, expl: "'Although' se traduce como 'aunque', indica contraste." },
+      { q: "Choose the correct passive voice:",       opts: ["The cake was ate by him","The cake was eaten by him","The cake is ate by him","The cake were eaten by him"], ans: 1, expl: "La voz pasiva usa 'was/were + participio': 'was eaten', no 'ate'." },
+      { q: "What does 'Nevertheless' mean?",         opts: ["Además","Sin embargo","Por eso","Al mismo tiempo"],        ans: 1, expl: "'Nevertheless' significa 'sin embargo'." },
     ],
     translate: [
-      { es:"Ella ha vivido aquí por cinco años.",   bank:["She","has","lived","here","for","five","years","ago","since","live"], ans:["She","has","lived","here","for","five","years"] },
-      { es:"Ellos estaban comiendo cuando llegué.", bank:["They","were","eating","when","I","arrived","come","was","are","came"], ans:["They","were","eating","when","I","arrived"] },
-      { es:"Si estudias, aprobarás el examen.",     bank:["If","you","study","you","will","pass","the","exam","would","are"],    ans:["If","you","study","you","will","pass","the","exam"] },
-      { es:"El libro fue escrito por ella.",        bank:["The","book","was","written","by","her","she","wrote","is","write"],   ans:["The","book","was","written","by","her"] },
-      { es:"Me gustaría tomar un café, por favor.", bank:["I","would","like","a","coffee","please","want","will","can","have"],  ans:["I","would","like","a","coffee","please"] },
+      { es:"Ella ha vivido aquí por cinco años.",   bank:["She","has","lived","here","for","five","years","ago","since","live"], ans:["She","has","lived","here","for","five","years"], expl: "Se usa el presente perfecto 'has lived' con 'for' para expresar duración." },
+      { es:"Ellos estaban comiendo cuando llegué.", bank:["They","were","eating","when","I","arrived","come","was","are","came"], ans:["They","were","eating","when","I","arrived"], expl: "El pasado continuo 'were eating' se interrumpe con el pasado simple 'arrived'." },
+      { es:"Si estudias, aprobarás el examen.",     bank:["If","you","study","you","will","pass","the","exam","would","are"],    ans:["If","you","study","you","will","pass","the","exam"], expl: "El primer condicional usa 'if + presente, will + infinitivo'." },
+      { es:"El libro fue escrito por ella.",        bank:["The","book","was","written","by","her","she","wrote","is","write"],   ans:["The","book","was","written","by","her"], expl: "Voz pasiva en pasado: 'was written' (fue escrito)." },
+      { es:"Me gustaría tomar un café, por favor.", bank:["I","would","like","a","coffee","please","want","will","can","have"],  ans:["I","would","like","a","coffee","please"], expl: "'Would like' es una forma cortés de pedir algo." },
     ],
     fill: [
-      { sentence: "By the time she arrived, we ___ already left.", bank:["had","have","has","was"],   ans:["had"],  full:"By the time she arrived, we had already left." },
-      { sentence: "She suggested ___ the movie together.",          bank:["watch","to watch","watching","watched"], ans:["watching"], full:"She suggested watching the movie together." },
-      { sentence: "He ___ in London for ten years now.",            bank:["lived","lives","has lived","is living"], ans:["has lived"], full:"He has lived in London for ten years now." },
-      { sentence: "If I ___ you, I would apologize.",               bank:["am","was","were","had"],   ans:["were"], full:"If I were you, I would apologize." },
-      { sentence: "The report must ___ by Monday.",                 bank:["submit","to submit","submitting","be submitted"], ans:["be submitted"], full:"The report must be submitted by Monday." },
+      { sentence: "By the time she arrived, we ___ already left.", bank:["had","have","has","was"],   ans:["had"],  full:"By the time she arrived, we had already left.", expl: "Se usa el pasado perfecto 'had' para una acción anterior a otra en el pasado." },
+      { sentence: "She suggested ___ the movie together.",          bank:["watch","to watch","watching","watched"], ans:["watching"], full:"She suggested watching the movie together.", expl: "Después de 'suggest' se usa el gerundio: 'watching'." },
+      { sentence: "He ___ in London for ten years now.",            bank:["lived","lives","has lived","is living"], ans:["has lived"], full:"He has lived in London for ten years now.", expl: "'Has lived' (presente perfecto) expresa una acción que continúa hasta ahora." },
+      { sentence: "If I ___ you, I would apologize.",               bank:["am","was","were","had"],   ans:["were"], full:"If I were you, I would apologize.", expl: "En el segundo condicional se usa 'were' para todas las personas." },
+      { sentence: "The report must ___ by Monday.",                 bank:["submit","to submit","submitting","be submitted"], ans:["be submitted"], full:"The report must be submitted by Monday.", expl: "Se usa la voz pasiva 'be submitted' después de un modal ('must')." },
     ],
   }
 };
@@ -218,18 +218,22 @@ function handleMC(btn, chosen, correct, grid) {
     if (i === correct) b.classList.add('correct');
     else if (i === chosen) b.classList.add('wrong');
   });
-  if (chosen === correct) {
+  const isCorrect = chosen === correct;
+  if (isCorrect) {
     score += 10;
     document.getElementById('mc-score').textContent = score;
     btn.classList.add('correct');
   } else {
     btn.classList.add('wrong','shake');
   }
-  setTimeout(() => {
-    currentQ++;
-    if (currentQ < totalQ) renderMC();
-    else showResults('Opción Múltiple');
-  }, 1000);
+  showExplain('mc', isCorrect, DATA._mcSession[currentQ]);
+}
+
+function nextMC() {
+  document.getElementById('mc-explain').classList.remove('show');
+  currentQ++;
+  if (currentQ < totalQ) renderMC();
+  else showResults('Opción Múltiple');
 }
 
 // ══════════════════════════════════════════
@@ -386,6 +390,7 @@ function checkFill() {
   if (correct) {
     row.style.border = '2.5px solid #58cc02';
     score += 10;
+    document.getElementById('fill-score').textContent = score;
   } else {
     row.style.border = '2.5px solid #ff4b4b';
     row.style.animation = 'none';
@@ -393,12 +398,16 @@ function checkFill() {
     row.innerHTML = `<span style="color:#ff4b4b;font-weight:800">✗ Respuesta: ${q.ans.join(' ')}</span>`;
   }
   document.getElementById('fill-check-btn').disabled = true;
-  setTimeout(() => {
-    row.style.border = '2.5px dashed #e5e7eb';
-    fillCurrent++;
-    if (fillCurrent < totalQ) renderFill();
-    else showResults('Completa la Frase');
-  }, 1100);
+  showExplain('fill', correct, q);
+}
+
+function nextFill() {
+  document.getElementById('fill-explain').classList.remove('show');
+  const row = document.getElementById('fill-answer-row');
+  row.style.border = '2.5px dashed #e5e7eb';
+  fillCurrent++;
+  if (fillCurrent < totalQ) renderFill();
+  else showResults('Completa la Frase');
 }
 
 // ══════════════════════════════════════════
@@ -458,17 +467,21 @@ function handleListen(btn, chosen, correct, grid) {
     if (i === correct) b.classList.add('correct');
     else if (i === chosen) b.classList.add('wrong');
   });
-  if (chosen === correct) {
+  const isCorrect = chosen === correct;
+  if (isCorrect) {
     score += 10;
     document.getElementById('listen-score').textContent = score;
   } else {
     btn.classList.add('shake');
   }
-  setTimeout(() => {
-    currentQ++;
-    if (currentQ < totalQ) renderListen();
-    else showResults('Escucha y Elige');
-  }, 1000);
+  showExplain('listen', isCorrect, listenSession[currentQ]);
+}
+
+function nextListen() {
+  document.getElementById('listen-explain').classList.remove('show');
+  currentQ++;
+  if (currentQ < totalQ) renderListen();
+  else showResults('Escucha y Elige');
 }
 
 // ══════════════════════════════════════════
@@ -540,17 +553,22 @@ function checkTranslate() {
   if (correct) {
     row.style.border = '2.5px solid #58cc02';
     score += 10;
+    document.getElementById('translate-score').textContent = score;
   } else {
     row.style.border = '2.5px solid #ff4b4b';
     row.innerHTML = `<span style="color:#ff4b4b;font-weight:800">✗ Respuesta: ${q.ans.join(' ')}</span>`;
   }
   document.getElementById('translate-check-btn').disabled = true;
-  setTimeout(() => {
-    row.style.border = '2.5px dashed #e5e7eb';
-    transCurrent++;
-    if (transCurrent < totalQ) renderTranslate();
-    else showResults('Traduce la Frase');
-  }, 1100);
+  showExplain('translate', correct, q);
+}
+
+function nextTranslate() {
+  document.getElementById('translate-explain').classList.remove('show');
+  const row = document.getElementById('translate-answer-row');
+  row.style.border = '2.5px dashed #e5e7eb';
+  transCurrent++;
+  if (transCurrent < totalQ) renderTranslate();
+  else showResults('Traduce la Frase');
 }
 
 // ══════════════════════════════════════════
@@ -616,6 +634,27 @@ function spawnConfetti() {
 }
 
 function playAgain() { startGame(currentGame, currentLevel); }
+
+// ══════════════════════════════════════════
+//  EXPLANATION BOX (shown after answering, before advancing)
+// ══════════════════════════════════════════
+
+function showExplain(prefix, isCorrect, q) {
+  const box    = document.getElementById(prefix + '-explain');
+  const result = document.getElementById(prefix + '-explain-result');
+  const text   = document.getElementById(prefix + '-explain-text');
+  if (!box || !result || !text) return;
+
+  if (isCorrect) {
+    result.textContent = '✅ ¡Correcto!';
+    result.style.color = '#58cc02';
+  } else {
+    result.textContent = '❌ Respuesta incorrecta.';
+    result.style.color = '#ff4b4b';
+  }
+  text.textContent = q && q.expl ? q.expl : '';
+  box.classList.add('show');
+}
 
 // ══════════════════════════════════════════
 //  UTILITIES

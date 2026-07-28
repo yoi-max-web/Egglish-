@@ -396,6 +396,33 @@ a {
 /* TRANSLATE */
 .translate-label { font-size: .85rem; font-weight: 700; color: var(--light); }
 
+/* EXPLANATION BOX */
+.explain-box {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #f7f9fc;
+  border: 2.5px solid var(--border);
+  animation: explain-in .25s ease;
+}
+.explain-box.show { display: flex; }
+@keyframes explain-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.explain-result { font-size: 1.05rem; font-weight: 900; }
+.explain-text   { font-size: .92rem; font-weight: 600; color: var(--mid); line-height: 1.4; }
+.btn-next {
+  align-self: flex-end;
+  padding: 12px 24px; border-radius: 14px; border: none;
+  background: var(--blue); color: var(--white);
+  font-family: var(--font); font-size: .95rem; font-weight: 900;
+  cursor: pointer; box-shadow: 0 4px 0 var(--blue-d); transition: transform .1s, box-shadow .1s;
+}
+.btn-next:hover { transform: translateY(1px); box-shadow: 0 3px 0 var(--blue-d); }
+
 /* ══════════ RESULTS ══════════ */
 .results-bg {
   min-height: calc(100vh - 68px); background: var(--blue);

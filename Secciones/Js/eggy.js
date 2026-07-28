@@ -239,7 +239,7 @@ async function sendMessage() {
     // 5. Manejo de error visible en el chat
     console.error('[Eggy] Error al comunicarse con Gemini:', error);
     hideThinking();
-    appendMessage('eggy', '❌ No fue posible obtener respuesta de Eggy. Verifica tu conexión e inténtalo de nuevo.');
+    appendMessage('eggy', `❌ No fue posible obtener respuesta de Eggy. ${error?.message || 'Revisa la consola del navegador para más detalles.'}`);
   }
 }
 
