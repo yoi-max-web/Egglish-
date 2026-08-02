@@ -12,8 +12,10 @@ export default async function handler(req, res) {
 
   // 2. Variables de entorno seguras (Vercel las provee)
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-// Cambia el modelo agotado por uno activo:
-  const GEMINI_MODEL = "gemini-1.5-flash";
+  // Modelo actualizado: gemini-1.5-flash fue retirado por Google (dev retorna 404).
+  // gemini-2.5-flash está activo (Google anuncia retiro para oct. 2026, hay que
+  // revisar https://ai.google.dev/gemini-api/docs/changelog cuando llegue esa fecha).
+  const GEMINI_MODEL = "gemini-2.5-flash";
   const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
   if (!GEMINI_API_KEY) {
