@@ -12,8 +12,8 @@ export default async function handler(req, res) {
 
   // 2. Variables de entorno seguras (Vercel las provee)
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  // Usamos un modelo estable y actual
- const GEMINI_MODEL = "gemini-3.6-flash";
+// Cambia el modelo agotado por uno activo:
+  const GEMINI_MODEL = "gemini-1.5-flash";
   const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
   if (!GEMINI_API_KEY) {
