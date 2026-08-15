@@ -5,336 +5,373 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Egglish – Inicio</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            'egg-blue': '#1cb0f6',
+            'egg-blue-d': '#0090d9',
+            'egg-yellow': '#f5a623',
+            'egg-yellow-d': '#d48800',
+            'egg-green': '#58cc02',
+            'egg-green-d': '#46a302',
+          },
+        },
+      },
+    };
+  </script>
   <style>
-    /* ============================================
-       VARIABLES Y RESET
-       ============================================ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --blue:    #1cb0f6;
-      --blue-d:  #0090d9;
-      --yellow:  #f5a623;
-      --yellow-d:#d48800;
-      --white:   #ffffff;
-      --bg:      #f0f4f8;
-      --text:    #1a1a2e;
-      --mid:     #4b5563;
-      --border:  #e5e7eb;
-      --font:    'Nunito', sans-serif;
+    /*
+      Notas de migración:
+      - Las utilidades de Tailwind cubren layout, color, tipografía y espaciado.
+      - Se conservan solo las reglas que Tailwind no resuelve limpiamente por
+        defecto: la animación del pollito del hero y las "sombras duras"
+        (box-shadow sólido, estilo "botón físico") que dan el efecto 3D.
+      - shadow-hard-* se usa en vez de shadow-lg/shadow-xl porque Tailwind no
+        trae por defecto una sombra sólida sin blur; el blur diluiría el
+        estilo "botón físico" del diseño original.
+    */
+    @keyframes bounce-chick {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
-
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    .animate-bounce-chick {
+      animation: bounce-chick 2s infinite ease-in-out;
     }
-
-    /* ============================================
-       NAVBAR
-       ============================================ */
-    .navbar {
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--white); padding: 0 32px; height: 68px;
-      border-bottom: 2px solid var(--border);
-      position: sticky; top: 0; z-index: 200;
+    .shadow-hard-yellow { box-shadow: 0 4px 0 #d48800; }
+    .shadow-hard-blue   { box-shadow: 0 12px 0 #0090d9; }
+    .shadow-hard-soft   { box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+    .shadow-hard-node   { box-shadow: 0 8px 0 rgba(0,0,0,0.05); }
+    .bg-cta-dots {
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 25%),
+        radial-gradient(circle at 85% 30%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 35%),
+        radial-gradient(circle at 35% 85%, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 30%),
+        radial-gradient(circle at 75% 75%, rgba(255,255,255,.1) 0%, rgba(255,255,255,0) 20%);
     }
-    .navbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .logo-img { width: 40px; height: 40px; object-fit: contain; }
-    .logo-text { font-size: 1.4rem; font-weight: 900; color: var(--text); }
-    
-    .nav-wrapper { display: flex; align-items: center; flex: 1; justify-content: flex-end; }
-
-    .navbar-links { 
-      display: flex; list-style: none; gap: 20px; 
-      position: absolute; left: 50%; transform: translateX(-50%);
-    }
-    .navbar-links a {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 14px; border-radius: 24px; text-decoration: none;
-      font-size: 0.9rem; font-weight: 700; color: var(--mid);
-      transition: background .2s, color .2s; white-space: nowrap; line-height: 1;
-    }
-    .navbar-links a:hover { background: var(--bg); color: var(--text); }
-    .navbar-links a.active { background: #dbeafe; color: var(--blue); }
-    
-    .navbar-auth { display: flex; align-items: center; gap: 12px; }
-    .btn-entrar { font-weight: 700; color: var(--mid); text-decoration: none; padding: 8px 14px; }
-    .btn-registrarse {
-      font-weight: 800; color: var(--white); background: var(--yellow); 
-      text-decoration: none; padding: 10px 22px; border-radius: 12px;
-      box-shadow: 0 4px 0 var(--yellow-d);
-    }
-
-    .menu-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; border: none; background: none; }
-    .menu-toggle span { width: 25px; height: 3px; background: var(--text); border-radius: 2px; }
-
-    /* ============================================
-       HERO
-       ============================================ */
-    .home-hero {
-      background: var(--blue); padding: 80px 32px; text-align: center;
-      position: relative; overflow: hidden; display: flex;
-      flex-direction: column; align-items: center; justify-content: center;
-    }
-    .hero-content { position: relative; z-index: 1; max-width: 600px; }
-    .hero-chick { width: 120px; height: 120px; animation: bounce 2s infinite ease-in-out; margin-bottom: 16px; }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    .hero-title { font-size: 2.8rem; font-weight: 900; color: var(--white); line-height: 1.1; margin-bottom: 12px; }
-    .hero-sub { font-size: 1.2rem; font-weight: 700; color: rgba(255,255,255,.9); margin-bottom: 32px; }
-    .btn-main-cta {
-      background: var(--white); color: var(--blue); padding: 16px 32px;
-      border-radius: 16px; text-decoration: none; font-weight: 900; font-size: 1.1rem;
-      box-shadow: 0 6px 0 rgba(0,0,0,0.1);
-    }
-
-    /* ============================================
-       SECCIONES INTERMEDIA   S
-       ============================================ */
-    .section-container { padding: 80px 20px; max-width: 1100px; margin: 0 auto; text-align: center; }
-    .section-title { font-size: 2.2rem; font-weight: 900; margin-bottom: 10px; }
-    .section-subtitle { font-size: 1.1rem; color: var(--mid); font-weight: 600; margin-bottom: 50px; }
-
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .feature-card {
-      background: var(--white); border: 2px solid var(--border); border-radius: 24px;
-      padding: 40px 30px; display: flex; flex-direction: column; align-items: center;
-    }
-    .feature-icon-box {
-      width: 70px; height: 70px; border-radius: 18px; display: flex;
-      align-items: center; justify-content: center; margin-bottom: 20px;
-    }
-    .feature-card h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; }
-    .feature-card p { color: var(--mid); font-weight: 600; line-height: 1.5; }
-
-    .bg-y { background: #fff9e6; border: 2px solid #ffe58f; }
-    .bg-o { background: #fff2e8; border: 2px solid #ffd591; }
-    .bg-b { background: #e6f7ff; border: 2px solid #91d5ff; }
-
-    .path-section { background: #f9fafb; padding: 80px 20px; border-top: 1px solid var(--border); }
-    .path-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 60px; }
-
-    .path-step { display: flex; align-items: center; justify-content: center; width: 100%; gap: 40px; }
-    .path-node {
-      width: 120px; height: 120px; background: var(--white);
-      border-radius: 30px; display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 0 rgba(0,0,0,0.05); flex-shrink: 0;
-    }
-    .node-border-1 { border: 4px solid #ffd591; }
-    .node-border-2 { border: 4px solid #ffbb96; }
-    .node-border-3 { border: 4px solid #91d5ff; }
-    .path-node img { width: 70px; height: 70px; object-fit: contain; }
-
-    .path-text { flex: 1; max-width: 400px; text-align: left; }
-    .path-text h3 { font-size: 1.6rem; font-weight: 900; margin-bottom: 8px; }
-    .path-text p { color: var(--mid); font-weight: 600; line-height: 1.4; }
-
-    /* ============================================
-       CTA FINAL (CORREGIDO)
-       ============================================ */
-    .cta-card-container { padding: 60px 20px; display: flex; justify-content: center; }
-    
-    .cta-blue-card {
-      position: relative;
-      background-color: var(--blue);
-      /* Patrón de círculos grandes y sutiles como en la referencia */
-      background-image: 
-        radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 25%),
-        radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 35%),
-        radial-gradient(circle at 35% 85%, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 30%),
-        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 20%);
-      
-      border-radius: 32px; padding: 60px 40px;
-      text-align: center; width: 100%; max-width: 800px;
-      box-shadow: 0 12px 0 var(--blue-d);
-      overflow: hidden;
-    }
-
-    /* Tamaño Medio para el Pollito */
-    .cta-avatar { 
-      width: 110px; 
-      height: auto; 
-      margin-bottom: 15px; 
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
-    }
-
-    .cta-blue-card h2 { font-size: 2.6rem; font-weight: 900; color: var(--white); margin-bottom: 15px; }
-    .cta-blue-card p { font-size: 1.15rem; font-weight: 700; color: rgba(255,255,255,0.9); margin-bottom: 35px; }
-    
-    .btn-cta-white {
-      background: var(--white); color: var(--blue); padding: 18px 45px;
-      border-radius: 18px; text-decoration: none; font-weight: 900; font-size: 1.15rem;
-      display: inline-block;
-      box-shadow: 0 6px 0 rgba(0,0,0,0.1);
-      transition: transform 0.2s;
-    }
-    .btn-cta-white:hover { transform: translateY(-2px); }
-
-    /* ============================================
-       FOOTER
-       ============================================ */
-    .footer { 
-      display: flex; flex-direction: column; align-items: center; justify-content: center; 
-      background: var(--white); padding: 40px 20px; text-align: center; 
-      border-top: 2px solid var(--border); gap: 12px;
-    }
-    .footer-logo { width: 48px; height: 48px; object-fit: contain; }
-    .footer-title { font-weight: 900; font-size: 1.5rem; color: var(--text); }
-    .footer-tagline { color: #9ca3af; font-weight: 600; font-size: 1.05rem; max-width: 400px; line-height: 1.5; }
-    .footer-copy { font-size: 0.95rem; color: var(--blue); font-weight: 800; margin-top: 4px; }
-
-    /* ============================================
-       RESPONSIVE
-       ============================================ */
-    @media (max-width: 850px) {
-      .nav-wrapper {
-        position: fixed; top: 68px; left: -100%; width: 100%; height: calc(100vh - 68px);
-        background: var(--white); flex-direction: column; padding: 40px; transition: 0.3s;
-        justify-content: flex-start;
-      }
-      .nav-wrapper.active { left: 0; }
-      .navbar-links { position: static; transform: none; flex-direction: column; width: 100%; text-align: center; gap: 10px; }
-      .navbar-auth { flex-direction: column; width: 100%; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
-      .menu-toggle { display: flex; }
-      .path-step { flex-direction: column; text-align: center; gap: 20px; }
-      .path-text { text-align: center; }
-      .cta-blue-card h2 { font-size: 2rem; }
+    html, body, header, nav, section, footer, div, a, button {
+      transition: background-color .25s ease, color .25s ease, border-color .25s ease;
     }
   </style>
+  <script>
+    /* Aplica el modo oscuro ANTES de pintar la página para evitar parpadeo */
+    if (localStorage.getItem('egglish-theme') === 'dark' ||
+        (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
 </head>
-<body>
+<body class="min-h-screen flex flex-col bg-[#f0f4f8] dark:bg-gray-950 text-[#1a1a2e] dark:text-gray-100 font-sans pt-[68px]">
 
+  <!--
+    ============================================================
+    HEADER / NAV
+    ============================================================
+    Simplificado a pedido: solo logo + botón "Empieza ahora" +
+    interruptor de modo oscuro. Se retiraron los links de navegación
+    (Inicio/Lecciones/Escucha/Juegos/Perfil), Entrar y Registrarse,
+    y el menú móvil (ya no hace falta, no hay nada que colapsar).
+
+    NOTA: el import de guards.js al final del documento dependía de
+    #nav-menu / #mobile-btn para su lógica de sesión/rutas. Al quitar
+    esos elementos se removió también ese import para no romper la
+    página con errores de consola; si necesitas esa protección de
+    rutas, dime y la reintegro apuntando al nuevo botón.
+  -->
   <header>
-    <nav class="navbar">
-      <a href="/index.html" class="navbar-logo">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="logo-img"/>
-        <span class="logo-text">Egglish</span>
+    <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
+      <a href="/index.html" class="flex items-center gap-2.5 no-underline">
+        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-10 h-10 object-contain"/>
+        <span class="text-xl font-black text-[#1a1a2e] dark:text-white">Egglish</span>
       </a>
 
-      <button class="menu-toggle" id="mobile-btn">
-        <span></span><span></span><span></span>
-      </button>
+      <div class="flex items-center gap-3">
+        <button
+          id="dark-mode-toggle"
+          type="button"
+          aria-label="Cambiar modo oscuro"
+          aria-pressed="false"
+          class="w-11 h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-[#1a1a2e] dark:text-white">
+            <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+            <g id="icon-sun" class="hidden">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            </g>
+          </svg>
+        </button>
 
-      <div class="nav-wrapper" id="nav-menu">
-        <ul class="navbar-links">
-          <li><a href="/index.html" class="active">🏠 Inicio</a></li>
-          <li><a href="/Secciones/lecciones.html">📖 Lecciones</a></li>
-          <li><a href="/Secciones/Escucha.html">🎯 Escucha</a></li>
-          <li><a href="/Secciones/juegos.html">🎮 Juegos</a></li> 
-          <li><a href="/Secciones/perfil.html">👤 Perfil</a></li>
-        </ul>
-        <div class="navbar-auth">
-          <a href="/entrar.html" class="btn-entrar">→ Entrar</a>
-          <a href="/Secciones/Registro.html" class="btn-registrarse">Registrarse</a>
-        </div>
+        <a
+          href="/Secciones/Registro.html"
+          class="font-extrabold text-white bg-egg-green hover:bg-egg-green-d no-underline px-5 md:px-6 py-2.5 rounded-full shadow-hard-soft transition-colors whitespace-nowrap"
+        >
+          Empieza ahora
+        </a>
       </div>
     </nav>
   </header>
 
-  <main>
-    <section class="home-hero">
-      
-      <div class="hero-content">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="hero-chick" alt="pollito"/>
-        <h1 class="hero-title">Domina el inglés jugando</h1>
-        <p class="hero-sub">La forma más rápida, divertida y efectiva de aprender.</p>
-        <a href="/Secciones/juegos.html" class="btn-main-cta">Empezar a Jugar →</a>
-      </div>
-    </section>
-    <section class="section-container">
-      <h2 class="section-title">¿Por qué elegir Egglish?</h2>
-      <p class="section-subtitle">Diseñado para que aprendas sin darte cuenta.</p>
-      
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon-box bg-y">🥚</div>
-          <h3>Lecciones Cortas</h3>
-          <p>Aprende jugando con lecciones divertidas que duran menos de 10 minutos.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon-box bg-o">⚡</div>
-          <h3>Práctica Diaria</h3>
-          <p>Mantén a tu pollito feliz practicando vocabulario todos los días.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon-box bg-b">🎯</div>
-          <h3>Logros y Metas</h3>
-          <p>Gana plumas doradas, sube de nivel y desbloquea accesorios.</p>
+  <main class="flex-1">
+
+    <!--
+      ============================================================
+      HERO SECTION — layout de 2 columnas pedido
+      ============================================================
+      - min-h-screen: ocupa el viewport completo bajo el navbar.
+      - flex-col en móvil (apilado) -> md:flex-row (2 columnas) en tablet+.
+      - Columna izquierda: imagen del pollito, centrada, protagonista en desktop.
+      - Columna derecha: texto + botones, centrados verticalmente.
+    -->
+    <section class="min-h-screen w-full flex flex-col md:flex-row items-center bg-white dark:bg-gray-950">
+
+      <!-- Columna Izquierda: Pollito (único protagonista, mascotas adicionales removidas a pedido) -->
+      <div class="w-full md:w-1/2 min-h-[45vh] md:min-h-screen flex items-center justify-center bg-egg-blue dark:bg-blue-950 px-4 md:px-12 py-12 md:py-0 order-1">
+        <div class="relative w-72 h-72 sm:w-96 sm:h-96 md:w-[26rem] md:h-[26rem] lg:w-[30rem] lg:h-[30rem] flex items-center justify-center">
+
+          <!-- Pollito: único protagonista de la columna, se quitaron las mascotas adicionales -->
+          <img
+            src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png"
+            alt="Pollito de Egglish"
+            class="relative z-10 animate-bounce-chick w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
+          />
         </div>
       </div>
-    </section>
 
-    <section class="path-section">
-      <div class="section-container">
-        <h2 class="section-title">Tu camino hacia la fluidez</h2>
-        <p class="section-subtitle">Mira cómo tu pollito crece con cada paso.</p>
-      </div>
+      <!-- Columna Derecha: Contenido -->
+      <div class="w-full md:w-1/2 flex flex-col justify-center px-4 md:px-12 py-12 md:py-0 order-2 max-w-screen-md mx-auto md:mx-0 text-center md:text-left bg-white dark:bg-gray-950">
+        <h1 class="animate__animated animate__pulse animate__infinite text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-[#1a1a2e] dark:text-white">
+          Domina el inglés jugando
+        </h1>
+        <p class="text-lg md:text-xl font-semibold text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto md:mx-0">
+          La forma más rápida, divertida y efectiva de aprender.
+        </p>
 
-      <div class="path-container">
-        <div class="path-step">
-          <div class="path-node node-border-1">
-            <img src="https://em-content.zobj.net/source/twitter/376/egg_1f95a.png" alt="Huevo">
-          </div>
-          <div class="path-text">
-            <h3>1. El Cascarón</h3>
-            <p>Empieza con lo básico: saludos, colores y números mientras tu huevo se prepara.</p>
-          </div>
-        </div>
-
-        <div class="path-step">
-          <div class="path-node node-border-2">
-            <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Pollito saliendo">
-          </div>
-          <div class="path-text">
-            <h3>2. Primeros Pasos</h3>
-            <p>Construye oraciones simples y gana confianza para presentarte al mundo.</p>
-          </div>
-        </div>
-
-        <div class="path-step">
-          <div class="path-node node-border-3">
-            <img src="/imgs/Bigger-removebg-preview.png" alt="Pollito">
-          </div>
-          <div class="path-text">
-            <h3>3. Volando Alto</h3>
-            <p>Mantén conversaciones complejas. ¡Tu pollito ahora es un águila del idioma!</p>
-          </div>
+        <div class="flex flex-col sm:flex-row items-center md:items-start gap-4">
+          <a
+            href="/Secciones/juegos.html"
+            class="w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-white bg-egg-green hover:bg-egg-green-d transition-colors shadow-hard-soft"
+          >
+            Empezar a Jugar →
+          </a>
+          <a
+            href="/Secciones/Registro.html"
+            class="w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-egg-blue border-2 border-egg-blue hover:bg-blue-50 transition-colors"
+          >
+            Crear cuenta gratis
+          </a>
         </div>
       </div>
     </section>
 
-    <section class="cta-card-container">
-      <div class="cta-blue-card">
-        <img src="/imgs/Bigger-removebg-preview.png" alt="Pollito" class="cta-avatar">
-        <h2>¿Qué esperas?</h2>
-        <p>Únete a miles de estudiantes y haz del inglés tu momento favorito del día.</p>
-        <a href="/Secciones/Registro.html" class="btn-cta-white">Crear mi cuenta gratis</a>
+    <!--
+      ============================================================
+      FEATURES
+      ============================================================
+    -->
+    <section class="px-4 md:px-12 py-20 max-w-screen-xl mx-auto text-center bg-white dark:bg-gray-950">
+      <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">¿Por qué elegir Egglish?</h2>
+      <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold mb-12">Diseñado para que aprendas sin darte cuenta.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10 flex flex-col items-center">
+          <div class="w-[70px] h-[70px] rounded-2xl flex items-center justify-center mb-5 bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-200 dark:border-yellow-800 text-3xl">🥚</div>
+          <h3 class="text-xl font-extrabold mb-3 text-[#1a1a2e] dark:text-white">Lecciones Cortas</h3>
+          <p class="text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Aprende jugando con lecciones divertidas que duran menos de 10 minutos.</p>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10 flex flex-col items-center">
+          <div class="w-[70px] h-[70px] rounded-2xl flex items-center justify-center mb-5 bg-orange-50 dark:bg-orange-900/30 border-2 border-orange-200 dark:border-orange-800 text-3xl">⚡</div>
+          <h3 class="text-xl font-extrabold mb-3 text-[#1a1a2e] dark:text-white">Práctica Diaria</h3>
+          <p class="text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Mantén a tu pollito feliz practicando vocabulario todos los días.</p>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10 flex flex-col items-center">
+          <div class="w-[70px] h-[70px] rounded-2xl flex items-center justify-center mb-5 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800 text-3xl">🎯</div>
+          <h3 class="text-xl font-extrabold mb-3 text-[#1a1a2e] dark:text-white">Logros y Metas</h3>
+          <p class="text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Gana plumas doradas, sube de nivel y desbloquea accesorios.</p>
+        </div>
       </div>
     </section>
+
+    <!--
+      ============================================================
+      CAMINO / PATH
+      ============================================================
+    -->
+    <section class="bg-gray-50 dark:bg-gray-900 px-4 md:px-12 py-20 border-t border-gray-200 dark:border-gray-800">
+      <div class="max-w-screen-xl mx-auto text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">Tu camino hacia la fluidez</h2>
+        <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold">Mira cómo tu pollito crece con cada paso.</p>
+      </div>
+
+      <div class="relative max-w-screen-md mx-auto flex flex-col items-center gap-16">
+
+        <div class="absolute left-1/2 md:left-[60px] top-[60px] bottom-[60px] w-1 -translate-x-1/2 md:translate-x-0 bg-gradient-to-b from-orange-200 via-orange-300 to-blue-300 dark:from-orange-800 dark:via-orange-700 dark:to-blue-800 rounded-full -z-10"></div>
+
+        <div class="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-10 text-center md:text-left">
+          <div class="relative z-10 w-[120px] h-[120px] bg-white dark:bg-gray-950 rounded-[30px] flex items-center justify-center shadow-hard-node border-4 border-orange-200 dark:border-orange-800 shrink-0">
+            <img src="https://em-content.zobj.net/source/twitter/376/egg_1f95a.png" alt="Huevo" class="w-[70px] h-[70px] object-contain">
+          </div>
+          <div class="flex-1 max-w-sm">
+            <h3 class="text-2xl font-black mb-2 text-[#1a1a2e] dark:text-white">1. El Cascarón</h3>
+            <p class="text-gray-500 dark:text-gray-400 font-semibold leading-snug">Empieza con lo básico: saludos, colores y números mientras tu huevo se prepara.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-10 text-center md:text-left">
+          <div class="relative z-10 w-[120px] h-[120px] bg-white dark:bg-gray-950 rounded-[30px] flex items-center justify-center shadow-hard-node border-4 border-orange-300 dark:border-orange-700 shrink-0">
+            <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Pollito saliendo" class="w-[70px] h-[70px] object-contain">
+          </div>
+          <div class="flex-1 max-w-sm">
+            <h3 class="text-2xl font-black mb-2 text-[#1a1a2e] dark:text-white">2. Primeros Pasos</h3>
+            <p class="text-gray-500 dark:text-gray-400 font-semibold leading-snug">Construye oraciones simples y gana confianza para presentarte al mundo.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-10 text-center md:text-left">
+          <div class="relative z-10 w-[120px] h-[120px] bg-white dark:bg-gray-950 rounded-[30px] flex items-center justify-center shadow-hard-node border-4 border-blue-200 dark:border-blue-800 shrink-0">
+            <img src="/imgs/Bigger-removebg-preview.png" alt="Pollito" class="w-[70px] h-[70px] object-contain">
+          </div>
+          <div class="flex-1 max-w-sm">
+            <h3 class="text-2xl font-black mb-2 text-[#1a1a2e] dark:text-white">3. Volando Alto</h3>
+            <p class="text-gray-500 dark:text-gray-400 font-semibold leading-snug">Mantén conversaciones complejas. ¡Tu pollito ahora es un águila del idioma!</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!--
+      ============================================================
+      CTA FINAL
+      ============================================================
+    -->
+    <section class="px-4 md:px-12 py-16 flex justify-center">
+      <div class="bg-cta-dots relative bg-egg-blue rounded-[32px] px-6 md:px-10 py-16 text-center w-full max-w-screen-md shadow-hard-blue overflow-hidden">
+        <img src="/imgs/Bigger-removebg-preview.png" alt="Pollito" class="w-[110px] h-auto mx-auto mb-4 drop-shadow-lg">
+        <h2 class="text-3xl md:text-5xl font-black text-white mb-4">¿Qué esperas?</h2>
+        <p class="text-lg font-bold text-white/90 mb-9">Únete a miles de estudiantes y haz del inglés tu momento favorito del día.</p>
+        <a href="/Secciones/Registro.html" class="inline-block bg-white text-egg-blue px-11 py-4 rounded-2xl no-underline font-black text-lg shadow-hard-soft hover:-translate-y-0.5 transition-transform">
+          Crear mi cuenta gratis
+        </a>
+      </div>
+    </section>
+
   </main>
-  
 
-  <footer class="footer">
-    <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="footer-logo" alt="logo"/>
-    <div class="footer-title">Egglish</div>
-    <p class="footer-tagline">El pollito que te acompaña desde tu primer "Hello" hasta que hables con total fluidez.</p>
-    <p class="footer-copy">© 2026 Egglish. Todos los derechos reservados.</p>
+  <!--
+    ============================================================
+    FOOTER
+    ============================================================
+  -->
+  <footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
+    <div class="max-w-screen-xl mx-auto">
+
+      <!-- Grid de columnas grande, con la paleta azul/amarillo de Egglish -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-6 gap-y-10 mb-14 text-left">
+
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Sobre nosotros</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Cursos</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Misión</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Método de enseñanza</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Empleo</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Prensa</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Productos</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="/index.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Egglish</a></li>
+            <li><a href="/Secciones/lecciones.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Lecciones</a></li>
+            <li><a href="/Secciones/Escucha.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Escucha</a></li>
+            <li><a href="/Secciones/juegos.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Juegos</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Egglish para escuelas</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Aplicaciones</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Egglish para Android</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Egglish para iOS</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Ayuda y soporte</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Centro de ayuda</a></li>
+            <li><a href="/Secciones/perfil.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Mi perfil</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Estado del servicio</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Contáctanos</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Términos y privacidad</h4>
+          <ul class="flex flex-col gap-2.5 mb-6">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Normas de la comunidad</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Términos</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Privacidad</a></li>
+          </ul>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Social</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Blog</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Fila inferior: logo + copyright, separada por línea -->
+      <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+        <div class="flex items-center gap-2.5">
+          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/>
+          <span class="font-black text-lg text-white">Egglish</span>
+        </div>
+        <p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p>
+      </div>
+    </div>
   </footer>
 
+  <!--
+    ============================================================
+    MODO OSCURO
+    ============================================================
+    Guarda la preferencia en localStorage y actualiza el ícono/aria-pressed
+    del botón. El bloque <script> en el <head> ya aplica la clase 'dark'
+    apenas carga la página para que no haya parpadeo de tema.
+  -->
   <script>
-    const mobileBtn = document.getElementById('mobile-btn');
-    const navMenu = document.getElementById('nav-menu');
-    mobileBtn.addEventListener('click', () => {
-      navMenu.classList.toggle('active');
+    const darkToggle = document.getElementById('dark-mode-toggle');
+    const darkIcon = document.getElementById('dark-mode-icon');
+    const root = document.documentElement;
+
+    function syncDarkModeUI() {
+      const isDark = root.classList.contains('dark');
+      const moon = document.getElementById('icon-moon');
+      const sun = document.getElementById('icon-sun');
+      moon.classList.toggle('hidden', isDark);
+      sun.classList.toggle('hidden', !isDark);
+      darkToggle.setAttribute('aria-pressed', String(isDark));
+    }
+
+    darkToggle.addEventListener('click', () => {
+      root.classList.toggle('dark');
+      localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
+      syncDarkModeUI();
     });
-  </script>
-  <!-- ★ EGGLISH AUTH ★ -->
-  <script type="module">
-    import { initIndexGuards } from '/Secciones/Js/guards.js';
-    initIndexGuards();
+
+    syncDarkModeUI();
   </script>
 </body>
 </html>
