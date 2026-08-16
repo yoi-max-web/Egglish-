@@ -674,18 +674,9 @@ function shuffle(arr) {
 
 buildGrid('A1');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('hamburger-btn');
-    const menu = document.getElementById('nav-menu');
-
-    if (btn && menu) {
-        btn.onclick = (e) => {
-            e.preventDefault(); // Evita cualquier salto
-            e.stopPropagation();
-            menu.classList.toggle('active');
-            
-            // Opcional: Cambia el icono de la hamburguesa a una X
-            btn.classList.toggle('is-active');
-        };
-    }
-});
+/*
+  El listener del menú hamburguesa (#hamburger-btn / #nav-menu) fue
+  eliminado de aquí: el nuevo menú off-canvas (#egg-menu-btn /
+  #egg-offcanvas) y el botón de tema se inicializan en un <script>
+  propio dentro de juegos.html, justo antes de este archivo.
+*/

@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Egglish - Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (solo para botones de tema y cerrar) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+    </script>
+    <script>
+      if (localStorage.getItem('egglish-theme') === 'dark' ||
+          (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+
     <style>
         :root {
             --blue: #1cb0f6;
@@ -17,6 +30,18 @@
             --input-bg: #f7f9fa;
             --focus-border: #84d8ff;
         }
+
+        html.dark {
+            --bg-color: #0f172a;
+            --border-color: #334155;
+            --text-color: #f1f5f9;
+            --input-bg: #0f172a;
+        }
+
+        html.dark .login-card { background-color: #1e293b; }
+        html.dark .input-group input { background-color: #0f172a; color: #f1f5f9; }
+        html.dark .input-group input::placeholder { color: #94a3b8; }
+        html.dark .modal-content { background-color: #1e293b; }
 
         * {
             box-sizing: border-box;
@@ -268,6 +293,22 @@
     </style>
 </head>
 <body>
+    <a href="/index.html" aria-label="Cerrar y volver al inicio"
+       class="fixed top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-white text-xl font-bold hover:bg-gray-100 dark:hover:bg-slate-700 no-underline shadow-sm">
+      &times;
+    </a>
+
+    <button id="dark-mode-toggle" type="button" aria-label="Cambiar modo oscuro" aria-pressed="false"
+       class="fixed top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700 shadow-sm">
+      <svg id="dark-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700 dark:text-white">
+        <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+        <g id="icon-sun" class="hidden">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+        </g>
+      </svg>
+    </button>
+
     <main class="login-container">
         <div class="login-card">
             <header class="card-header">
@@ -424,6 +465,25 @@
             return map[code] || 'Error al enviar el correo. Intenta de nuevo.';
         }
     </script>
+    <script>
+      (function () {
+        const root = document.documentElement;
+        const darkToggle = document.getElementById('dark-mode-toggle');
+        function syncDarkModeUI() {
+          const isDark = root.classList.contains('dark');
+          document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+          document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+          darkToggle.setAttribute('aria-pressed', String(isDark));
+        }
+        darkToggle.addEventListener('click', () => {
+          root.classList.toggle('dark');
+          localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
+          syncDarkModeUI();
+        });
+        syncDarkModeUI();
+      })();
+    </script>
+
   <!-- ★ EGGLISH AUTH ★ -->
   <script type="module" src="/Secciones/Js/entrar-logic.js"></script>
 </body>

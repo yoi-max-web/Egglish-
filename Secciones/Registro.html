@@ -10,6 +10,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
+    <!-- Tailwind CSS (solo para botones de tema y cerrar) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+    </script>
+    <script>
+      if (localStorage.getItem('egglish-theme') === 'dark' ||
+          (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+
     <style>
         :root {
             /* Paleta original — sin cambios */
@@ -32,6 +44,19 @@
             --shadow-card: 0 24px 48px -16px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
             --shadow-input-focus: 0 0 0 4px var(--blue-soft);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html.dark {
+            --border-color: #334155;
+            --text-main: #f1f5f9;
+            --text-placeholder: #94a3b8;
+            --bg-page: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+        }
+
+        html.dark body {
+            background-image: none;
         }
 
         * {
@@ -132,6 +157,21 @@
             border-color: var(--blue);
             background-color: var(--bg-card);
             box-shadow: var(--shadow-input-focus);
+        }
+
+        .input-field.is-error {
+            border-color: var(--danger);
+        }
+
+        .field-error {
+            margin-top: 6px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        .field-error.hidden {
+            display: none;
         }
 
         .password-field-wrapper {
@@ -347,6 +387,27 @@
             transform: scale(1.05);
         }
 
+        /* Modo oscuro — medidor de contraseña */
+        html.dark .password-meter {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-color: var(--border-color);
+        }
+        html.dark .password-meter__bar {
+            background: #334155;
+        }
+        html.dark .password-meter__hint {
+            color: #cbd5e1;
+        }
+        html.dark .password-requirements li {
+            color: #e2e8f0;
+        }
+        html.dark .password-requirements li.is-invalid {
+            color: #cbd5e1;
+        }
+        html.dark .req-icon {
+            background-color: rgba(239, 68, 68, 0.18);
+        }
+
         /* Responsive refinements */
         @media (max-width: 520px) {
             body {
@@ -416,19 +477,42 @@
         }
     </style>
 </head>
-<body>
+<body class="dark:bg-slate-900 transition-colors relative">
 
-    <main class="registration-card">
+    <!-- Botones flotantes: cerrar (izquierda) y tema (derecha) -->
+    <a href="/index.html" aria-label="Cerrar y volver al inicio"
+       class="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-white text-xl font-bold hover:bg-gray-100 dark:hover:bg-slate-700 no-underline shadow-sm">
+      &times;
+    </a>
+
+    <button id="dark-mode-toggle" type="button" aria-label="Cambiar modo oscuro" aria-pressed="false"
+       class="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700 shadow-sm">
+      <svg id="dark-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700 dark:text-white">
+        <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+        <g id="icon-sun" class="hidden">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+        </g>
+      </svg>
+    </button>
+
+    <main class="registration-card" style="margin-top: 56px;">
 
         <header class="card-header">
             <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logito " width="46" height="46">
             <h1>Egglish</h1>
         </header>
 
-        <form class="signup-form" onsubmit="event.preventDefault();">
-            <input type="text" class="input-field" placeholder="Nombre completo" required>
-            <input type="email" class="input-field" placeholder="Correo electrónico" required>
-            <input type="number" class="input-field" placeholder="Edad" min="1" required>
+        <form class="signup-form" id="signup-form" onsubmit="event.preventDefault();" novalidate>
+            <input type="text" id="reg-nombre" class="input-field" placeholder="Nombre completo" required>
+            <div>
+                <input type="email" id="reg-email" class="input-field" placeholder="Correo electrónico" required>
+                <p id="email-error" class="field-error hidden">Ingresa un correo electrónico válido (debe contener @ y un dominio, ej: nombre@ejemplo.com).</p>
+            </div>
+            <div>
+                <input type="number" id="reg-edad" class="input-field" placeholder="Edad" min="1" max="18" step="1" required>
+                <p id="edad-error" class="field-error hidden">La edad debe ser un número entero entre 1 y 18.</p>
+            </div>
             <div class="password-field-wrapper">
                 <input id="reg-password" type="password" class="input-field" placeholder="Contraseña" required>
                 <button type="button" class="password-toggle" id="password-toggle" aria-label="Mostrar contraseña">
@@ -465,7 +549,72 @@
 
     </main>
 
-  <!-- ✅ Script FUERA del main, justo antes de </body> -->
+    <script>
+      (function () {
+        const root = document.documentElement;
+        const darkToggle = document.getElementById('dark-mode-toggle');
+        function syncDarkModeUI() {
+          const isDark = root.classList.contains('dark');
+          document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+          document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+          darkToggle.setAttribute('aria-pressed', String(isDark));
+        }
+        darkToggle.addEventListener('click', () => {
+          root.classList.toggle('dark');
+          localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
+          syncDarkModeUI();
+        });
+        syncDarkModeUI();
+      })();
+    </script>
+
+    <script>
+      (function () {
+        const form = document.getElementById('signup-form');
+        const emailInput = document.getElementById('reg-email');
+        const emailError = document.getElementById('email-error');
+        const edadInput = document.getElementById('reg-edad');
+        const edadError = document.getElementById('edad-error');
+
+        // Regex de correo razonablemente estricta: usuario@dominio.tld
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+        function validarEmail() {
+          const valor = emailInput.value.trim();
+          const esValido = EMAIL_REGEX.test(valor);
+          emailInput.classList.toggle('is-error', !esValido);
+          emailError.classList.toggle('hidden', esValido);
+          return esValido;
+        }
+
+        function validarEdad() {
+          const valor = edadInput.value.trim();
+          const numero = Number(valor);
+          const esEntero = /^\d+$/.test(valor);
+          const esValido = esEntero && numero >= 1 && numero <= 18;
+          edadInput.classList.toggle('is-error', !esValido);
+          edadError.classList.toggle('hidden', esValido);
+          return esValido;
+        }
+
+        emailInput.addEventListener('input', validarEmail);
+        emailInput.addEventListener('blur', validarEmail);
+        edadInput.addEventListener('input', validarEdad);
+        edadInput.addEventListener('blur', validarEdad);
+
+        form.addEventListener('submit', function (e) {
+          const emailOk = validarEmail();
+          const edadOk = validarEdad();
+          if (!emailOk || !edadOk) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            if (!emailOk) emailInput.focus();
+            else if (!edadOk) edadInput.focus();
+          }
+        }, true);
+      })();
+    </script>
+
   <script type="module" src="/Secciones/Js/registro-logic.js"></script>
 </body>
 </html>

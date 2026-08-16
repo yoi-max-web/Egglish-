@@ -87,20 +87,20 @@
   -->
   <header>
     <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
-      <a href="/index.html" class="flex items-center gap-2.5 no-underline">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-10 h-10 object-contain"/>
-        <span class="text-xl font-black text-[#1a1a2e] dark:text-white">Egglish</span>
+      <a href="/index.html" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
+        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+        <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
       </a>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
         <button
           id="dark-mode-toggle"
           type="button"
           aria-label="Cambiar modo oscuro"
           aria-pressed="false"
-          class="w-11 h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+          class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
         >
-          <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-[#1a1a2e] dark:text-white">
+          <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
             <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
             <g id="icon-sun" class="hidden">
               <circle cx="12" cy="12" r="4"></circle>
@@ -109,12 +109,6 @@
           </svg>
         </button>
 
-        <a
-          href="/Secciones/Registro.html"
-          class="font-extrabold text-white bg-egg-green hover:bg-egg-green-d no-underline px-5 md:px-6 py-2.5 rounded-full shadow-hard-soft transition-colors whitespace-nowrap"
-        >
-          Empieza ahora
-        </a>
       </div>
     </nav>
   </header>
@@ -156,10 +150,10 @@
 
         <div class="flex flex-col sm:flex-row items-center md:items-start gap-4">
           <a
-            href="/Secciones/juegos.html"
+            href="/entrar.html"
             class="w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-white bg-egg-green hover:bg-egg-green-d transition-colors shadow-hard-soft"
           >
-            Empezar a Jugar →
+            Empezar a Jugar 
           </a>
           <a
             href="/Secciones/Registro.html"
@@ -257,9 +251,6 @@
         <img src="/imgs/Bigger-removebg-preview.png" alt="Pollito" class="w-[110px] h-auto mx-auto mb-4 drop-shadow-lg">
         <h2 class="text-3xl md:text-5xl font-black text-white mb-4">¿Qué esperas?</h2>
         <p class="text-lg font-bold text-white/90 mb-9">Únete a miles de estudiantes y haz del inglés tu momento favorito del día.</p>
-        <a href="/Secciones/Registro.html" class="inline-block bg-white text-egg-blue px-11 py-4 rounded-2xl no-underline font-black text-lg shadow-hard-soft hover:-translate-y-0.5 transition-transform">
-          Crear mi cuenta gratis
-        </a>
       </div>
     </section>
 
@@ -273,36 +264,15 @@
   <footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
     <div class="max-w-screen-xl mx-auto">
 
-      <!-- Grid de columnas grande, con la paleta azul/amarillo de Egglish -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-6 gap-y-10 mb-14 text-left">
+      <!-- Grid de columnas simplificado (3 columnas), paleta azul/amarillo de Egglish -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10 mb-14 text-left">
 
         <div>
           <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Sobre nosotros</h4>
           <ul class="flex flex-col gap-2.5">
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Cursos</a></li>
             <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Misión</a></li>
             <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Método de enseñanza</a></li>
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Empleo</a></li>
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Prensa</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Productos</h4>
-          <ul class="flex flex-col gap-2.5">
-            <li><a href="/index.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Egglish</a></li>
-            <li><a href="/Secciones/lecciones.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Lecciones</a></li>
-            <li><a href="/Secciones/Escucha.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Escucha</a></li>
-            <li><a href="/Secciones/juegos.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Juegos</a></li>
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Egglish para escuelas</a></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Aplicaciones</h4>
-          <ul class="flex flex-col gap-2.5">
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Egglish para Android</a></li>
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Egglish para iOS</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Creadores</a></li>
           </ul>
         </div>
 
@@ -310,8 +280,6 @@
           <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Ayuda y soporte</h4>
           <ul class="flex flex-col gap-2.5">
             <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Centro de ayuda</a></li>
-            <li><a href="/Secciones/perfil.html" class="text-sm font-bold text-white/90 hover:text-white no-underline">Mi perfil</a></li>
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Estado del servicio</a></li>
             <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Contáctanos</a></li>
           </ul>
         </div>
@@ -319,7 +287,6 @@
         <div>
           <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Términos y privacidad</h4>
           <ul class="flex flex-col gap-2.5 mb-6">
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Normas de la comunidad</a></li>
             <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Términos</a></li>
             <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Privacidad</a></li>
           </ul>

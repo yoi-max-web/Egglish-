@@ -1,0 +1,744 @@
+/* ============================================================
+   EGGY.CSS — Interfaz del asistente IA de Egglish
+   Reutiliza exactamente las variables CSS de index.html
+   ============================================================ */
+
+/* ============================================================
+   VARIABLES (idénticas al index.html de Egglish)
+   ============================================================ */
+:root {
+  --blue:    #1cb0f6;
+  --blue-d:  #0090d9;
+  --yellow:  #f5a623;
+  --yellow-d:#d48800;
+  --white:   #ffffff;
+  --bg:      #f0f4f8;
+  --text:    #1a1a2e;
+  --mid:     #4b5563;
+  --border:  #e5e7eb;
+  --font:    'Nunito', sans-serif;
+
+  /* Tokens propios de Eggy (derivados del sistema Egglish) */
+  --sidebar-w: 280px;
+  --sidebar-bg: #f9fafb;
+  --msg-user-bg: var(--blue);
+  --msg-user-text: var(--white);
+  --msg-eggy-bg: var(--white);
+  --msg-eggy-text: var(--text);
+  --radius-msg: 20px;
+  --radius-btn: 12px;
+  --shadow-card: 0 4px 0 var(--border);
+  --shadow-btn-yellow: 0 4px 0 var(--yellow-d);
+  --shadow-btn-blue: 0 4px 0 var(--blue-d);
+  --transition: .2s ease;
+}
+
+/* ============================================================
+   RESET BASE (en línea con el index.html)
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ============================================================
+   NAVBAR — igual que en index.html
+   ============================================================ */
+.navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--white); padding: 0 32px; height: 68px;
+  border-bottom: 2px solid var(--border);
+  position: sticky; top: 0; z-index: 200;
+}
+.navbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.logo-img { width: 40px; height: 40px; object-fit: contain; }
+.logo-text { font-size: 1.4rem; font-weight: 900; color: var(--text); }
+
+.nav-wrapper { display: flex; align-items: center; flex: 1; justify-content: flex-end; }
+
+.navbar-links {
+  display: flex; list-style: none; gap: 20px;
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.navbar-links a {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: 24px; text-decoration: none;
+  font-size: 0.9rem; font-weight: 700; color: var(--mid);
+  transition: background .2s, color .2s; white-space: nowrap; line-height: 1;
+}
+.navbar-links a:hover { background: var(--bg); color: var(--text); }
+.navbar-links a.active { background: #dbeafe; color: var(--blue); }
+
+.navbar-auth { display: flex; align-items: center; gap: 12px; }
+.btn-entrar { font-weight: 700; color: var(--mid); text-decoration: none; padding: 8px 14px; }
+.btn-registrarse {
+  font-weight: 800; color: var(--white); background: var(--yellow);
+  text-decoration: none; padding: 10px 22px; border-radius: 12px;
+  box-shadow: 0 4px 0 var(--yellow-d);
+}
+
+.menu-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; border: none; background: none; }
+.menu-toggle span { width: 25px; height: 3px; background: var(--text); border-radius: 2px; }
+
+/* ============================================================
+   LAYOUT PRINCIPAL — toda la página Eggy
+   ============================================================ */
+
+/* Wrapper que ocupa toda la ventana debajo del navbar */
+.eggy-page {
+  display: flex;
+  height: calc(100vh - 68px); /* 68px = altura del navbar de Egglish */
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font);
+}
+
+/* ============================================================
+   SIDEBAR IZQUIERDA
+   ============================================================ */
+.eggy-sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  border-right: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: transform var(--transition);
+  overflow: hidden;
+}
+
+/* Cabecera de la sidebar: logo + nombre */
+.eggy-sidebar__header {
+  padding: 24px 20px 20px;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.eggy-sidebar__logo-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.eggy-sidebar__logo-text {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+/* Botón "Nuevo chat" — usa el estilo del btn-registrarse de index.html */
+.eggy-sidebar__new-btn {
+  margin: 16px 16px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--yellow);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-btn);
+  box-shadow: var(--shadow-btn-yellow);
+  padding: 12px 18px;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  text-decoration: none;
+  width: calc(100% - 32px);
+}
+
+.eggy-sidebar__new-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--yellow-d);
+}
+
+.eggy-sidebar__new-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--yellow-d);
+}
+
+.eggy-sidebar__new-btn svg {
+  flex-shrink: 0;
+}
+
+/* Sección historial */
+.eggy-sidebar__history {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.eggy-sidebar__history-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 8px;
+  margin-bottom: 8px;
+}
+
+/* Item de conversación en el historial */
+.eggy-history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-btn);
+  cursor: pointer;
+  transition: background var(--transition);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--mid);
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.eggy-history-item:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+.eggy-history-item.is-active {
+  background: #dbeafe;
+  color: var(--blue);
+}
+
+.eggy-history-item__icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.eggy-history-item__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pie de la sidebar: información del asistente */
+.eggy-sidebar__footer {
+  padding: 16px;
+  border-top: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eggy-sidebar__avatar-sm {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #dbeafe;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.eggy-sidebar__meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.eggy-sidebar__meta-name {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.eggy-sidebar__meta-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--blue);
+  background: #dbeafe;
+  border-radius: 8px;
+  padding: 1px 7px;
+  width: fit-content;
+}
+
+/* ============================================================
+   ÁREA PRINCIPAL DEL CHAT
+   ============================================================ */
+.eggy-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* Encabezado del chat principal */
+.eggy-main__topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: var(--white);
+  border-bottom: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* Botón hamburger — visible solo en móvil */
+.eggy-topbar__menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background var(--transition);
+}
+
+.eggy-topbar__menu-btn:hover {
+  background: var(--bg);
+}
+
+.eggy-main__topbar-avatar {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  background: #dbeafe;
+  border-radius: 14px;
+  padding: 3px;
+}
+
+.eggy-main__topbar-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.eggy-main__topbar-name {
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.eggy-main__topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.eggy-main__topbar-status::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   ZONA DE MENSAJES (scroll)
+   ============================================================ */
+.eggy-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* ---- Mensaje genérico ---- */
+.eggy-msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  max-width: 720px;
+  animation: msgFadeIn .35s ease both;
+}
+
+@keyframes msgFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Mensajes de Eggy (izquierda) */
+.eggy-msg--eggy {
+  align-self: flex-start;
+}
+
+/* Mensajes del usuario (derecha) */
+.eggy-msg--user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+/* Avatar en burbuja */
+.eggy-msg__avatar {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #dbeafe;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+/* Avatar usuario */
+.eggy-msg__avatar--user {
+  background: #fef3c7;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+/* Burbuja de mensaje */
+.eggy-msg__bubble {
+  padding: 14px 18px;
+  border-radius: var(--radius-msg);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.55;
+  max-width: calc(100% - 52px);
+  position: relative;
+}
+
+/* Burbuja Eggy */
+.eggy-msg--eggy .eggy-msg__bubble {
+  background: var(--msg-eggy-bg);
+  color: var(--msg-eggy-text);
+  border: 2px solid var(--border);
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 4px 0 var(--border);
+}
+
+/* Burbuja usuario */
+.eggy-msg--user .eggy-msg__bubble {
+  background: var(--msg-user-bg);
+  color: var(--msg-user-text);
+  border-bottom-right-radius: 6px;
+  box-shadow: var(--shadow-btn-blue);
+}
+
+/* Hora del mensaje */
+.eggy-msg__time {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #9ca3af;
+  margin-top: 6px;
+  display: block;
+}
+
+.eggy-msg--user .eggy-msg__time {
+  text-align: right;
+}
+
+/* ---- Indicador "Eggy está pensando..." ---- */
+.eggy-thinking {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  align-self: flex-start;
+  animation: msgFadeIn .3s ease both;
+}
+
+.eggy-thinking__bubble {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-msg);
+  border-bottom-left-radius: 6px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 0 var(--border);
+}
+
+.eggy-thinking__label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--mid);
+  margin-right: 4px;
+}
+
+/* Tres puntos animados */
+.eggy-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: eggyDot 1.2s infinite ease-in-out;
+}
+
+.eggy-dot:nth-child(2) { animation-delay: .2s; }
+.eggy-dot:nth-child(3) { animation-delay: .4s; }
+
+@keyframes eggyDot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: .5; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+
+/* Ocultar / mostrar pensando */
+.eggy-thinking.is-hidden { display: none; }
+
+/* ============================================================
+   BIENVENIDA VACÍA (pantalla inicial)
+   ============================================================ */
+.eggy-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  gap: 16px;
+  padding: 40px 20px;
+  animation: msgFadeIn .4s ease both;
+}
+
+.eggy-welcome__chick {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  animation: bounce 2s infinite ease-in-out;
+}
+
+/* Reutiliza el keyframe bounce del index.html */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+.eggy-welcome__title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.eggy-welcome__sub {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--mid);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+/* Chips de sugerencias rápidas */
+.eggy-welcome__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.eggy-chip {
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  padding: 9px 18px;
+  font-family: var(--font);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--mid);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+  box-shadow: 0 3px 0 var(--border);
+}
+
+.eggy-chip:hover {
+  background: #dbeafe;
+  border-color: var(--blue);
+  color: var(--blue);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   CAJA DE INPUT
+   ============================================================ */
+.eggy-input-area {
+  padding: 16px 24px 20px;
+  background: var(--white);
+  border-top: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.eggy-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  padding: 10px 14px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.eggy-input-row:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(28, 176, 246, 0.15);
+}
+
+/* Textarea (crece automáticamente con JS) */
+.eggy-input-row__textarea {
+  flex: 1;
+  resize: none;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.5;
+  max-height: 160px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  outline: none;
+}
+
+.eggy-input-row__textarea::placeholder {
+  color: #9ca3af;
+  font-weight: 600;
+}
+
+/* Botón enviar — estilo btn-registrarse de Egglish */
+.eggy-input-row__send-btn {
+  width: 44px;
+  height: 44px;
+  background: var(--blue);
+  border: none;
+  border-radius: 12px;
+  box-shadow: var(--shadow-btn-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+.eggy-input-row__send-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--blue-d);
+}
+
+.eggy-input-row__send-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--blue-d);
+}
+
+.eggy-input-row__send-btn:disabled {
+  background: #d1d5db;
+  box-shadow: 0 4px 0 #b0b3b8;
+  cursor: not-allowed;
+}
+
+.eggy-input-row__send-btn svg {
+  transition: transform var(--transition);
+}
+
+.eggy-input-row__send-btn:hover:not(:disabled) svg {
+  transform: translateX(2px);
+}
+
+/* Pie: hint de teclado */
+.eggy-input-hint {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9ca3af;
+}
+
+.eggy-input-hint kbd {
+  background: var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: var(--font);
+  font-size: 0.72rem;
+}
+
+/* ============================================================
+   OVERLAY MÓVIL (cubre el main cuando la sidebar está abierta)
+   ============================================================ */
+.eggy-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 150;
+}
+
+.eggy-overlay.is-visible { display: block; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 850px) {
+  :root { --sidebar-w: 260px; }
+
+  .nav-wrapper {
+    position: fixed; top: 68px; left: -100%; width: 100%; height: calc(100vh - 68px);
+    background: var(--white); flex-direction: column; padding: 40px; transition: 0.3s;
+    justify-content: flex-start;
+  }
+  .nav-wrapper.active { left: 0; }
+  .navbar-links { position: static; transform: none; flex-direction: column; width: 100%; text-align: center; gap: 10px; }
+  .navbar-auth { flex-direction: column; width: 100%; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .menu-toggle { display: flex; }
+
+  /* Sidebar: se oculta fuera de pantalla por defecto */
+  .eggy-sidebar {
+    position: fixed;
+    top: 68px;
+    left: 0;
+    height: calc(100vh - 68px);
+    z-index: 160;
+    transform: translateX(-100%);
+  }
+
+  .eggy-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  /* Mostrar botón hamburger en móvil */
+  .eggy-topbar__menu-btn { display: flex; }
+
+  .eggy-messages { padding: 20px 14px; }
+  .eggy-input-area { padding: 12px 14px 16px; }
+
+  .eggy-welcome__title { font-size: 1.4rem; }
+  .eggy-msg__bubble { font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+  .eggy-main__topbar { padding: 12px 14px; }
+  .eggy-welcome__chips { gap: 8px; }
+  .eggy-chip { font-size: 0.82rem; padding: 7px 14px; }
+}
+
+/* ============================================================
+   ACCESIBILIDAD — respeta prefers-reduced-motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

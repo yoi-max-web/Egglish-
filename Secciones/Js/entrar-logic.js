@@ -1,16 +1,21 @@
 // ============================================================
 //  Secciones/Js/entrar-logic.js
 //  ✅ Redirige a /Secciones/perfil.html tras login exitoso
-//  🔧 CORREGIDO: isLoggedIn() era síncrono y dependía de
-//     localStorage. Firebase Auth resuelve la sesión de forma
-//     ASÍNCRONA, así que ahora usamos onAuthChange().
 // ============================================================
 
-import { loginUser, onAuthChange } from './auth.js';
+import { loginUser } from './auth.js';
+import { auth } from './firebase-config.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-// Si ya hay sesión activa en Firebase → ir directo al perfil
-onAuthChange((user) => {
-  if (user) window.location.replace('/Secciones/perfil.html');
+// Si ya hay sesión REAL en Firebase → ir directo al perfil.
+// onAuthStateChanged es la única fuente de verdad; no confiamos
+// en localStorage porque puede quedar un residuo de una sesión
+// vieja (p. ej. de un proyecto de Firebase distinto) que ya no
+// corresponde a ningún usuario autenticado real.
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    window.location.replace('/Secciones/perfil.html');
+  }
 });
 
 const EYE_ICON = `
@@ -110,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.style.background = '#58cc02';
         btn.style.boxShadow  = '0 4px 0 #46a302';
       }
-      // ✅ Redirige a perfil.html (la sesión ya la maneja Firebase Auth)
+      // ✅ Redirige a perfil.html
       setTimeout(() => window.location.replace('/Secciones/perfil.html'), 700);
     } else {
       setFormError(result.error);
