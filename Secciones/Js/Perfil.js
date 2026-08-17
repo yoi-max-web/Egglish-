@@ -1,26 +1,53 @@
 // ============================================================
 //  Secciones/Js/Perfil.js
-//  ✅ Lee la sesión guardada y rellena el perfil con datos reales
-//     del usuario: nombre, email, edad, avatar con inicial
+//  ✅ Lee la sesión REAL desde Firebase (onAuthStateChanged) y
+//     rellena el perfil con datos del usuario: nombre, email,
+//     edad, avatar con inicial.
 //  ✅ Rellena la navbar (Entrar/Registrarse o Cerrar sesión)
 //     tal como en Juegos.html, tanto en escritorio como en el
 //     menú hamburguesa off-canvas.
+//
+//  🩹 FIX (bucle perfil <-> entrar):
+//     Antes este archivo decidía si había sesión mirando SOLO
+//     localStorage ('egglish_session'). El problema es que, al
+//     hacer login, Firebase dispara `onAuthStateChanged` (en
+//     entrar-logic.js) y navega a esta página ANTES de que
+//     `loginUser()` termine de guardar esa clave en localStorage
+//     (la navegación aborta el script de entrar.html a medias).
+//     Resultado: localStorage nunca se llenaba, esta página
+//     rebotaba a entrar.html, Firebase decía "sí hay sesión" y
+//     te mandaba de vuelta aquí → bucle infinito.
+//
+//     Ahora la ÚNICA fuente de verdad es Firebase Auth
+//     (onAuthStateChanged), igual que en entrar-logic.js.
+//     localStorage se usa solo como caché para pintar rápido
+//     mientras Firebase termina de inicializar (evita parpadeo),
+//     pero nunca para decidir si redirigir.
 // ============================================================
 
-// ── Leer sesión desde localStorage ───────────────────────────
-function getSession() {
+import { auth, db } from '/Secciones/Js/firebase-config.js';
+import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const SESSION_KEY = 'egglish_session';
+
+// ── Caché local (solo para pintar rápido, NO para decidir sesión) ──
+function getCachedSession() {
   try {
-    const raw = localStorage.getItem('egglish_session');
+    const raw = localStorage.getItem(SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
 }
 
-// ── Si no hay sesión → redirigir a login ─────────────────────
-const session = getSession();
-if (!session) {
-  window.location.replace('/entrar.html');
+function saveCachedSession(data) {
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {}
+}
+
+function clearCachedSession() {
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem('egglish_join_date');
 }
 
 // ── Generar avatar con inicial del nombre ─────────────────────
@@ -54,45 +81,42 @@ function getJoinDate() {
 }
 
 // ── Rellenar el perfil con datos reales ───────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  // La navbar (login/logout) se rellena siempre, haya o no sesión
-  adaptNavbar(session);
-
-  if (!session) return;
-
+function fillProfile(session) {
   const { name, email, age } = session;
 
   // ── 1. AVATAR ─────────────────────────────────────────────
   const avatarImg     = document.querySelector('.avatar-img');
-  const avatarWrapper = document.querySelector('.avatar-wrapper');
+  const existingAvatar = document.getElementById('user-avatar-initial');
 
-  if (avatarImg && name) {
-    // Reemplazar la imagen del pollito por un avatar con inicial
+  if (name && (avatarImg || existingAvatar)) {
     const initial = name.charAt(0).toUpperCase();
     const color   = getAvatarColor(name);
 
-    // Crear elemento de inicial
-    const avatarDiv = document.createElement('div');
-    avatarDiv.id = 'user-avatar-initial';
-    avatarDiv.style.cssText = `
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: ${color};
-      border: 4px solid #1cb0f6;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.8rem;
-      font-weight: 900;
-      color: white;
-      font-family: 'Nunito', sans-serif;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-    `;
-    avatarDiv.textContent = initial;
-
-    // Sustituir la imagen por el div con inicial
-    avatarImg.replaceWith(avatarDiv);
+    if (existingAvatar) {
+      // Ya se había sustituido antes (p. ej. re-render con datos de Firestore)
+      existingAvatar.textContent = initial;
+      existingAvatar.style.background = color;
+    } else {
+      const avatarDiv = document.createElement('div');
+      avatarDiv.id = 'user-avatar-initial';
+      avatarDiv.style.cssText = `
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: ${color};
+        border: 4px solid #1cb0f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.8rem;
+        font-weight: 900;
+        color: white;
+        font-family: 'Nunito', sans-serif;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      `;
+      avatarDiv.textContent = initial;
+      avatarImg.replaceWith(avatarDiv);
+    }
   }
 
   // ── 2. NOMBRE ─────────────────────────────────────────────
@@ -114,20 +138,59 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── 6. EDAD en sección de info (opcional) ─────────────────
   const ageEl = document.getElementById('profile-age');
   if (ageEl && age) ageEl.textContent = `${age} años`;
+}
+
+// ── Pintado optimista con caché mientras Firebase inicializa ──
+// (Firebase tarda un instante en confirmar la sesión al cargar la
+// página; sin esto, se ve un parpadeo de "sin datos" cada vez).
+document.addEventListener('DOMContentLoaded', () => {
+  const cached = getCachedSession();
+  if (cached) {
+    adaptNavbar(cached);
+    fillProfile(cached);
+  } else {
+    // Estado neutro mientras se confirma con Firebase; se corrige
+    // en cuanto onAuthStateChanged responda (abajo).
+    adaptNavbar(null);
+  }
+});
+
+// ── Firebase es la ÚNICA fuente de verdad sobre la sesión ─────
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    // No hay sesión real → limpiar caché y mandar a login
+    clearCachedSession();
+    window.location.replace('/entrar.html');
+    return;
+  }
+
+  // Traer datos extra (edad) desde Firestore, guardados al registrarse
+  let age = null;
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) age = snap.data().age ?? null;
+  } catch (e) {
+    console.warn('[Egglish] No se pudo leer el perfil en Firestore:', e);
+  }
+
+  const session = {
+    uid:   user.uid,
+    name:  user.displayName || user.email?.split('@')[0] || 'Usuario',
+    email: user.email,
+    age,
+  };
+
+  saveCachedSession(session);
+  adaptNavbar(session);
+  fillProfile(session);
 });
 
 // ── Cerrar sesión (compartido entre botón desktop y móvil) ────
 async function cerrarSesion() {
-  localStorage.removeItem('egglish_session');
-
-  // Si Firebase está activo, hacer signOut también
+  clearCachedSession();
   try {
-    const FB_CDN = 'https://www.gstatic.com/firebasejs/10.12.2';
-    const { getAuth, signOut } = await import(`${FB_CDN}/firebase-auth.js`);
-    const auth = getAuth();
-    if (auth.currentUser) await signOut(auth);
-  } catch (_) { /* ignorar si Firebase no está activo */ }
-
+    await signOut(auth);
+  } catch (_) { /* ignorar si ya estaba desconectado */ }
   window.location.href = '/index.html';
 }
 

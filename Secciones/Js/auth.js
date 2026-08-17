@@ -2,31 +2,41 @@
 //  Secciones/Js/auth.js
 //  ✅ Versión corregida para navegador puro con Firebase CDN
 //     NO requiere Node.js, Webpack ni Vite
+//
+//  🩹 FIX (bucle perfil <-> entrar):
+//     Antes, `perfil.html` decidía si había sesión mirando SOLO
+//     `localStorage`. Pero justo al hacer login, Firebase dispara
+//     `onAuthStateChanged` (en entrar-logic.js) y navega a
+//     perfil.html ANTES de que termine de ejecutarse el resto de
+//     `loginUser()` (que es quien guarda la sesión en localStorage).
+//     Resultado: la navegación aborta el script a medias, el
+//     localStorage nunca se llega a escribir, y perfil.html rebota
+//     de vuelta a entrar.html → bucle infinito.
+//
+//     Ahora `localStorage` es solo una CACHÉ para pintar rápido
+//     (evitar parpadeo), pero la fuente de verdad real es SIEMPRE
+//     Firebase Auth (`onAuthStateChanged`), tanto en entrar.html
+//     como en perfil.html. Los datos extra (edad) se guardan en
+//     Firestore, ya que Firebase Auth no tiene un campo para eso.
 // ============================================================
 
-import { USE_FIREBASE, firebaseConfig } from './firebase-config.js';
+import { USE_FIREBASE, auth as _sharedAuth, db as _sharedDb } from './firebase-config.js';
 
 // ── URLs de Firebase CDN (navegador puro) ─────────────────────
 const FB_CDN = 'https://www.gstatic.com/firebasejs/10.12.2';
 
-// ── Instancias Firebase (se crean una sola vez) ──────────────
-let _auth = null;
-
+// ── Instancia Firebase compartida ─────────────────────────────
+// IMPORTANTE: reutilizamos la MISMA instancia `auth` que exporta
+// firebase-config.js (y que usa entrar-logic.js / Perfil.js para
+// onAuthStateChanged), en vez de crear una segunda con un import()
+// dinámico. Tener dos instancias es una fuente de bugs difíciles
+// de rastrear (p. ej. listeners que no se disparan en la instancia
+// que uno cree que está usando).
 async function getAuth() {
-  if (_auth) return _auth;
-  const { initializeApp, getApps } = await import(`${FB_CDN}/firebase-app.js`);
-  const { getAuth: _getAuth }      = await import(`${FB_CDN}/firebase-auth.js`);
-
-  // Evitar doble inicialización
-  const app = getApps().length === 0
-    ? initializeApp(firebaseConfig)
-    : getApps()[0];
-
-  _auth = _getAuth(app);
-  return _auth;
+  return _sharedAuth;
 }
 
-// ── Clave de sesión en localStorage ──────────────────────────
+// ── Clave de sesión en localStorage (solo caché, no fuente de verdad) ──
 const SESSION_KEY = 'egglish_session';
 
 // ─────────────────────────────────────────────────────────────
@@ -80,16 +90,31 @@ export async function registerUser({ name, email, age, password }) {
       const auth = await getAuth();
       const { createUserWithEmailAndPassword, updateProfile } =
         await import(`${FB_CDN}/firebase-auth.js`);
+      const { doc, setDoc } = await import(`${FB_CDN}/firebase-firestore.js`);
 
       const { user } = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(user, { displayName: name });
 
-      // Guardar sesión local
+      // Guardar datos extra (edad) en Firestore, ya que Firebase Auth
+      // no tiene un campo nativo para eso. IMPORTANTE: esperamos a que
+      // esto termine ANTES de resolver, para que cuando perfil.html
+      // consulte Firestore los datos ya existan.
+      try {
+        await setDoc(doc(_sharedDb, 'users', user.uid), { name, email, age });
+      } catch (e) {
+        console.warn('[Egglish Auth] No se pudo guardar el perfil en Firestore:', e);
+      }
+
+      // Guardar caché local (solo para pintar rápido, no es la fuente de verdad)
       saveLocalSession({ uid: user.uid, name, email, age });
       return { ok: true };
 
     } catch (e) {
-      console.error('[Egglish Auth] Error registro Firebase:', e);
+      console.error('[Egglish Auth] Error registro Firebase:', {
+        code: e.code,
+        message: e.message,
+        emailIntentado: email,
+      });
       return { ok: false, error: _firebaseError(e.code) };
     }
   }
@@ -123,7 +148,11 @@ export async function loginUser({ email, password }) {
 
       const { user } = await signInWithEmailAndPassword(auth, email, password);
 
-      // Guardar sesión local con nombre si existe
+      // 🩹 Guardamos la caché local, pero OJO: esto puede NO llegar a
+      // ejecutarse si la página ya navegó a perfil.html por culpa del
+      // listener onAuthStateChanged (ver nota arriba). Por eso
+      // Perfil.js YA NO depende de esto para decidir si hay sesión;
+      // solo lo usa como caché opcional para pintar más rápido.
       saveLocalSession({
         uid:   user.uid,
         name:  user.displayName || email.split('@')[0],
@@ -133,7 +162,15 @@ export async function loginUser({ email, password }) {
       return { ok: true };
 
     } catch (e) {
-      console.error('[Egglish Auth] Error login Firebase:', e);
+      // 🔍 DIAGNÓSTICO: deja esto activo hasta confirmar la causa real.
+      // Firebase agrupa varios errores bajo 'auth/invalid-credential' por
+      // seguridad, así que el código exacto es la única forma de saber
+      // si el problema es el email, la contraseña, o la config del proyecto.
+      console.error('[Egglish Auth] Error login Firebase:', {
+        code: e.code,
+        message: e.message,
+        emailIntentado: email,
+      });
       return { ok: false, error: _firebaseError(e.code) };
     }
   }
@@ -154,10 +191,10 @@ export async function loginUser({ email, password }) {
 export async function logoutUser() {
   localStorage.removeItem(SESSION_KEY);
 
-  if (USE_FIREBASE && _auth) {
+  if (USE_FIREBASE) {
     try {
       const { signOut } = await import(`${FB_CDN}/firebase-auth.js`);
-      await signOut(_auth);
+      await signOut(_sharedAuth);
     } catch (e) {
       console.warn('[Egglish Auth] Error signOut:', e);
     }
@@ -167,8 +204,12 @@ export async function logoutUser() {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  DETECCIÓN DE SESIÓN
+//  DETECCIÓN DE SESIÓN (SOLO CACHÉ — no usar para proteger rutas)
 // ─────────────────────────────────────────────────────────────
+// ⚠️ Esta función lee localStorage, que es solo una caché para pintar
+// rápido. NO la uses para decidir si redirigir a login: usa
+// onAuthStateChanged(auth, ...) de Firebase, que es la fuente de verdad
+// real (ver Perfil.js).
 export function getSession() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);

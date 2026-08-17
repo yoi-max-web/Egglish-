@@ -4,42 +4,142 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Egglish – Lecciones</title>
+  
+  <!-- Estilos base de lecciones -->
   <link rel="stylesheet" href="/Secciones/Css/lecciones.css">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  
   <script src="/Secciones/Js/env-config.js"></script>
   <script type="module" src="/Secciones/Js/eggy-widget.js"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            'egg-blue': '#1cb0f6',
+            'egg-blue-d': '#0090d9',
+            'egg-yellow': '#f5a623',
+            'egg-yellow-d': '#d48800',
+            'egg-green': '#58cc02',
+            'egg-green-d': '#46a302',
+          },
+        },
+      },
+    };
+  </script>
+  
+  <script>
+    /* Previene el parpadeo blanco si el tema oscuro está guardado */
+    if (localStorage.getItem('egglish-theme') === 'dark' ||
+        (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <style>
+      .shadow-hard-soft { box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+
+      /* CORRECCIÓN DE MODO OSCURO PARA lecciones.css */
+      .dark body {
+          background-color: #111827 !important; /* bg-gray-900 */
+          color: #ffffff !important;
+      }
+      .dark .level-tabs-wrapper,
+      .dark .path-stats-bar {
+          background-color: #111827 !important;
+          border-color: #1f2937 !important; /* border gray-800 */
+          color: #ffffff !important;
+      }
+      .dark .level-tab {
+          color: #9ca3af !important;
+      }
+      .dark .level-tab.active {
+          color: #ffffff !important;
+          border-bottom-color: #58cc02 !important;
+      }
+      .dark .path-stat {
+          color: #ffffff !important;
+      }
+      .dark .guide-card,
+      .dark .completion-card {
+          background-color: #1f2937 !important;
+          color: #ffffff !important;
+      }
+  </style>
 </head>
-<body>
+<body class="bg-gray-50 dark:bg-gray-900 dark:text-white transition-colors duration-200">
 
-  <!-- NAVBAR (no modificar) -->
-  <nav class="navbar">
-    <a>
-      <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="logo-img"/>
-      <span class="logo-text">Egglish</span>
-    </a>
-
-    <button class="hamburger" id="hamburger-btn">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
-
-    <div class="nav-menu" id="nav-menu">
-      <ul class="navbar-links">
-        <li><a href="/Secciones/lecciones.html" class="active">📖 Lecciones</a></li>
-        <li><a href="/Secciones/Escucha.html">🎯 Escucha</a></li>
-        <li><a href="/Secciones/juegos.html">🎮 Juegos</a></li>
-        <li><a href="/Secciones/perfil.html">👤 Perfil</a></li>
-      </ul>
-
-      <div class="navbar-auth">
-        <a href="/entrar.html" class="btn-entrar">→ Entrar</a>
-        <a href="/Secciones/Registro.html" class="btn-registrarse">Registrarse</a>
+  <!-- HEADER NAVEGACIÓN -->
+  <header>
+   <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
+      
+      <!-- Menú móvil + Logo -->
+      <div class="flex items-center gap-1 sm:gap-2 min-w-0">
+        <button id="egg-menu-btn" type="button" aria-label="Abrir menú" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+        <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
       </div>
-    </div>
-  </nav>
+  
+      <!-- Links Escritorio -->
+      <ul class="hidden md:flex items-center gap-1 list-none m-0 p-0">
+        <li><a href="/Secciones/lecciones.html" class="px-3 py-2 rounded-full text-sm font-bold text-egg-blue dark:text-egg-blue no-underline">📖 Lecciones</a></li>
+        <li><a href="/Secciones/Escucha.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎯 Escucha</a></li>
+        <li><a href="/Secciones/juegos.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎮 Juegos</a></li>
+        <li><a href="/Secciones/perfil.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">👤 Perfil</a></li>
+      </ul>
+  
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <button id="btn-cerrar-sesion" type="button" class="hidden md:inline-block text-sm font-bold text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full shadow-hard-soft no-underline transition-colors">Cerrar sesión</button>
+        
+        <!-- Botón Modo Oscuro -->
+        <button id="dark-mode-toggle" type="button" aria-label="Cambiar tema" class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
+          <svg id="dark-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
+            <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+            <g id="icon-sun" class="hidden"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></g>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+  <div class="h-[68px]"></div>
 
-  <!-- LEVEL TABS -->
+  <!-- MENÚ MENÚ OFF-CANVAS (MÓVIL) -->
+  <div id="egg-offcanvas-wrap" class="md:hidden">
+    <div id="egg-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[220] opacity-0 pointer-events-none transition-opacity duration-300 ease-out"></div>
+    <aside id="egg-offcanvas" class="fixed top-0 left-0 h-full w-[78%] max-w-[320px] bg-white dark:bg-gray-900 z-[230] -translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col">
+      <div class="flex items-center justify-between px-5 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 object-contain"/>
+          <span class="text-lg font-black text-[#1a1a2e] dark:text-white">Egglish</span>
+        </div>
+        <button id="egg-menu-close" type="button" class="w-9 h-9 flex items-center justify-center rounded-full text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <nav class="flex-1 overflow-y-auto px-3 py-4">
+        <ul class="flex flex-col gap-1 list-none m-0 p-0">
+          <li><a href="/Secciones/lecciones.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-egg-blue bg-blue-50 dark:bg-blue-950 no-underline">📖 Lecciones</a></li>
+          <li><a href="/Secciones/Escucha.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎯 Escucha</a></li>
+          <li><a href="/Secciones/juegos.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎮 Juegos</a></li>
+          <li><a href="/Secciones/perfil.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">👤 Perfil</a></li>
+        </ul>
+      </nav>
+      <div class="px-4 py-5 border-t-2 border-gray-200 dark:border-gray-800 flex flex-col gap-3 shrink-0">
+        <button id="btn-cerrar-sesion-mobile" type="button" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-bold text-white bg-red-500 hover:bg-red-600 shadow-hard-soft no-underline transition-colors">Cerrar sesión</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- PESTAÑAS DE NIVEL -->
   <div class="level-tabs-wrapper">
     <button class="level-tab active" data-level="a1" aria-selected="true">
       🐥 A1 <span class="tab-badge">Principiante</span>
@@ -52,19 +152,18 @@
     </button>
   </div>
 
-  <!-- HEADER DE RACHA / RESUMEN -->
+  <!-- BARRA DE RACHA / ESTADÍSTICAS -->
   <div class="path-stats-bar" id="path-stats-bar">
     <div class="path-stat"><span class="path-stat-icon">🔥</span><span id="stat-streak">0</span></div>
     <div class="path-stat"><span class="path-stat-icon">⭐</span><span id="stat-total-xp">0</span></div>
     <div class="path-stat"><span class="path-stat-icon">🏆</span><span id="stat-lessons-done">0</span><span class="path-stat-sub">/12</span></div>
   </div>
 
-  <!-- PATH: se genera dinámicamente vía JS -->
+  <!-- CONTENEDOR PRINCIPAL DEL CAMINO -->
+  <!-- Tu JavaScript renderizará las lecciones aquí dentro automáticamente -->
   <main class="path-main" id="path-main"></main>
 
-  <!-- ═══════════════════════════════════════════
-       GUÍA MODAL
-       ═══════════════════════════════════════════ -->
+  <!-- ESTRUCTURA DE MODALES (Mantenidos en el DOM para cuando JS los active) -->
   <div class="guide-modal-backdrop" id="guide-modal">
     <div class="guide-card">
       <button class="guide-close" id="guide-close">✕</button>
@@ -73,11 +172,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════
-       LESSON MODAL — Motor de ejercicios
-       ═══════════════════════════════════════════ -->
   <div class="lesson-modal-backdrop" id="lesson-modal">
-
     <div class="lesson-topbar">
       <button class="lesson-close-btn" id="lesson-close" title="Cerrar">✕</button>
       <div class="lesson-progress-wrap">
@@ -93,22 +188,16 @@
 
     <div class="lesson-body" id="lesson-body">
       <div class="lesson-instruction" id="lesson-instruction">Escribe esto en español</div>
-
       <div class="lesson-character-row" id="lesson-character-row">
         <div class="lesson-char-avatar" id="lesson-avatar">🐣</div>
         <div class="lesson-speech-bubble" id="lesson-audio-btn" title="Escuchar">
           <div class="audio-btn-inner">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-            </svg>
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
           </div>
           <span class="phrase-text" id="lesson-phrase"></span>
         </div>
       </div>
-
       <p class="phrase-hint-label" id="phrase-hint-label">💡 Pasa el cursor sobre las <span>palabras subrayadas</span> para ver su traducción</p>
-
-      <!-- Zona dinámica según tipo de ejercicio -->
       <div class="exercise-area" id="exercise-area"></div>
     </div>
 
@@ -128,64 +217,132 @@
         <button class="btn-check" id="btn-check">COMPROBAR</button>
       </div>
     </div>
-
   </div>
 
-  <!-- COMPLETION MODAL -->
   <div class="completion-modal" id="completion-modal">
     <div class="completion-card">
       <div class="completion-chick">🐣</div>
       <div class="completion-title">¡Lección Completada!</div>
-      <div class="completion-sub" id="completion-sub">Has dominado esta lección. ¡Increíble trabajo!</div>
-      <div class="completion-stats">
-        <div class="stat-box">
-          <div class="stat-value" id="stat-xp">+0</div>
-          <div class="stat-label">XP ganado</div>
+      <div class="completion-sub" id="completion-sub">Has dominado esta lección</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900 mt-10">
+    <div class="max-w-screen-xl mx-auto">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10 mb-14 text-left">
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Sobre nosotros</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Misión</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Método de enseñanza</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Creadores</a></li>
+          </ul>
         </div>
-        <div class="stat-box">
-          <div class="stat-value" id="stat-correct">0/10</div>
-          <div class="stat-label">Aciertos</div>
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Ayuda y soporte</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Centro de ayuda</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Contáctanos</a></li>
+          </ul>
         </div>
-        <div class="stat-box">
-          <div class="stat-value" id="stat-time">0:00</div>
-          <div class="stat-label">Tiempo</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-value" id="stat-hearts">❤️❤️❤️</div>
-          <div class="stat-label">Vidas</div>
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Términos y privacidad</h4>
+          <ul class="flex flex-col gap-2.5 mb-6">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Términos</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Privacidad</a></li>
+          </ul>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Social</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Blog</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li>
+          </ul>
         </div>
       </div>
-      <button class="completion-btn" id="completion-continue">¡CONTINUAR!</button>
+      <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+        <div class="flex items-center gap-2.5">
+          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/>
+          <span class="font-black text-lg text-white">Egglish</span>
+        </div>
+        <p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p>
+      </div>
     </div>
-  </div>
-
-  <!-- LOSE MODAL (sin corazones) -->
-  <div class="lose-modal" id="lose-modal">
-    <div class="lose-card">
-      <div class="lose-chick">🥚</div>
-      <div class="lose-title">¡Sin vidas!</div>
-      <div class="lose-sub">Te quedaste sin corazones. No te preocupes, puedes reiniciar esta lección e intentarlo de nuevo.</div>
-      <button class="lose-btn" id="lose-retry">🔄 INTENTAR DE NUEVO</button>
-      <button class="lose-btn-secondary" id="lose-exit">Salir de la lección</button>
-    </div>
-  </div>
-
-  <!-- TOAST -->
-  <div class="toast" id="toast"></div>
-
-  <!-- FOOTER (no modificar) -->
-  <footer class="footer">
-    <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="footer-logo" alt="logo"/>
-    <div class="footer-title">Egglish</div>
-    <p class="footer-tagline">El pollito que te acompaña desde tu primer "Hello" hasta que hables con total fluidez.</p>
-    <p class="footer-copy">© 2026 Egglish. Todos los derechos reservados.</p>
   </footer>
 
-  <script src="/Secciones/Js/lecciones.js"></script>
-  <!-- ★ EGGLISH AUTH ★ -->
-  <script type="module">
-    import { initIndexGuards } from '/Secciones/Js/guards.js';
-    initIndexGuards();
+  <!-- SCRIPTS DE INTERFAZ -->
+  <script>
+    function setupHamburgerMenu() {
+        const menuBtn   = document.getElementById('egg-menu-btn');
+        const closeBtn  = document.getElementById('egg-menu-close');
+        const offcanvas = document.getElementById('egg-offcanvas');
+        const backdrop  = document.getElementById('egg-backdrop');
+        const links     = document.querySelectorAll('.egg-offcanvas-link');
+
+        if (!menuBtn || !offcanvas || !backdrop) return;
+
+        function openMenu() {
+            offcanvas.classList.remove('-translate-x-full');
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMenu() {
+            offcanvas.classList.add('-translate-x-full');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
+            document.body.style.overflow = '';
+        }
+
+        menuBtn.addEventListener('click', openMenu);
+        if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+        backdrop.addEventListener('click', closeMenu);
+        links.forEach(link => link.addEventListener('click', closeMenu));
+    }
+
+    function setupDarkMode() {
+        const toggleBtn = document.getElementById('dark-mode-toggle');
+        const moonIcon  = document.getElementById('icon-moon');
+        const sunIcon   = document.getElementById('icon-sun');
+        if (!toggleBtn) return;
+
+        function applyIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (moonIcon) moonIcon.classList.toggle('hidden', isDark);
+            if (sunIcon) sunIcon.classList.toggle('hidden', !isDark);
+        }
+
+        applyIcons();
+
+        toggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            try { localStorage.setItem('egglish-theme', isDark ? 'dark' : 'light'); } catch (e) {}
+            applyIcons();
+        });
+    }
+
+    /* FUNCIÓN PARA CERRAR SESIÓN */
+    function setupLogout() {
+        const btnDesktop = document.getElementById('btn-cerrar-sesion');
+        const btnMobile  = document.getElementById('btn-cerrar-sesion-mobile');
+
+        function cerrarSesion() {
+            // Limpia variables de sesión locales
+            localStorage.removeItem('egglish-user');
+            sessionStorage.clear();
+            
+            // Redirige al inicio/login
+            window.location.href = '/index.html'; 
+        }
+
+        if (btnDesktop) btnDesktop.addEventListener('click', cerrarSesion);
+        if (btnMobile)  btnMobile.addEventListener('click', cerrarSesion);
+    }
+
+    setupHamburgerMenu();
+    setupDarkMode();
+    setupLogout();
   </script>
+  <!-- ⚠️ SCRIPT CLAVE: Carga la lógica de lecciones y dibuja el camino/modales -->
+  <script type="module" src="/Secciones/Js/lecciones.js"></script>
+
 </body>
 </html>

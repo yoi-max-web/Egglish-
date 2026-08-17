@@ -9,7 +9,37 @@
     <script src="/Secciones/Js/env-config.js"></script>
 <script type="module" src="/Secciones/Js/eggy-widget.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS (mismo config que juegos.html: colores egg-* + darkMode por clase) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Nunito', 'sans-serif'],
+            },
+            colors: {
+              'egg-blue': '#1cb0f6',
+              'egg-blue-d': '#0090d9',
+              'egg-yellow': '#f5a623',
+              'egg-yellow-d': '#d48800',
+              'egg-green': '#58cc02',
+              'egg-green-d': '#46a302',
+            },
+          },
+        },
+      };
+    </script>
+    <script>
+      /* Aplica el modo oscuro ANTES de pintar la página para evitar parpadeo */
+      if (localStorage.getItem('egglish-theme') === 'dark' ||
+          (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
     <style>
+        .shadow-hard-soft { box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
         :root {
             /* Variables Corporativas Egglish */
             --bg-main: #ffffff;
@@ -48,207 +78,6 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-        }
-
-        /* --- NAVBAR EGGGLISH --- */
-        /* --- NAVBAR EGGGLISH (AJUSTADO) --- */
-.navbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; /* Esto empuja el logo a la izquierda y el botón a la derecha */
-    padding: 0 20px;
-    height: 70px;
-    background: white;
-    position: relative;
-}
-
-/* El contenedor que envuelve links y auth */
-.nav-menu {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex: 1;
-    margin-left: 20px;
-}
-
-.navbar-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    flex-shrink: 0;
-}
-
-.logo-img {
-    width: 40px;
-    height: 40px;
-}
-
-.logo-text {
-    font-size: 24px;
-    font-weight: 800;
-    color: #111b21;
-}
-
-.navbar-links {
-    display: flex;
-    list-style: none;
-    gap: 15px;
-    margin: 0 auto; /* Centra los links en escritorio */
-}
-
-.navbar-links a {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    text-decoration: none;
-    color: var(--text-mid);
-    font-weight: 700;
-    font-size: 15px;
-    border-radius: 12px;
-    transition: all 0.2s;
-    white-space: nowrap;
-    line-height: 1;
-}
-
-.navbar-links a:hover {
-    background-color: #f7f7f7;
-}
-
-.navbar-links a.active {
-    color: var(--blue);
-    background-color: #dbeafe; /* Tu azul claro */
-}
-
-.navbar-auth {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.btn-entrar {
-    text-decoration: none;
-    color: var(--text-mid);
-    font-weight: 800;
-    font-size: 15px;
-}
-
-.btn-registrarse {
-    background-color: var(--yellow);
-    color: white;
-    padding: 10px 24px;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 800;
-    text-transform: none;
-    box-shadow: 0 4px 0 var(--yellow-d);
-    transition: all 0.1s;
-}
-
-.btn-registrarse:active {
-    box-shadow: 0 0 0 var(--yellow-d);
-    transform: translateY(4px);
-}
-
-/* --- LÓGICA MOBILE-FIRST PARA EL MENÚ --- */
-
-/* Escondemos el botón en escritorio */
-.hamburger {
-    display: flex; /* Cambiado de 'none' a 'flex' para probar */
-    flex-direction: column;
-    justify-content: space-around; /* Distribuye las rayitas */
-    width: 30px;
-    height: 24px;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    z-index: 1001;
-    position: relative;
-}
-
-.hamburger span {
-    display: block;
-    width: 100%;
-    height: 4px;
-    background-color: #111b21; /* Color oscuro para que resalte en el fondo blanco */
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-@media (max-width: 768px) {
-    .nav-menu {
-        /* ... tus otras propiedades (position, left, etc.) ... */
-        
-        display: flex;
-        flex-direction: column;
-        
-        /* SOLUCIÓN AL SCROLL */
-        overflow-y: auto;       /* Permite scroll vertical si el contenido supera la pantalla */
-        max-height: 100vh;      /* El menú no puede medir más que la ventana */
-        padding-bottom: 40px;   /* Espacio extra al final para que el botón no pegue abajo */
-    }
-
-}
-
-/* Ocultar en escritorio (Pantallas grandes) */
-@media (min-width: 769px) {
-    .hamburger {
-        display: none !important;
-    }
-}
-@media (max-width: 768px) {
-    .hamburger { display: flex; }
-
-    .nav-menu {
-        position: fixed;
-        top: 70px;
-        left: -100%; /* Fuera de pantalla a la izquierda */
-        flex-direction: column;
-        background: white;
-        width: 100%;
-        height: calc(100vh - 70px);
-        padding: 40px 20px;
-        transition: 0.4s ease-in-out;
-        margin: 0;
-        justify-content: flex-start;
-        gap: 40px;
-    }
-
-    .nav-menu.active {
-        left: 0; /* Entra suavemente */
-    }
-
-    .navbar-links {
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
-    }
-
-    .navbar-links a {
-        width: 100%;
-        font-size: 18px;
-        padding: 15px;
-    }
-
-    .navbar-auth {
-        flex-direction: column;
-        width: 100%;
-        border-top: 1px solid var(--border);
-        padding-top: 20px;
-    }
-
-    .btn-registrarse {
-        width: 100%;
-        text-align: center;
-    }
-}
-
-        .menu-toggle span {
-            width: 25px;
-            height: 3px;
-            background-color: var(--text-dark);
-            border-radius: 2px;
         }
 
         /* --- MAIN CONTENT --- */
@@ -436,43 +265,261 @@
             box-shadow: 0 4px 0 var(--blue-shadow);
         }
 
-        /* --- FOOTER --- */
-        footer {
-            padding: 60px 20px;
-            text-align: center;
+        /* ======================================================================
+           MODO OSCURO — se activa cuando <html> tiene la clase "dark"
+           (mismo interruptor Tailwind que juegos.html / index.html)
+        ====================================================================== */
+        html.dark body { background-color: #0f172a; color: #f1f5f9; }
+
+        /* Tarjetas y superficies principales */
+        html.dark .lesson-card,
+        html.dark .option,
+        html.dark .tf-btn,
+        html.dark .img-card,
+        html.dark .stat-pill,
+        html.dark .level-tab,
+        html.dark .chip,
+        html.dark .order-slot,
+        html.dark .level-selector {
+            background: #1e293b;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+
+        /* Textos de título / instrucciones / etiquetas */
+        html.dark .instruction,
+        html.dark .question-text,
+        html.dark .img-card .label,
+        html.dark .listening-card-title,
+        html.dark .biblioteca-title,
+        html.dark .topic-chip,
+        html.dark .completion-title,
+        html.dark .fill-sentence,
+        html.dark .feedback-explain,
+        html.dark .level-tab span,
+        html.dark .listening-card-badge,
+        html.dark .listening-card-progress,
+        html.dark .completion-sub,
+        html.dark .audio-status,
+        html.dark .lock-hint,
+        html.dark .btn-back-lib,
+        html.dark .btn-go-library {
+            color: #f1f5f9;
+        }
+
+        /* Estados sutiles que necesitan un gris más claro sobre fondo oscuro */
+        html.dark .topic-chip,
+        html.dark .completion-sub,
+        html.dark .audio-status,
+        html.dark .completion-metric .label { color: #94a3b8; }
+        html.dark .audio-status.is-playing { color: #38bdf8; }
+        html.dark .audio-status.is-ready { color: #4ade80; }
+
+        html.dark .fill-sentence { background: #0f172a; border-color: #334155; }
+        html.dark .order-slot { background: #0f172a; border-color: #334155; color: #94a3b8; }
+        html.dark .order-slot.filled { background: #17304f; border-color: #1cb0f6; color: #7fd3ff; }
+        html.dark .chip:hover:not(:disabled) { background: #24344a; }
+
+        html.dark .progress-container,
+        html.dark .audio-progress-container { background: #334155; }
+
+        html.dark .btn-action { background: #334155; color: #94a3b8; }
+
+        html.dark .lock-hint { background: #3a1f24; border-color: #7f2b32; color: #fca5a5; }
+        html.dark .listening-card-badge { background: #1e293b; border-color: #334155; }
+
+        html.dark .biblioteca-section { background: #0f172a; }
+        html.dark .level-tab:hover { border-color: var(--blue); color: var(--blue); }
+        html.dark .level-tab.active,
+        html.dark .level-tab.active span { color: #ffffff; }
+
+        html.dark .option.selected,
+        html.dark .tf-btn.selected,
+        html.dark .img-card.selected { background: #17304f; border-color: #1cb0f6; color: #7fd3ff; }
+        html.dark .option.correct,
+        html.dark .tf-btn.correct,
+        html.dark .img-card.correct,
+        html.dark .option.multi.correct { background: #16321a; border-color: var(--green); color: #86efac; }
+        html.dark .option.wrong,
+        html.dark .tf-btn.wrong,
+        html.dark .img-card.wrong,
+        html.dark .option.multi.wrong { background: #3a1414; border-color: var(--red); color: #fca5a5; }
+        html.dark .feedback-banner.correct { background: #16321a; border-color: var(--green); }
+        html.dark .feedback-banner.wrong { background: #3a1414; border-color: var(--red); }
+        html.dark .feedback-title { color: #f1f5f9; }
+
+        /* ======================================================================
+           BIBLIOTECA DE LISTENINGS (pantalla inicial, estilo tarjetas de nivel)
+        ====================================================================== */
+        .screen { display: none; }
+        .screen.active { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
+        .biblioteca-section {
+            width: 100%;
+            max-width: 900px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
-            background-color: white;
-            border-top: 2px solid var(--border-light);
+            padding: 0 4px;
         }
 
-        .footer-logo img {
-            width: 45px;
-            margin-bottom: 10px;
+        .biblioteca-title {
+            font-size: 1.9rem;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 22px;
+            text-align: center;
         }
 
-        .footer-logo h3 {
-            font-size: 22px;
-            font-weight: 800;
-            margin-bottom: 8px;
+        .biblioteca-level-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        .footer-slogan {
+        .level-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px 20px;
+            border-radius: 14px;
+            border: 2.5px solid var(--border-light);
+            background: white;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 900;
             color: var(--text-gray);
-            font-size: 15px;
-            max-width: 300px;
-            line-height: 1.4;
-            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .level-tab span { font-size: 0.72rem; font-weight: 700; color: var(--text-gray); margin-top: 2px; }
+        .level-tab:hover { border-color: var(--blue); color: var(--blue); }
+        .level-tab.active { background: var(--blue); border-color: var(--blue); color: white; box-shadow: 0 4px 0 var(--blue-shadow); }
+        .level-tab.active span { color: rgba(255,255,255,.85); }
+
+        .listening-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px 18px;
+            margin-bottom: 40px;
         }
 
-        .footer-copy {
-            color: var(--blue);
-            font-weight: 700;
-            font-size: 14px;
-            text-decoration: none;
+        @media (max-width: 640px) {
+            .listening-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 14px; }
+            .biblioteca-title { font-size: 1.5rem; }
         }
+
+        .listening-card {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Nunito', sans-serif;
+            padding: 0;
+        }
+
+        .listening-card-icon {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.6rem;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+            transition: transform .15s ease, box-shadow .15s ease;
+            position: relative;
+        }
+        .listening-card-icon .card-img {
+            width: 52%;
+            height: 52%;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+        }
+        .listening-card-icon .emoji-fallback { font-size: 2.6rem; line-height: 1; }
+        .listening-card-badge .badge-img { width: 16px; height: 16px; object-fit: contain; vertical-align: middle; }
+        .listening-card:hover .listening-card-icon { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(0,0,0,0.15); }
+        .listening-card:active .listening-card-icon { transform: translateY(1px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
+
+        .listening-card-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: white;
+            border: 2px solid var(--border-light);
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 900;
+            padding: 2px 7px;
+            color: var(--text-dark);
+        }
+
+        .listening-card-title {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            text-align: center;
+            line-height: 1.25;
+        }
+
+        .listening-card-progress {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .lc-blue   { background: var(--blue); }
+        .lc-green  { background: var(--green); }
+        .lc-yellow { background: var(--yellow); }
+        .lc-red    { background: var(--red); }
+        .lc-purple { background: #8549ba; }
+        .lc-teal   { background: #00c5a1; }
+
+        .biblioteca-stats {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-back-lib {
+            align-self: flex-start;
+            margin-bottom: 16px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            background: var(--gray-btn);
+            border: none;
+            padding: 10px 18px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .btn-back-lib:hover { background: #d8d8d8; }
+        html.dark .btn-back-lib { background: #334155; color: #f1f5f9; }
+
+        .btn-go-library {
+            width: 100%;
+            padding: 16px;
+            margin-top: 10px;
+            border-radius: 16px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            border: 2px solid var(--border-light);
+            background: white;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all .1s;
+        }
+        html.dark .btn-go-library { background: #1e293b; border-color: #334155; color: #f1f5f9; }
 
         /* ======================================================================
            NUEVO — EXPERIENCIA DE LISTENING GAMIFICADA (no toca navbar/footer)
@@ -668,7 +715,8 @@
             font-family: 'Nunito', sans-serif;
             transition: all 0.2s;
         }
-        .img-card .emoji { font-size: 2.2rem; line-height: 1; }
+        .img-card .card-img { width: 56px; height: 56px; object-fit: contain; }
+        .img-card .emoji-fallback { font-size: 2.2rem; line-height: 1; }
         .img-card .label { font-size: 0.8rem; font-weight: 800; color: var(--text-dark); }
         .img-card:hover:not(:disabled) { background:#f7f7f7; }
         .img-card.selected { background: var(--blue-light); border-color: var(--blue-light-border); box-shadow: 0 2px 0 var(--blue-light-border); }
@@ -837,95 +885,241 @@
 </head>
 <body>
 
-<nav class="navbar">
-  <a>
-    <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="logo-img"/>
-    <span class="logo-text">Egglish</span>
-  </a>
+<header>
+ <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
 
-  <button class="hamburger" id="hamburger-btn">
-    <span></span><span></span><span></span>
-  </button>
+    <!-- Botón hamburguesa (solo móvil) + Logo -->
+    <div class="flex items-center gap-1 sm:gap-2 min-w-0">
+      <button
+        id="egg-menu-btn"
+        type="button"
+        aria-label="Abrir menú de navegación"
+        aria-expanded="false"
+        aria-controls="egg-offcanvas"
+        class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
 
-  <div class="nav-menu" id="nav-menu">
-    <ul class="navbar-links">
-      <li><a href="/Secciones/lecciones.html" class="active">📖 Lecciones</a></li>
-      <li><a href="/Secciones/Escucha.html">🎯 Escucha</a></li>
-      <li><a href="/Secciones/juegos.html">🎮 Juegos</a></li>
-      <li><a href="/Secciones/perfil.html">👤 Perfil</a></li>
+      <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+      <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
+    </div>
+
+    <!-- Links de navegación (escritorio) -->
+    <ul class="hidden md:flex items-center gap-1 list-none m-0 p-0">
+      <li><a href="/Secciones/lecciones.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">📖 Lecciones</a></li>
+      <li><a href="/Secciones/Escucha.html" class="px-3 py-2 rounded-full text-sm font-bold text-egg-blue dark:text-egg-blue no-underline">🎯 Escucha</a></li>
+      <li><a href="/Secciones/juegos.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎮 Juegos</a></li>
+      <li><a href="/Secciones/perfil.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">👤 Perfil</a></li>
     </ul>
 
-    <div class="navbar-auth">
-      <a href="/entrar.html" class="btn-entrar">→ Entrar</a>
-      <a href="/Secciones/Registro.html" class="btn-registrarse">Registrarse</a>
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <button id="btn-cerrar-sesion" type="button" class="hidden md:inline-block text-sm font-bold text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full shadow-hard-soft no-underline transition-colors">Cerrar sesión</button>
+
+      <!-- Botón de cambiar tema -->
+      <button
+        id="dark-mode-toggle"
+        type="button"
+        aria-label="Cambiar modo oscuro"
+        aria-pressed="false"
+        class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
+      >
+        <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
+          <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+          <g id="icon-sun" class="hidden">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </g>
+        </svg>
+      </button>
     </div>
-  </div>
-</nav>
+  </nav>
+</header>
+<div class="h-[68px]"></div>
+
+<!-- ── MENÚ HAMBURGUESA OFF-CANVAS ── -->
+<div id="egg-offcanvas-wrap" class="md:hidden">
+  <div
+    id="egg-backdrop"
+    class="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[220] opacity-0 pointer-events-none transition-opacity duration-300 ease-out"
+    aria-hidden="true"
+  ></div>
+
+  <aside
+    id="egg-offcanvas"
+    class="fixed top-0 left-0 h-full w-[78%] max-w-[320px] bg-white dark:bg-gray-900 z-[230] -translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menú de navegación"
+    aria-hidden="true"
+  >
+    <div class="flex items-center justify-between px-5 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 shrink-0">
+      <div class="flex items-center gap-2.5">
+        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 object-contain"/>
+        <span class="text-lg font-black text-[#1a1a2e] dark:text-white">Egglish</span>
+      </div>
+      <button
+        id="egg-menu-close"
+        type="button"
+        aria-label="Cerrar menú de navegación"
+        class="w-9 h-9 flex items-center justify-center rounded-full text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-3 py-4">
+      <ul class="flex flex-col gap-1 list-none m-0 p-0">
+        <li><a href="/Secciones/lecciones.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">📖 Lecciones</a></li>
+        <li><a href="/Secciones/Escucha.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-egg-blue bg-blue-50 dark:bg-blue-950 no-underline">🎯 Escucha</a></li>
+        <li><a href="/Secciones/juegos.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎮 Juegos</a></li>
+        <li><a href="/Secciones/perfil.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">👤 Perfil</a></li>
+      </ul>
+    </nav>
+
+    <div class="px-4 py-5 border-t-2 border-gray-200 dark:border-gray-800 flex flex-col gap-3 shrink-0">
+      <button id="btn-cerrar-sesion-mobile" type="button" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-bold text-white bg-red-500 hover:bg-red-600 shadow-hard-soft no-underline transition-colors">Cerrar sesión</button>
+    </div>
+  </aside>
+</div>
 
     <main>
-        <div class="listening-shell">
 
-            <div class="stats-bar" aria-live="polite">
-                <span class="stat-pill xp" id="xpPill">⭐ <span id="xpValue">0</span> XP</span>
-                <span class="stat-pill streak" id="streakPill">🔥 <span id="streakValue">0</span> racha</span>
-                <span class="stat-pill accuracy" id="accuracyPill">🎯 <span id="accuracyValue">0%</span></span>
-            </div>
+        <!-- ══════════ SCREEN 0: BIBLIOTECA DE LISTENINGS ══════════ -->
+        <div id="screen-library" class="screen active">
+            <div class="biblioteca-section">
 
-            <select id="levelSelector" class="level-selector" aria-label="Seleccionar nivel">
-                <option value="A1">Nivel A1 (Principiante)</option>
-                <option value="A2">Nivel A2 (Básico)</option>
-                <option value="B1">Nivel B1 (Intermedio)</option>
-            </select>
-
-            <div class="lesson-card" id="lessonCard" style="position:relative;">
-                <div class="progress-container">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-
-                <p class="topic-chip" id="topicChip">Tema</p>
-                <h2 class="instruction" id="questionText">Toca para escuchar</h2>
-
-                <div class="audio-panel">
-                    <div class="audio-wrapper" id="audioWrapper">
-                        <button class="btn-audio" id="audioBtn" aria-label="Reproducir audio">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                            </svg>
-                        </button>
-                        <div class="wave-ring"></div>
-                    </div>
-                    <p class="audio-status" id="audioStatus">Toca para escuchar</p>
-                    <div class="audio-progress-container">
-                        <div class="audio-progress-bar" id="audioProgressBar"></div>
-                    </div>
-                    <p class="lock-hint" id="lockHint" role="status">Escucha el audio completo antes de responder.</p>
-                </div>
-
-                <div id="exerciseArea"></div>
-
-                <div class="feedback-banner" id="feedbackBanner" role="status" aria-live="polite">
-                    <span class="feedback-icon" id="feedbackIcon">✅</span>
-                    <div class="feedback-text">
-                        <p class="feedback-title" id="feedbackTitle">¡Correcto!</p>
-                        <p class="feedback-explain" id="feedbackExplain"></p>
+                <div class="biblioteca-stats">
+                    <div class="stats-bar" aria-live="polite">
+                        <span class="stat-pill xp" id="xpPill">⭐ <span id="xpValue">0</span> XP</span>
+                        <span class="stat-pill streak" id="streakPill">🔥 <span id="streakValue">0</span> racha</span>
+                        <span class="stat-pill accuracy" id="accuracyPill">🎯 <span id="accuracyValue">0%</span></span>
                     </div>
                 </div>
 
-                <div class="bottom-section">
-                    <button class="btn-action" id="actionBtn" disabled>Comprobar</button>
+                <h1 class="biblioteca-title">📚 Biblioteca</h1>
+
+                <div class="biblioteca-level-tabs" id="levelTabs">
+                    <button class="level-tab active" data-level="A1">🐣 A1 <span>Principiante</span></button>
+                    <button class="level-tab" data-level="A2">🐥 A2 <span>Básico</span></button>
+                    <button class="level-tab" data-level="B1">🦅 B1 <span>Intermedio</span></button>
+                </div>
+
+                <div class="listening-grid" id="listeningGrid">
+                    <!-- tarjetas generadas por JS -->
                 </div>
             </div>
         </div>
+
+        <!-- ══════════ SCREEN 1: LECCIÓN / LISTENING EN CURSO ══════════ -->
+        <div id="screen-lesson" class="screen">
+            <div class="listening-shell">
+
+                <button class="btn-back-lib" id="btnBackLibrary" type="button">← Biblioteca</button>
+
+                <div class="stats-bar" aria-live="polite">
+                    <span class="stat-pill xp" id="xpPill2">⭐ <span id="xpValue2">0</span> XP</span>
+                    <span class="stat-pill streak" id="streakPill2">🔥 <span id="streakValue2">0</span> racha</span>
+                    <span class="stat-pill accuracy" id="accuracyPill2">🎯 <span id="accuracyValue2">0%</span></span>
+                </div>
+
+                <div class="lesson-card" id="lessonCard" style="position:relative;">
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+
+                    <p class="topic-chip" id="topicChip">Tema</p>
+                    <h2 class="instruction" id="questionText">Toca para escuchar</h2>
+
+                    <div class="audio-panel">
+                        <div class="audio-wrapper" id="audioWrapper">
+                            <button class="btn-audio" id="audioBtn" aria-label="Reproducir audio">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                                </svg>
+                            </button>
+                            <div class="wave-ring"></div>
+                        </div>
+                        <p class="audio-status" id="audioStatus">Toca para escuchar</p>
+                        <div class="audio-progress-container">
+                            <div class="audio-progress-bar" id="audioProgressBar"></div>
+                        </div>
+                        <p class="lock-hint" id="lockHint" role="status">Escucha el audio completo antes de responder.</p>
+                    </div>
+
+                    <div id="exerciseArea"></div>
+
+                    <div class="feedback-banner" id="feedbackBanner" role="status" aria-live="polite">
+                        <span class="feedback-icon" id="feedbackIcon">✅</span>
+                        <div class="feedback-text">
+                            <p class="feedback-title" id="feedbackTitle">¡Correcto!</p>
+                            <p class="feedback-explain" id="feedbackExplain"></p>
+                        </div>
+                    </div>
+
+                    <div class="bottom-section">
+                        <button class="btn-action" id="actionBtn" disabled>Comprobar</button>
+                        <button class="btn-go-library" id="btnGoLibrary" type="button" style="display:none;">🏠 Ver biblioteca</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
-    <footer>
-        <div class="footer-logo">
-            <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Egglish Footer">
-            <h3>Egglish</h3>
-        </div>
-        <p class="footer-slogan">El pollito que te acompaña desde tu primer "Hello" hasta que hables con total fluidez.</p>
-        <a href="#" class="footer-copy">© 2026 Egglish. Todos los derechos reservados.</a>
-    </footer>
+<!-- ══════════════ FOOTER (extraído tal cual de juegos.html) ══════════════ -->
+<footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
+  <div class="max-w-screen-xl mx-auto">
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10 mb-14 text-left">
+      <div>
+        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Sobre nosotros</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Misión</a></li>
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Método de enseñanza</a></li>
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Creadores</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Ayuda y soporte</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Centro de ayuda</a></li>
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Contáctanos</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Términos y privacidad</h4>
+        <ul class="flex flex-col gap-2.5 mb-6">
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Términos</a></li>
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Privacidad</a></li>
+        </ul>
+        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Social</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Blog</a></li>
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li>
+          <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+      <div class="flex items-center gap-2.5">
+        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/>
+        <span class="font-black text-lg text-white">Egglish</span>
+      </div>
+      <p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>
 
 <script>
     // ============================================================
@@ -1110,7 +1304,6 @@
     const exerciseArea      = document.getElementById('exerciseArea');
     const actionBtn         = document.getElementById('actionBtn');
     const progressBar       = document.getElementById('progressBar');
-    const levelSelector     = document.getElementById('levelSelector');
     const feedbackBanner    = document.getElementById('feedbackBanner');
     const feedbackIcon      = document.getElementById('feedbackIcon');
     const feedbackTitle     = document.getElementById('feedbackTitle');
@@ -1118,9 +1311,78 @@
     const xpValue           = document.getElementById('xpValue');
     const streakValue       = document.getElementById('streakValue');
     const accuracyValue     = document.getElementById('accuracyValue');
+    const xpValue2           = document.getElementById('xpValue2');
+    const streakValue2       = document.getElementById('streakValue2');
+    const accuracyValue2     = document.getElementById('accuracyValue2');
     const xpPill             = document.getElementById('xpPill');
     const streakPill         = document.getElementById('streakPill');
+    const xpPill2             = document.getElementById('xpPill2');
+    const streakPill2         = document.getElementById('streakPill2');
     const lessonCard         = document.getElementById('lessonCard');
+
+    // Pantallas / biblioteca
+    const screenLibrary      = document.getElementById('screen-library');
+    const screenLesson       = document.getElementById('screen-lesson');
+    const levelTabs          = document.getElementById('levelTabs');
+    const listeningGrid      = document.getElementById('listeningGrid');
+    const btnBackLibrary     = document.getElementById('btnBackLibrary');
+    const btnGoLibrary       = document.getElementById('btnGoLibrary');
+
+    // Metadatos visuales de cada listening para la biblioteca
+    const CARD_META = {
+        A1: [
+            { icon:'👋', color:'lc-blue' },
+            { icon:'💬', color:'lc-green' },
+            { icon:'🔢', color:'lc-yellow' },
+            { icon:'🎨', color:'lc-red' },
+            { icon:'👨‍👩‍👧', color:'lc-purple' },
+            { icon:'🍕', color:'lc-teal' },
+            { icon:'🏫', color:'lc-blue' },
+            { icon:'⏰', color:'lc-green' },
+            { icon:'📚', color:'lc-yellow' },
+            { icon:'🐶', color:'lc-red' },
+            { icon:'🌍', color:'lc-purple' },
+            { icon:'👩‍⚕️', color:'lc-teal' },
+            { icon:'🕘', color:'lc-blue' },
+            { icon:'🚌', color:'lc-green' }
+        ],
+        A2: [
+            { icon:'🍽️', color:'lc-yellow' },
+            { icon:'✈️', color:'lc-blue' },
+            { icon:'🛍️', color:'lc-red' },
+            { icon:'🏨', color:'lc-purple' },
+            { icon:'🩺', color:'lc-teal' },
+            { icon:'💼', color:'lc-green' },
+            { icon:'🌦️', color:'lc-blue' },
+            { icon:'🏖️', color:'lc-yellow' },
+            { icon:'🎂', color:'lc-red' },
+            { icon:'🧭', color:'lc-purple' },
+            { icon:'☎️', color:'lc-teal' },
+            { icon:'🤝', color:'lc-green' }
+        ],
+        B1: [
+            { icon:'🎙️', color:'lc-blue' },
+            { icon:'🎙️', color:'lc-blue' },
+            { icon:'🎧', color:'lc-green' },
+            { icon:'🎧', color:'lc-green' },
+            { icon:'📰', color:'lc-yellow' },
+            { icon:'📰', color:'lc-yellow' },
+            { icon:'📖', color:'lc-red' },
+            { icon:'📖', color:'lc-red' },
+            { icon:'🧳', color:'lc-purple' },
+            { icon:'🧳', color:'lc-purple' },
+            { icon:'💭', color:'lc-teal' },
+            { icon:'💭', color:'lc-teal' },
+            { icon:'⚖️', color:'lc-blue' },
+            { icon:'⚖️', color:'lc-blue' },
+            { icon:'⛵', color:'lc-green' },
+            { icon:'⛵', color:'lc-green' },
+            { icon:'👥', color:'lc-yellow' },
+            { icon:'👥', color:'lc-yellow' }
+        ]
+    };
+
+    let libraryLevel = 'A1';
 
     let hintTimer = null;
     let audioCtx  = null;
@@ -1175,6 +1437,25 @@
         el.classList.remove('bump');
         void el.offsetWidth; // reinicia animación
         el.classList.add('bump');
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  ICONOS COMO IMÁGENES REALES (no emojis de fuente del sistema)
+    //  Convertimos cada emoji a su imagen PNG equivalente (Twemoji).
+    //  Si la imagen no carga, se muestra automáticamente el emoji
+    //  de respaldo para que nunca quede un espacio roto.
+    // ─────────────────────────────────────────────────────────
+    function emojiToImageUrl(emoji) {
+        const codePoints = Array.from(emoji)
+            .map(ch => ch.codePointAt(0).toString(16))
+            .filter(cp => cp !== 'fe0f');
+        return `https://cdn.jsdelivr.net/npm/twemoji@14.0.2/assets/72x72/${codePoints.join('-')}.png`;
+    }
+    function iconImgHtml(emoji, cssClass, fallbackClass) {
+        const url = emojiToImageUrl(emoji);
+        return `<img src="${url}" alt="" class="${cssClass}" loading="lazy" ` +
+               `onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">` +
+               `<span class="${fallbackClass}" style="display:none;">${emoji}</span>`;
     }
 
     // ─────────────────────────────────────────────────────────
@@ -1338,6 +1619,8 @@
         exerciseArea.classList.remove('exercise-enter');
         void exerciseArea.offsetWidth;
         exerciseArea.classList.add('exercise-enter');
+        if (btnGoLibrary) btnGoLibrary.style.display = 'none';
+        document.querySelector('.audio-panel').style.display = 'flex';
 
         // El tipo "order" no siempre tiene texto de audio propio: se arma
         // uniendo las partes en su orden correcto para poder reproducirlo.
@@ -1373,7 +1656,7 @@
             btn.disabled = true;
             if (isImage) {
                 btn.className = 'img-card';
-                btn.innerHTML = `<span class="emoji">${optRaw.emoji}</span><span class="label">${optRaw.label}</span>`;
+                btn.innerHTML = `${iconImgHtml(optRaw.emoji, 'card-img', 'emoji-fallback')}<span class="label">${optRaw.label}</span>`;
             } else {
                 btn.className = 'option';
                 btn.innerText = optRaw;
@@ -1681,12 +1964,97 @@
     }
 
     function updateStatsUI() {
+        const acc = STATE.totalInLevel > 0 ? Math.round((STATE.correctInLevel / STATE.totalInLevel) * 100) : 0;
+
         xpValue.textContent = STATE.xp;
         streakValue.textContent = STATE.streak;
-        const acc = STATE.totalInLevel > 0 ? Math.round((STATE.correctInLevel / STATE.totalInLevel) * 100) : 0;
         accuracyValue.textContent = acc + '%';
+
+        if (xpValue2) xpValue2.textContent = STATE.xp;
+        if (streakValue2) streakValue2.textContent = STATE.streak;
+        if (accuracyValue2) accuracyValue2.textContent = acc + '%';
+
         bump(xpPill);
-        if (STATE.streak > 0) bump(streakPill);
+        if (xpPill2) bump(xpPill2);
+        if (STATE.streak > 0) {
+            bump(streakPill);
+            if (streakPill2) bump(streakPill2);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  BIBLIOTECA DE LISTENINGS
+    // ─────────────────────────────────────────────────────────
+    function renderLibrary() {
+        const list = LESSON_DATA[libraryLevel];
+        const meta = CARD_META[libraryLevel];
+        listeningGrid.innerHTML = '';
+
+        list.forEach((ex, i) => {
+            const m = meta[i % meta.length];
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'listening-card';
+            card.innerHTML = `
+                <div class="listening-card-icon ${m.color}">
+                    ${iconImgHtml(m.icon, 'card-img', 'emoji-fallback')}
+                    <span class="listening-card-badge">${exerciseTypeLabel(ex.type)}</span>
+                </div>
+                <span class="listening-card-title">${ex.topic}</span>
+                <span class="listening-card-progress">${libraryLevel} · ${i + 1}</span>
+            `;
+            card.addEventListener('click', () => startLessonAt(libraryLevel, i));
+            listeningGrid.appendChild(card);
+        });
+    }
+
+    function exerciseTypeLabel(type) {
+        const labels = { mc:'📝', tf:'⚖️', img:'🖼️', fill:'✏️', order:'🔀', multi:'☑️' };
+        const emoji = labels[type] || '🎧';
+        return iconImgHtml(emoji, 'badge-img', 'emoji-fallback');
+    }
+
+    function showScreen(name) {
+        screenLibrary.classList.toggle('active', name === 'library');
+        screenLesson.classList.toggle('active', name === 'lesson');
+    }
+
+    function startLessonAt(level, index) {
+        STATE.level = level;
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        document.querySelector('.audio-panel').style.display = 'flex';
+        showScreen('lesson');
+        STATE.index          = index;
+        STATE.checked        = false;
+        STATE.completed      = false;
+        STATE.correctInLevel = 0;
+        STATE.totalInLevel   = 0;
+        STATE.streak         = 0;
+        updateStatsUI();
+        updateProgress();
+        loadExercise();
+    }
+
+    levelTabs.addEventListener('click', (e) => {
+        const tab = e.target.closest('.level-tab');
+        if (!tab) return;
+        libraryLevel = tab.dataset.level;
+        Array.from(levelTabs.children).forEach(t => t.classList.toggle('active', t === tab));
+        renderLibrary();
+    });
+
+    btnBackLibrary.addEventListener('click', () => {
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        showScreen('library');
+        renderLibrary();
+    });
+
+    if (btnGoLibrary) {
+        btnGoLibrary.addEventListener('click', () => {
+            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            showScreen('library');
+            renderLibrary();
+        });
     }
 
     // ─────────────────────────────────────────────────────────
@@ -1727,44 +2095,98 @@
         actionBtn.disabled = false;
         actionBtn.className = 'btn-action active continue';
         actionBtn.innerText = 'Reiniciar nivel';
+        if (btnGoLibrary) btnGoLibrary.style.display = 'block';
     }
 
     // ─────────────────────────────────────────────────────────
     //  EVENT LISTENERS
     // ─────────────────────────────────────────────────────────
     audioBtn.addEventListener('click', playAudio);
-    actionBtn.addEventListener('click', handleAction);
-
-    levelSelector.addEventListener('change', (e) => {
-        STATE.level = e.target.value;
-        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-        document.querySelector('.audio-panel').style.display = 'flex';
-        initLesson();
+    actionBtn.addEventListener('click', () => {
+        if (STATE.completed) { startLessonAt(STATE.level, 0); return; }
+        handleAction();
     });
 
-    // ── Hamburger del navbar ──────────────────────────────────
-    window.addEventListener('load', () => {
-        const hamburgerBtn = document.getElementById('hamburger-btn');
-        const navMenu      = document.getElementById('nav-menu');
+    // ── Menú hamburguesa off-canvas ────────────────────────────
+    function setupHamburgerMenu() {
+        const menuBtn   = document.getElementById('egg-menu-btn');
+        const closeBtn  = document.getElementById('egg-menu-close');
+        const offcanvas = document.getElementById('egg-offcanvas');
+        const backdrop  = document.getElementById('egg-backdrop');
+        const links     = document.querySelectorAll('.egg-offcanvas-link');
 
-        if (hamburgerBtn && navMenu) {
-            hamburgerBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                navMenu.classList.toggle('active');
-            });
-            document.addEventListener('click', (e) => {
-                if (navMenu.classList.contains('active') &&
-                    !navMenu.contains(e.target) &&
-                    !hamburgerBtn.contains(e.target)) {
-                    navMenu.classList.remove('active');
-                }
-            });
+        if (!menuBtn || !offcanvas || !backdrop) return;
+
+        function openMenu() {
+            offcanvas.classList.remove('-translate-x-full');
+            offcanvas.setAttribute('aria-hidden', 'false');
+            backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            menuBtn.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
         }
-    });
+        function closeMenu() {
+            offcanvas.classList.add('-translate-x-full');
+            offcanvas.setAttribute('aria-hidden', 'true');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
+            menuBtn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
 
-    // Iniciar
+        menuBtn.addEventListener('click', openMenu);
+        if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+        backdrop.addEventListener('click', closeMenu);
+        links.forEach(link => link.addEventListener('click', closeMenu));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeMenu();
+        });
+    }
+
+    // ── Modo oscuro ─────────────────────────────────────────────
+    function setupDarkMode() {
+        const toggleBtn = document.getElementById('dark-mode-toggle');
+        const moonIcon  = document.getElementById('icon-moon');
+        const sunIcon   = document.getElementById('icon-sun');
+        if (!toggleBtn) return;
+
+        function applyIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            toggleBtn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+            if (moonIcon) moonIcon.classList.toggle('hidden', isDark);
+            if (sunIcon) sunIcon.classList.toggle('hidden', !isDark);
+        }
+
+        applyIcons();
+
+        toggleBtn.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            try { localStorage.setItem('egglish-theme', isDark ? 'dark' : 'light'); } catch (e) {}
+            applyIcons();
+        });
+    }
+
+    // ── Cerrar sesión (placeholder seguro, no rompe si no hay backend) ──
+    function setupLogoutButtons() {
+        const ids = ['btn-cerrar-sesion', 'btn-cerrar-sesion-mobile'];
+        ids.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', () => {
+                try {
+                    localStorage.removeItem('egglish_session');
+                } catch (e) {}
+                window.location.href = '/Secciones/lecciones.html';
+            });
+        });
+    }
+
+    setupHamburgerMenu();
+    setupDarkMode();
+    setupLogoutButtons();
+
+    // Iniciar en la biblioteca
     updateStatsUI();
-    initLesson();
+    libraryLevel = 'A1';
+    renderLibrary();
+    showScreen('library');
 </script>
 <!-- ★ EGGLISH AUTH ★ -->
 <script type="module">
