@@ -56,302 +56,297 @@ const LEVELS = {
   ]},
 };
 
-/* ----------------------------------------------------------------
-   CONTENIDO POR TEMA: icono, xp, guía y 10 preguntas (un solo tema c/u)
-   tipos: order (ordenar palabras) | choice (opción múltiple)
-          blank (completar espacio) | boolean (verdadero/falso)
----------------------------------------------------------------- */
 const THEMES = {
 
   saludos: {
     label: 'Saludos', icon: '👋', xp: 40,
     guide: {
-      summary: 'Aprende a saludar, despedirte y presentarte de forma cortés en español.',
-      rules: ['"Buenos días" se usa en la mañana, "Buenas tardes" después del mediodía y "Buenas noches" al anochecer.', '"Hola" es informal y sirve a cualquier hora.', 'Para despedirte puedes usar "Adiós", "Hasta luego" o "Hasta mañana".'],
-      examples: ['Hola, ¿cómo estás?', 'Buenas tardes, mucho gusto.', '¡Hasta luego!'],
-      mistakes: ['Confundir "Adiós" (despedida) con un saludo.', 'Usar "Buenos días" de noche.'],
-      tips: ['"Por favor" y "Gracias" siempre suman puntos de cortesía.', 'Practica en voz alta con el botón de audio 🔊.'],
+      summary: 'Aprende a saludar, despedirte y presentarte de forma cortés en inglés.',
+      rules: ['"Good morning" se usa en la mañana, "Good afternoon" después del mediodía y "Good evening" al anochecer.'],
+      examples: ['Hello, how are you?', 'Good afternoon, nice to meet you.', 'See you later!'],
+      mistakes: ['Confundir "Good evening" (saludo de noche) con "Good night" (despedida).'],
+      tips: ['"Please" y "Thank you" son esenciales en inglés para no sonar grosero.'],
     },
     questions: [
       { type:'order', en:'Good morning!', es:['¡Buenos','días!'], distractors:['noches','tardes','hola','adiós'] },
-      { type:'choice', prompt:"¿Cómo se dice 'Hello' en español?", options:['Hola','Adiós','Gracias','Por favor'], answer:0 },
-      { type:'blank', sentence:'Buenas ___, ¿cómo estás?', answer:'tardes', options:['tardes','gracias','perdón','luego'] },
-      { type:'boolean', statement:"'Adiós' se usa para saludar cuando llegas.", answer:false },
-      { type:'order', en:'Good afternoon, nice to meet you.', es:['Buenas','tardes,','mucho','gusto.'], distractors:['noches','día','adiós','hola'] },
+      { type:'choice', prompt:"Traduce la palabra: 'Hello'", options:['Hola','Adiós','Gracias','Por favor'], answer:0 },
+      { type:'blank', sentence:'Good ___, how are you? (Buenas tardes)', answer:'afternoon', options:['afternoon','thanks','sorry','later'] },
+      { type:'boolean', statement:"'Goodbye' significa que estás saludando al llegar.", answer:false },
+      { type:'order', en:'Good afternoon, nice to meet you.', es:['Buenas','tardes,','mucho','gusto.'], distractors:['noches','días','adiós','hola'] },
       { type:'choice', prompt:"¿Qué significa 'Thank you'?", options:['Gracias','Perdón','De nada','Por favor'], answer:0 },
-      { type:'blank', sentence:'¡Hasta ___! Nos vemos mañana.', answer:'luego', options:['luego','nunca','aquí','bien'] },
-      { type:'boolean', statement:"'Buenos días' se usa por la noche.", answer:false },
+      { type:'blank', sentence:'See you ___! (¡Hasta luego!)', answer:'later', options:['later','never','here','well'] },
+      { type:'boolean', statement:"'Good morning' se utiliza durante la noche.", answer:false },
       { type:'order', en:'See you tomorrow, goodbye!', es:['¡Hasta','mañana,','adiós!'], distractors:['luego','hoy','ayer','bien'] },
-      { type:'choice', prompt:"¿Cómo respondes educadamente a '¿Cómo estás?'?", options:['Bien, gracias','Sí','No','Adiós'], answer:0 },
+      { type:'choice', prompt:"Traduce: 'How are you?'", options:['¿Cómo estás?','¿Qué tal?','¿Dónde estás?','¿Quién eres?'], answer:0 },
     ],
   },
 
   colores: {
     label: 'Colores', icon: '🎨', xp: 40,
     guide: {
-      summary: 'Vocabulario esencial de colores para describir objetos, ropa y el mundo que te rodea.',
-      rules: ['Los colores concuerdan en género y número con el sustantivo: "carro rojo", "casa roja", "carros rojos".', 'Colores terminados en "-o" cambian a "-a" en femenino (rojo/roja); los que terminan en otra letra no cambian (verde/verde).'],
-      examples: ['El cielo es azul.', 'Me gusta el color morado.', 'La hierba es verde.'],
-      mistakes: ['Olvidar la concordancia de género: "camisa rojo" (incorrecto) en vez de "camisa roja".'],
-      tips: ['Asocia cada color con un objeto real para memorizarlo mejor.', 'Repite los colores primarios primero: rojo, azul, amarillo.'],
+      summary: 'Vocabulario esencial de colores para describir objetos y ropa en inglés.',
+      rules: ['En inglés, los colores van ANTES del sustantivo: "red car", no "car red".'],
+      examples: ['The sky is blue.', 'I like the color purple.', 'The grass is green.'],
+      mistakes: ['Poner el color después del objeto: "car blue" (incorrecto).'],
+      tips: ['Asocia cada color con un objeto real en tu casa para memorizarlo.'],
     },
     questions: [
       { type:'order', en:'The sky is blue.', es:['El','cielo','es','azul.'], distractors:['rojo','verde','amarillo','gris'] },
-      { type:'choice', prompt:"¿Cómo se dice 'red' en español?", options:['Rojo','Azul','Verde','Amarillo'], answer:0 },
-      { type:'blank', sentence:'La hierba es de color ___.', answer:'verde', options:['verde','rojo','azul','negro'] },
-      { type:'boolean', statement:"'Amarillo' es el color del sol.", answer:true },
-      { type:'order', en:'I like the color purple.', es:['Me','gusta','el','color','morado.'], distractors:['rosado','negro','blanco','gris'] },
-      { type:'choice', prompt:"¿Qué color es 'black'?", options:['Negro','Blanco','Gris','Café'], answer:0 },
-      { type:'blank', sentence:'Mi carro favorito es de color ___.', answer:'blanco', options:['blanco','negro','rojo','azul'] },
-      { type:'boolean', statement:"'Rosado' y 'rosa' pueden significar lo mismo.", answer:true },
+      { type:'choice', prompt:"¿Qué color es 'Red'?", options:['Rojo','Azul','Verde','Amarillo'], answer:0 },
+      { type:'blank', sentence:'The grass is ___ (verde).', answer:'green', options:['green','red','blue','black'] },
+      { type:'boolean', statement:"'Yellow' es el color típico del sol.", answer:true },
+      { type:'order', en:'I like the color purple.', es:['Me','gusta','el','color','morado.'], distractors:['rosa','negro','blanco','gris'] },
+      { type:'choice', prompt:"Traduce el color 'Black'", options:['Negro','Blanco','Gris','Café'], answer:0 },
+      { type:'blank', sentence:'My favorite car is ___ (blanco).', answer:'white', options:['white','black','red','blue'] },
+      { type:'boolean', statement:"La palabra 'Pink' significa rosado.", answer:true },
       { type:'order', en:'The orange fruit is orange.', es:['La','fruta','naranja','es','naranja.'], distractors:['roja','verde','morada','azul'] },
-      { type:'choice', prompt:"¿Cómo se dice 'gray' en español?", options:['Gris','Café','Beige','Plata'], answer:0 },
+      { type:'choice', prompt:"¿Qué color es 'Gray'?", options:['Gris','Café','Beige','Plateado'], answer:0 },
     ],
   },
 
   numeros: {
     label: 'Números', icon: '🔢', xp: 45,
     guide: {
-      summary: 'Cuenta del 1 al 100 y aprende a usar los números para hablar de edad y cantidades.',
-      rules: ['Los números del 16 al 29 suelen escribirse en una sola palabra: dieciséis, veintidós.', 'A partir de 31 se separan con "y": treinta y uno.', 'Para la edad usamos el verbo "tener": "Tengo veinte años", no "soy veinte".'],
-      examples: ['Tengo tres manzanas.', 'Hay diez estudiantes.', 'Tengo veinte años.'],
-      mistakes: ['Decir "Soy veinte años" en vez de "Tengo veinte años".'],
-      tips: ['Practica contando objetos reales a tu alrededor.', 'Aprende primero del 1 al 10, luego del 11 al 20.'],
+      summary: 'Cuenta del 1 al 100 y aprende a hablar de edades y cantidades.',
+      rules: ['Para la edad usamos el verbo "to be" (ser/estar): "I am twenty", NO "I have twenty".'],
+      examples: ['I have three apples.', 'There are ten students.', 'I am twenty years old.'],
+      mistakes: ['Decir "I have 20 years" en lugar de usar el verbo to be.'],
+      tips: ['Nota la diferencia entre "-teen" (13-19) y "-ty" (20, 30, 40...).'],
     },
     questions: [
       { type:'order', en:'I have three apples.', es:['Tengo','tres','manzanas.'], distractors:['dos','cuatro','cinco','peras'] },
-      { type:'choice', prompt:"¿Cómo se dice 'seven' en español?", options:['Siete','Ocho','Seis','Nueve'], answer:0 },
-      { type:'blank', sentence:'Tengo ___ años.', answer:'veinte', options:['veinte','diez','cien','mil'] },
-      { type:'boolean', statement:"'Diez' es el número 10.", answer:true },
+      { type:'choice', prompt:"Traduce el número 'Seven'", options:['Siete','Ocho','Seis','Nueve'], answer:0 },
+      { type:'blank', sentence:'I am ___ years old (veinte).', answer:'twenty', options:['twenty','ten','hundred','thousand'] },
+      { type:'boolean', statement:"'Ten' equivale al número 10.", answer:true },
       { type:'order', en:'There are ten students.', es:['Hay','diez','estudiantes.'], distractors:['nueve','once','veinte','profesores'] },
-      { type:'choice', prompt:"¿Qué número es 'hundred'?", options:['Cien','Mil','Diez','Cincuenta'], answer:0 },
-      { type:'blank', sentence:'El autobús número ___ pasa a las ocho.', answer:'cinco', options:['cinco','seis','siete','ocho'] },
-      { type:'boolean', statement:"'Mil' es más grande que 'cien'.", answer:true },
-      { type:'order', en:'I am twenty-five years old.', es:['Tengo','veinticinco','años.'], distractors:['treinta','quince','cuarenta','diez'] },
-      { type:'choice', prompt:"¿Cómo se dice 'first' en un conteo?", options:['Primero','Segundo','Tercero','Último'], answer:0 },
-    ],
+      { type:'choice', prompt:"¿Qué significa 'Hundred'?", options:['Cien','Mil','Diez','Cincuenta'], answer:0 },
+      { type:'blank', sentence:'Bus number ___ arrives at eight (cinco).', answer:'five', options:['five','six','seven','eight'] },
+      { type:'boolean', statement:"'Thousand' es una cantidad mayor que 'Hundred'.", answer:true },
+      { type:'order', en:'I am twenty-five years old.', es:['Tengo','veinticinco','años.'], distractors:['treinta','soy','cuarenta','diez'] },
+      { type:'choice', prompt:"¿Qué significa 'First' en un conteo?", options:['Primero','Segundo','Tercero','Último'], answer:0 },
+    ]
   },
 
   animales: {
     label: 'Animales', icon: '🐾', xp: 45,
     guide: {
       summary: 'Nombra animales comunes de granja, mascotas y fauna silvestre.',
-      rules: ['Muchos nombres de animales cambian de género: gato/gata, perro/perra.', 'El verbo "ladrar" es solo para perros; "maullar" para gatos.'],
-      examples: ['El perro corre rápido.', 'Los peces viven en el agua.', 'La vaca da leche todos los días.'],
-      mistakes: ['Confundir "gallina" (ave) con un tipo de pez.'],
-      tips: ['Relaciona cada animal con el sonido que hace para recordarlo.'],
+      rules: ['En inglés los animales suelen tratarse como objetos a menos que sean tus mascotas.'],
+      examples: ['The dog runs fast.', 'Fish live in the water.', 'The cow gives milk.'],
+      mistakes: ['Confundir "chicken" (pollo/gallina) con "kitchen" (cocina).'],
+      tips: ['Aprende los animales agrupándolos por su hábitat.'],
     },
     questions: [
       { type:'order', en:'The dog runs fast.', es:['El','perro','corre','rápido.'], distractors:['gato','lento','salta','camina'] },
-      { type:'choice', prompt:"¿Cómo se dice 'cat' en español?", options:['Gato','Perro','Pájaro','Pez'], answer:0 },
-      { type:'blank', sentence:'El ___ vuela muy alto.', answer:'pájaro', options:['pájaro','pez','perro','gato'] },
-      { type:'boolean', statement:'Los peces viven en el agua.', answer:true },
+      { type:'choice', prompt:"Traduce 'Cat'", options:['Gato','Perro','Pájaro','Pez'], answer:0 },
+      { type:'blank', sentence:'The ___ flies very high (pájaro).', answer:'bird', options:['bird','fish','dog','cat'] },
+      { type:'boolean', statement:"Los 'Fish' viven en el agua.", answer:true },
       { type:'order', en:'I have two small dogs.', es:['Tengo','dos','perros','pequeños.'], distractors:['grandes','gatos','tres','uno'] },
-      { type:'choice', prompt:"¿Qué animal es 'horse'?", options:['Caballo','Vaca','Cerdo','Oveja'], answer:0 },
-      { type:'blank', sentence:'La ___ da leche todos los días.', answer:'vaca', options:['vaca','gallina','oveja','cabra'] },
-      { type:'boolean', statement:"'Gallina' es un tipo de pez.", answer:false },
+      { type:'choice', prompt:"¿Qué animal es 'Horse'?", options:['Caballo','Vaca','Cerdo','Oveja'], answer:0 },
+      { type:'blank', sentence:'The ___ gives milk every day (vaca).', answer:'cow', options:['cow','chicken','sheep','goat'] },
+      { type:'boolean', statement:"'Chicken' significa pez.", answer:false },
       { type:'order', en:'The bird sings in the morning.', es:['El','pájaro','canta','en','la','mañana.'], distractors:['tarde','noche','perro','ladra'] },
-      { type:'choice', prompt:"¿Cómo se dice 'rabbit' en español?", options:['Conejo','Ratón','Ardilla','Zorro'], answer:0 },
+      { type:'choice', prompt:"Traduce 'Rabbit'", options:['Conejo','Ratón','Ardilla','Zorro'], answer:0 },
     ],
   },
 
   familia: {
     label: 'Familia', icon: '👨‍👩‍👧', xp: 45,
     guide: {
-      summary: 'Habla sobre tu familia: padres, hermanos, abuelos y otros parientes.',
-      rules: ['Los sustantivos de parentesco cambian de género: hijo/hija, tío/tía, primo/prima.', 'El masculino plural puede incluir a ambos géneros: "mis hermanos" puede referirse a hermanos y hermanas juntos.'],
-      examples: ['Esta es mi madre.', 'Amo a mis abuelos.', 'Mi familia es grande.'],
-      mistakes: ['Pensar que "hija" se refiere a un hombre.'],
-      tips: ['Dibuja tu árbol genealógico en español para practicar.'],
+      summary: 'Habla sobre tu familia: padres, hermanos, abuelos y parientes.',
+      rules: ['"Parents" significa padres (mamá y papá juntos), no parientes.'],
+      examples: ['This is my mother.', 'I love my grandparents.', 'My family is big.'],
+      mistakes: ['Usar "fathers" para referirse a ambos padres.'],
+      tips: ['Dibuja tu árbol genealógico en inglés.'],
     },
     questions: [
       { type:'order', en:'This is my mother.', es:['Esta','es','mi','madre.'], distractors:['padre','hermana','abuela','tío'] },
-      { type:'choice', prompt:"¿Cómo se dice 'brother' en español?", options:['Hermano','Hermana','Primo','Tío'], answer:0 },
-      { type:'blank', sentence:'Mi ___ es el papá de mi papá.', answer:'abuelo', options:['abuelo','tío','primo','hermano'] },
-      { type:'boolean', statement:"'Hija' se refiere a un hombre.", answer:false },
+      { type:'choice', prompt:"Traduce 'Brother'", options:['Hermano','Hermana','Primo','Tío'], answer:0 },
+      { type:'blank', sentence:'My ___ is my father\'s dad (abuelo).', answer:'grandfather', options:['grandfather','uncle','cousin','brother'] },
+      { type:'boolean', statement:"'Daughter' se refiere a una hija.", answer:true },
       { type:'order', en:'I love my grandparents.', es:['Amo','a','mis','abuelos.'], distractors:['padres','tíos','primos','hermanos'] },
-      { type:'choice', prompt:"¿Qué significa 'aunt'?", options:['Tía','Tío','Prima','Nuera'], answer:0 },
-      { type:'blank', sentence:'Mi ___ tiene tres hijos.', answer:'tía', options:['tía','tío','abuela','hermana'] },
-      { type:'boolean', statement:"'Primo' y 'prima' son la misma persona pero de distinto género.", answer:true },
+      { type:'choice', prompt:"¿Qué significa 'Aunt'?", options:['Tía','Tío','Prima','Sobrina'], answer:0 },
+      { type:'blank', sentence:'My ___ has three children (tía).', answer:'aunt', options:['aunt','uncle','grandmother','sister'] },
+      { type:'boolean', statement:"'Cousin' sirve tanto para primo como para prima.", answer:true },
       { type:'order', en:'My family is big.', es:['Mi','familia','es','grande.'], distractors:['pequeña','feliz','unida','triste'] },
-      { type:'choice', prompt:"¿Cómo se dice 'son' en español?", options:['Hijo','Hija','Nieto','Sobrino'], answer:0 },
+      { type:'choice', prompt:"Traduce 'Son'", options:['Hijo','Hija','Nieto','Sobrino'], answer:0 },
     ],
   },
 
   comida: {
     label: 'Comida', icon: '🍽️', xp: 45,
     guide: {
-      summary: 'Frases útiles para pedir comida y bebida en un restaurante o café.',
-      rules: ['"Quisiera" es una forma cortés de pedir algo, más formal que "quiero".', '"La cuenta" es la palabra para "the bill" en un restaurante.'],
-      examples: ['Quisiera un café, por favor.', '¿Puede traer la cuenta, por favor?', 'La sopa está muy caliente.'],
-      mistakes: ['Pensar que "postre" se come al inicio de la comida (se come al final).'],
-      tips: ['Practica pidiendo tu comida favorita en español antes de viajar.'],
+      summary: 'Frases útiles para pedir comida y bebida.',
+      rules: ['"I would like" es la forma cortés de pedir algo, mejor que "I want".'],
+      examples: ['I would like a coffee, please.', 'Can I have the bill?', 'The soup is hot.'],
+      mistakes: ['Decir "Give me" al mesero, suena muy grosero.'],
+      tips: ['Agrega siempre "please" en tus peticiones.'],
     },
     questions: [
       { type:'order', en:'I would like a coffee, please.', es:['Quisiera','un','café,','por','favor.'], distractors:['té','jugo','agua','dos'] },
-      { type:'choice', prompt:"¿Cómo se dice 'bread' en español?", options:['Pan','Arroz','Queso','Huevo'], answer:0 },
-      { type:'blank', sentence:'Quiero un vaso de ___ fría.', answer:'agua', options:['agua','leche','jugo','café'] },
-      { type:'boolean', statement:"'La cuenta' significa 'the bill'.", answer:true },
-      { type:'order', en:'The soup is very hot.', es:['La','sopa','está','muy','caliente.'], distractors:['fría','rica','salada','dulce'] },
-      { type:'choice', prompt:"¿Qué significa 'cheese'?", options:['Queso','Leche','Mantequilla','Huevo'], answer:0 },
-      { type:'blank', sentence:'¿Tiene usted ___ vegetariano?', answer:'menú', options:['menú','mesa','plato','postre'] },
-      { type:'boolean', statement:"'Postre' se come al inicio de la comida.", answer:false },
+      { type:'choice', prompt:"Traduce 'Bread'", options:['Pan','Arroz','Queso','Huevo'], answer:0 },
+      { type:'blank', sentence:'I want a glass of cold ___ (agua).', answer:'water', options:['water','milk','juice','coffee'] },
+      { type:'boolean', statement:"'The bill' es la cuenta del restaurante.", answer:true },
+      { type:'order', en:'The soup is very hot.', es:['La','sopa','está','muy','caliente.'], distractors:['fría','sabrosa','salada','dulce'] },
+      { type:'choice', prompt:"¿Qué significa 'Cheese'?", options:['Queso','Leche','Mantequilla','Huevo'], answer:0 },
+      { type:'blank', sentence:'Do you have a vegetarian ___? (menú)', answer:'menu', options:['menu','table','plate','dessert'] },
+      { type:'boolean', statement:"'Dessert' se come al principio de la comida.", answer:false },
       { type:'order', en:'Can I have the bill, please?', es:['¿Puede','traer','la','cuenta,','por','favor?'], distractors:['mesa','menú','agua','dos'] },
-      { type:'choice', prompt:"¿Cómo se dice 'delicious' en español?", options:['Delicioso','Feo','Frío','Caro'], answer:0 },
+      { type:'choice', prompt:"Traduce 'Delicious'", options:['Delicioso','Feo','Frío','Caro'], answer:0 },
     ],
   },
 
   pronombres: {
     label: 'Pronombres', icon: '🙋', xp: 50,
     guide: {
-      summary: 'Los pronombres personales reemplazan al sujeto: yo, tú, él, ella, nosotros, ellos.',
-      rules: ['"Tú" es informal y "usted" es formal; ambos significan "you".', '"Nosotros/nosotras" y "ellos/ellas" cambian según el género del grupo.'],
-      examples: ['Ella es mi amiga.', 'Nosotros somos estudiantes.', 'Yo te amo.'],
-      mistakes: ['Usar "yo" para hablar de otra persona.'],
-      tips: ['En español el pronombre a veces se omite porque el verbo ya indica quién habla.'],
+      summary: 'Los pronombres personales reemplazan al sujeto.',
+      rules: ['"You" sirve para tú, usted y ustedes.', 'En inglés nunca se omite el pronombre.'],
+      examples: ['She is my friend.', 'We are students.', 'I love you.'],
+      mistakes: ['Omitir el sujeto como en español.'],
+      tips: ['Usa "It" obligatoriamente para cosas o clima.'],
     },
     questions: [
       { type:'order', en:'She is my friend.', es:['Ella','es','mi','amiga.'], distractors:['él','ellos','nosotros','tú'] },
-      { type:'choice', prompt:"¿Qué pronombre corresponde a 'they'?", options:['Ellos/Ellas','Nosotros','Usted','Vosotros'], answer:0 },
-      { type:'blank', sentence:'___ somos estudiantes.', answer:'Nosotros', options:['Nosotros','Ellos','Ella','Usted'] },
-      { type:'boolean', statement:"'Tú' y 'usted' son formas de decir 'you'.", answer:true },
+      { type:'choice', prompt:"¿Qué pronombre es 'They'?", options:['Ellos / Ellas','Nosotros','Ustedes','Él'], answer:0 },
+      { type:'blank', sentence:'___ are students. (Nosotros)', answer:'We', options:['We','They','She','You'] },
+      { type:'boolean', statement:"'You' significa tú y ustedes.", answer:true },
       { type:'order', en:'We are happy today.', es:['Nosotros','estamos','felices','hoy.'], distractors:['ellos','tristes','ayer','ella'] },
-      { type:'choice', prompt:"¿Cómo se dice 'he' en español?", options:['Él','Ella','Ellos','Yo'], answer:0 },
-      { type:'blank', sentence:'___ tiene un perro nuevo.', answer:'Ella', options:['Ella','Yo','Nosotros','Ellos'] },
-      { type:'boolean', statement:"'Yo' se usa para hablar de otra persona.", answer:false },
-      { type:'order', en:'I love you.', es:['Yo','te','amo.'], distractors:['tú','me','ella','él'] },
-      { type:'choice', prompt:"¿Qué pronombre usarías con tu jefe formalmente?", options:['Usted','Tú','Vos','Ustedes'], answer:0 },
+      { type:'choice', prompt:"Traduce 'He'", options:['Él','Ella','Ellos','Yo'], answer:0 },
+      { type:'blank', sentence:'___ has a new dog. (Ella)', answer:'She', options:['She','I','We','They'] },
+      { type:'boolean', statement:"'I' se usa para hablar de otra persona.", answer:false },
+      { type:'order', en:'I love you.', es:['Yo','te','amo.'], distractors:['mí','ella','él','nosotros'] },
+      { type:'choice', prompt:"Pronombre para objetos o clima:", options:['It','He','She','They'], answer:0 },
     ],
   },
 
   serestar: {
     label: 'Verb To Be', icon: '🧩', xp: 50,
     guide: {
-      summary: '"Ser" y "estar" traducen "to be", pero se usan en contextos distintos.',
-      rules: ['Usa "ser" para características permanentes: profesión, nacionalidad, personalidad.', 'Usa "estar" para estados temporales: emociones, ubicación, condición.'],
-      examples: ['Ella es doctora. (permanente)', 'Estoy cansado hoy. (temporal)', 'El café está caliente.'],
-      mistakes: ['Decir "Soy cansado" en vez de "Estoy cansado".'],
-      tips: ['Piensa: ¿es algo que siempre es así, o algo que cambia? Eso te dice si usar "ser" o "estar".'],
+      summary: 'El verbo "To be" significa ser o estar.',
+      rules: ['Formas en presente: am, is, are.', 'Se usa para la edad.'],
+      examples: ['I am happy.', 'She is a doctor.', 'They are students.'],
+      mistakes: ['Decir "You is" en vez de "You are".'],
+      tips: ['Relaciona ser/estar con am, is, are inmediatamente.'],
     },
     questions: [
-      { type:'order', en:'I am happy.', es:['Yo','estoy','feliz.'], distractors:['soy','eres','están','triste'] },
-      { type:'choice', prompt:"¿Cuál es correcta: 'She ___ a teacher'?", options:['es','está','son','están'], answer:0 },
-      { type:'blank', sentence:'Nosotros ___ cansados hoy.', answer:'estamos', options:['estamos','somos','es','son'] },
-      { type:'boolean', statement:'Usamos "ser" para describir profesiones.', answer:true },
-      { type:'order', en:'They are students.', es:['Ellos','son','estudiantes.'], distractors:['están','es','era','fueron'] },
-      { type:'choice', prompt:"¿Qué verbo usarías para el clima: 'ser' o 'estar'?", options:['Estar','Ser','Ambos','Ninguno'], answer:0 },
-      { type:'blank', sentence:'El café ___ muy caliente.', answer:'está', options:['está','es','son','somos'] },
-      { type:'boolean', statement:"'Soy de Colombia' usa el verbo 'estar'.", answer:false },
-      { type:'order', en:'You are very kind.', es:['Tú','eres','muy','amable.'], distractors:['estás','soy','es','amables'] },
-      { type:'choice', prompt:"¿Cuál es correcta: 'I ___ tired'?", options:['am','is','are','be'], answer:0 },
+      { type:'order', en:'I am happy.', es:['Yo','estoy','feliz.'], distractors:['es','son','ser','triste'] },
+      { type:'choice', prompt:"Selecciona la correcta: 'She ___ a teacher'", options:['is','are','am','be'], answer:0 },
+      { type:'blank', sentence:'We ___ tired today. (estamos)', answer:'are', options:['are','am','is','be'] },
+      { type:'boolean', statement:"Se usa 'To be' para decir la profesión.", answer:true },
+      { type:'order', en:'They are students.', es:['Ellos','son','estudiantes.'], distractors:['es','somos','fue','fueron'] },
+      { type:'choice', prompt:"Verbo para decir la edad:", options:['To be','To have','To make','To do'], answer:0 },
+      { type:'blank', sentence:'The coffee ___ very hot. (está)', answer:'is', options:['is','are','am','be'] },
+      { type:'boolean', statement:"'I am from Colombia' usa el verbo To be.", answer:true },
+      { type:'order', en:'You are very kind.', es:['Tú','eres','muy','amable.'], distractors:['es','somos','ser','amables'] },
+      { type:'choice', prompt:"Traducción de 'I am tired'", options:['Yo estoy cansado','Yo tengo cansancio','Yo soy cansado','Yo estoy cansada'], answer:0 },
     ],
   },
 
   presente: {
     label: 'Simple Present', icon: '🔁', xp: 50,
     guide: {
-      summary: 'El presente simple describe hábitos, rutinas y hechos generales.',
-      rules: ['En español, el verbo cambia según la persona: yo trabajo, ella trabaja, ellos trabajan.', 'No necesitas un auxiliar como "do/does" en español.'],
-      examples: ['Yo trabajo todos los días.', 'Ella habla inglés muy bien.', 'Nosotros trabajamos en una oficina.'],
-      mistakes: ['Usar el pasado o futuro cuando se habla de una rutina habitual.'],
-      tips: ['Palabras como "todos los días", "siempre" y "cada" son pistas de presente simple.'],
+      summary: 'Describe hábitos y rutinas.',
+      rules: ['Con he, she o it se agrega "s" al final del verbo.'],
+      examples: ['I work every day.', 'She speaks English.', 'They play soccer.'],
+      mistakes: ['Olvidar la "s" en tercera persona.'],
+      tips: ['Palabras clave: every day, always, usually.'],
     },
     questions: [
-      { type:'order', en:'I work every day.', es:['Yo','trabajo','todos','los','días.'], distractors:['trabajé','trabajaré','noches','semanas'] },
-      { type:'choice', prompt:"¿Cuál es la forma correcta para 'she'?", options:['Ella trabaja','Ella trabajar','Ella trabajando','Ella trabajó'], answer:0 },
-      { type:'blank', sentence:'Él ___ inglés todos los días.', answer:'estudia', options:['estudia','estudió','estudiará','estudiando'] },
-      { type:'boolean', statement:'El presente simple describe hábitos y rutinas.', answer:true },
-      { type:'order', en:'They play soccer on weekends.', es:['Ellos','juegan','fútbol','los','fines','de','semana.'], distractors:['jugaron','jugarán','básquetbol','lunes'] },
-      { type:'choice', prompt:"¿Cómo se dice 'I like coffee'?", options:['Me gusta el café','Me gustó el café','Me gustará el café','Me gustaba el café'], answer:0 },
-      { type:'blank', sentence:'Nosotros ___ en una oficina.', answer:'trabajamos', options:['trabajamos','trabajaremos','trabajábamos','trabajaron'] },
-      { type:'boolean', statement:"'Como pan todos los días' está en presente.", answer:true },
-      { type:'order', en:'She speaks English very well.', es:['Ella','habla','inglés','muy','bien.'], distractors:['habló','hablará','mal','poco'] },
-      { type:'choice', prompt:"¿Qué opción usa correctamente el presente simple?", options:['Yo vivo en Bogotá','Yo viví en Bogotá','Yo viviré en Bogotá','Yo viviendo en Bogotá'], answer:0 },
+      { type:'order', en:'I work every day.', es:['Yo','trabajo','todos','los','días.'], distractors:['trabaja','noches','semanas'] },
+      { type:'choice', prompt:"Forma correcta para 'ella trabaja':", options:['She works','She work','She working','She worked'], answer:0 },
+      { type:'blank', sentence:'He ___ English every day. (estudia)', answer:'studies', options:['studies','study','studied','studying'] },
+      { type:'boolean', statement:"El presente simple describe rutinas.", answer:true },
+      { type:'order', en:'They play soccer on weekends.', es:['Ellos','juegan','fútbol','los','fines','de','semana.'], distractors:['juega','baloncesto','lunes'] },
+      { type:'choice', prompt:"Traduce 'I like coffee'", options:['Me gusta el café','Me gustaba el café','Gusto café','Quiero café'], answer:0 },
+      { type:'blank', sentence:'We ___ in an office. (trabajamos)', answer:'work', options:['work','works','worked','working'] },
+      { type:'boolean', statement:"'He eat bread' es gramaticalmente correcto.", answer:false },
+      { type:'order', en:'She speaks English very well.', es:['Ella','habla','inglés','muy','bien.'], distractors:['hablo','mal','poco'] },
+      { type:'choice', prompt:"Opción correcta con regla de la 's':", options:['He lives in Bogotá','He live in Bogotá','He living','He lived'], answer:0 },
     ],
   },
 
   rutina: {
     label: 'Rutina Diaria', icon: '⏰', xp: 50,
     guide: {
-      summary: 'Describe las actividades que haces cada día, desde despertarte hasta dormir.',
-      rules: ['Muchos verbos de rutina son reflexivos: despertarse, vestirse, ducharse.', 'Usa "a las" + hora para decir cuándo haces algo: "a las siete".'],
-      examples: ['Me despierto a las siete.', 'Ella hace ejercicio cada mañana.', 'Me voy a dormir a las diez de la noche.'],
-      mistakes: ['Confundir "cenar" (comer de noche) con desayunar.'],
-      tips: ['Escribe tu rutina diaria en español para practicar el vocabulario.'],
+      summary: 'Actividades diarias desde despertar hasta dormir.',
+      rules: ['Usa "at" para las horas.'],
+      examples: ['I wake up at seven.', 'She exercises.', 'I go to bed.'],
+      mistakes: ['Traducir literalmente verbos reflexivos como "I shower me".'],
+      tips: ['Distingue entre wake up y get up.'],
     },
     questions: [
-      { type:'order', en:'I wake up at seven.', es:['Me','despierto','a','las','siete.'], distractors:['ocho','duermo','como','seis'] },
-      { type:'choice', prompt:"¿Cómo se dice 'I have breakfast'?", options:['Desayuno','Almuerzo','Ceno','Duermo'], answer:0 },
-      { type:'blank', sentence:'Después del trabajo, yo ___ a casa.', answer:'camino', options:['camino','corro','duermo','como'] },
-      { type:'boolean', statement:'"Cenar" significa comer por la mañana.', answer:false },
-      { type:'order', en:'I go to bed at ten at night.', es:['Me','voy','a','dormir','a','las','diez','de','la','noche.'], distractors:['mañana','tarde','nueve','once'] },
-      { type:'choice', prompt:"¿Qué significa 'to take a shower'?", options:['Ducharse','Dormir','Comer','Vestirse'], answer:0 },
-      { type:'blank', sentence:'Todos los días yo ___ el periódico.', answer:'leo', options:['leo','escribo','cocino','limpio'] },
-      { type:'boolean', statement:'"Vestirse" es ponerse la ropa.', answer:true },
-      { type:'order', en:'She exercises every morning.', es:['Ella','hace','ejercicio','cada','mañana.'], distractors:['tarde','noche','duerme','come'] },
-      { type:'choice', prompt:"¿Cómo se dice 'my schedule' en español?", options:['Mi horario','Mi reunión','Mi trabajo','Mi casa'], answer:0 },
+      { type:'order', en:'I wake up at seven.', es:['Me','despierto','a','las','siete.'], distractors:['ocho','duermo','seis'] },
+      { type:'choice', prompt:"Traduce 'I have breakfast'", options:['Yo desayuno','Yo almuerzo','Yo como pan','Yo cocino'], answer:0 },
+      { type:'blank', sentence:'After work, I ___ home. (camino)', answer:'walk', options:['walk','run','sleep','eat'] },
+      { type:'boolean', statement:"'Dinner' es la comida de la mañana.", answer:false },
+      { type:'order', en:'I go to bed at ten at night.', es:['Me','voy','a','dormir','a','las','diez','de','la','noche.'], distractors:['mañana','tarde','nueve'] },
+      { type:'choice', prompt:"Significado de 'to take a shower'", options:['Ducharse','Dormir','Comer','Vestirse'], answer:0 },
+      { type:'blank', sentence:'Every day I ___ the newspaper. (leo)', answer:'read', options:['read','write','cook','clean'] },
+      { type:'boolean', statement:"'Get dressed' significa ponerse la ropa.", answer:true },
+      { type:'order', en:'She exercises every morning.', es:['Ella','hace','ejercicio','cada','mañana.'], distractors:['tarde','noche','duerme'] },
+      { type:'choice', prompt:"Traduce 'My schedule'", options:['Mi horario','Mi reunión','Mi trabajo','Mi casa'], answer:0 },
     ],
   },
 
   lugares: {
     label: 'Lugares', icon: '📍', xp: 55,
     guide: {
-      summary: 'Vocabulario para hablar de lugares comunes en la ciudad y dar direcciones.',
-      rules: ['Usa "ir a" + el lugar: "voy al banco", "voy a la farmacia".', 'Recuerda la contracción "a + el = al".'],
-      examples: ['El hospital es muy grande.', 'Voy al farmacia a comprar medicinas.', 'Necesito ir al banco.'],
-      mistakes: ['Pensar que "la plaza" es un lugar dentro de una casa.'],
-      tips: ['Aprende los lugares que más usas: banco, farmacia, escuela, parque.'],
+      summary: 'Lugares en la ciudad y direcciones.',
+      rules: ['Usa "go to" para indicar desplazamiento a un lugar.'],
+      examples: ['The hospital is big.', 'I am going to the pharmacy.', 'I need to go to the bank.'],
+      mistakes: ['Decir "I go at the bank" en vez de "to the bank".'],
+      tips: ['Aprende primero los lugares de tu entorno.'],
     },
     questions: [
-      { type:'order', en:'The hospital is very big.', es:['El','hospital','es','muy','grande.'], distractors:['pequeño','escuela','banco','viejo'] },
-      { type:'choice', prompt:"¿Cómo se dice 'library' en español?", options:['Biblioteca','Farmacia','Banco','Escuela'], answer:0 },
-      { type:'blank', sentence:'Voy a la ___ a comprar medicinas.', answer:'farmacia', options:['farmacia','banco','parque','museo'] },
-      { type:'boolean', statement:'"El parque" es un buen lugar para caminar.', answer:true },
-      { type:'order', en:'The museum opens at nine.', es:['El','museo','abre','a','las','nueve.'], distractors:['cierra','diez','ocho','tarde'] },
-      { type:'choice', prompt:"¿Qué significa 'airport'?", options:['Aeropuerto','Estación','Puerto','Aduana'], answer:0 },
-      { type:'blank', sentence:'El tren sale de la ___ a las seis.', answer:'estación', options:['estación','aeropuerto','plaza','calle'] },
-      { type:'boolean', statement:'"La plaza" es un lugar dentro de una casa.', answer:false },
-      { type:'order', en:'I need to go to the bank.', es:['Necesito','ir','al','banco.'], distractors:['hospital','parque','museo','aeropuerto'] },
-      { type:'choice', prompt:"¿Cómo se dice 'church' en español?", options:['Iglesia','Escuela','Oficina','Tienda'], answer:0 },
+      { type:'order', en:'The hospital is very big.', es:['El','hospital','es','muy','grande.'], distractors:['pequeño','escuela','banco'] },
+      { type:'choice', prompt:"Traduce 'Library'", options:['Biblioteca','Farmacia','Banco','Escuela'], answer:0 },
+      { type:'blank', sentence:'I am going to the ___ to buy medicine. (farmacia)', answer:'pharmacy', options:['pharmacy','bank','park','museum'] },
+      { type:'boolean', statement:"Un parque es un lugar para caminar.", answer:true },
+      { type:'order', en:'The museum opens at nine.', es:['El','museo','abre','a','las','nueve.'], distractors:['cierra','diez','ocho'] },
+      { type:'choice', prompt:"Significado de 'Airport'", options:['Aeropuerto','Estación','Puerto','Aduana'], answer:0 },
+      { type:'blank', sentence:'The train leaves the ___ at six. (estación)', answer:'station', options:['station','airport','plaza','street'] },
+      { type:'boolean', statement:"Una library es una tienda para comprar libros.", answer:false },
+      { type:'order', en:'I need to go to the bank.', es:['Necesito','ir','al','banco.'], distractors:['hospital','parque','museo'] },
+      { type:'choice', prompt:"Traduce 'Church'", options:['Iglesia','Escuela','Oficina','Tienda'], answer:0 },
     ],
   },
 
   trabajos: {
     label: 'Trabajos', icon: '💼', xp: 55,
     guide: {
-      summary: 'Nombra profesiones comunes y aprende a decir a qué te dedicas.',
-      rules: ['Muchas profesiones cambian de género: doctor/doctora, maestro/maestra.', 'Usa "trabajar como" + profesión: "trabajo como ingeniero".'],
-      examples: ['Ella es doctora.', 'Él trabaja como ingeniero.', 'Quiero ser ingeniero.'],
-      mistakes: ['Pensar que un "policía" trabaja preparando comida.'],
-      tips: ['Practica presentándote y diciendo tu profesión en español.'],
+      summary: 'Nombra profesiones y ocupaciones.',
+      rules: ['Es obligatorio usar "a" o "an" antes de la profesión: "I am a doctor".'],
+      examples: ['She is a doctor.', 'He works as an engineer.'],
+      mistakes: ['Omitir el artículo y decir "I am doctor".'],
+      tips: ['Practica diciendo tu propia profesión u oficio.'],
     },
     questions: [
-      { type:'order', en:'She is a doctor.', es:['Ella','es','doctora.'], distractors:['enfermera','maestra','abogada','ingeniera'] },
-      { type:'choice', prompt:"¿Cómo se dice 'teacher' en español?", options:['Maestro/a','Doctor/a','Abogado/a','Ingeniero/a'], answer:0 },
-      { type:'blank', sentence:'Mi hermano es ___, trabaja en un hospital.', answer:'enfermero', options:['enfermero','maestro','chef','piloto'] },
-      { type:'boolean', statement:'Un "chef" trabaja cocinando en un restaurante.', answer:true },
-      { type:'order', en:'He works as an engineer.', es:['Él','trabaja','como','ingeniero.'], distractors:['doctor','maestro','abogado','chef'] },
-      { type:'choice', prompt:"¿Qué significa 'lawyer'?", options:['Abogado/a','Ingeniero/a','Piloto','Policía'], answer:0 },
-      { type:'blank', sentence:'El ___ vuela los aviones.', answer:'piloto', options:['piloto','chef','policía','doctor'] },
-      { type:'boolean', statement:'Un "policía" trabaja preparando comida.', answer:false },
-      { type:'order', en:'I want to be an engineer.', es:['Quiero','ser','ingeniero.'], distractors:['doctor','maestro','chef','abogado'] },
-      { type:'choice', prompt:"¿Cómo se dice 'nurse' en español?", options:['Enfermero/a','Doctor/a','Maestro/a','Piloto'], answer:0 },
+      { type:'order', en:'She is a doctor.', es:['Ella','es','doctora.'], distractors:['enfermera','maestra','abogada'] },
+      { type:'choice', prompt:"Traduce 'Teacher'", options:['Maestro / Maestra','Doctor','Abogado','Ingeniero'], answer:0 },
+      { type:'blank', sentence:'My brother is a ___, he works in a hospital. (enfermero)', answer:'nurse', options:['nurse','teacher','chef','pilot'] },
+      { type:'boolean', statement:"Un chef cocina en un restaurante.", answer:true },
+      { type:'order', en:'He works as an engineer.', es:['Él','trabaja','como','ingeniero.'], distractors:['doctor','maestro','abogado'] },
+      { type:'choice', prompt:"Significado de 'Lawyer'", options:['Abogado','Ingeniero','Piloto','Policía'], answer:0 },
+      { type:'blank', sentence:'The ___ flies airplanes. (piloto)', answer:'pilot', options:['pilot','chef','police','doctor'] },
+      { type:'boolean', statement:"Un police officer se encarga de preparar comida.", answer:false },
+      { type:'order', en:'I want to be an engineer.', es:['Quiero','ser','ingeniero.'], distractors:['doctor','maestro','chef'] },
+      { type:'choice', prompt:"Traduce 'Nurse'", options:['Enfermera / Enfermero','Doctor','Profesor','Piloto'], answer:0 },
     ],
   },
 
 };
 
-/* ----------------------------------------------------------------
-   PROGRESO / ESTADÍSTICAS (localStorage)
----------------------------------------------------------------- */
+/* ================================================================
+   PROGRESO (persistencia local)
+================================================================ */
 const STORAGE_KEY = 'egglish_lecciones_v3';
 
 function loadProgress() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { done:{}, xp:0, streak:0, lastDay:null }; }
-  catch(e) { return { done:{}, xp:0, streak:0, lastDay:null }; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { done: {}, xp: 0, streak: 0, lastDay: null }; }
+  catch (e) { return { done: {}, xp: 0, streak: 0, lastDay: null }; }
 }
 function saveProgress() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch(e) {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (e) {}
 }
 const progress = loadProgress();
 
@@ -366,12 +361,71 @@ function registerDayStreak() {
 
 function flatThemeOrder() {
   const order = [];
-  ['a1','a2','b1'].forEach(lvl => {
+  ['a1', 'a2', 'b1'].forEach(lvl => {
     LEVELS[lvl].units.forEach(unit => unit.themes.forEach(t => order.push(t)));
   });
   return order;
 }
 
+/* ================================================================
+   UTILIDADES
+================================================================ */
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Normaliza texto para comparaciones tolerantes a mayúsculas, espacios
+ *  y puntuación, sin perdonar palabras o acentos incorrectos. */
+function normalizeText(str) {
+  return String(str)
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[¡!¿?.,;:"']/g, '')
+    .trim();
+}
+
+/* ================================================================
+   REFERENCIAS AL DOM (elementos ya presentes en lecciones.html)
+================================================================ */
+const pathMain        = document.getElementById('path-main');
+const toastEl          = document.getElementById('toast');
+
+const guideModal        = document.getElementById('guide-modal');
+const guideTabsEl       = document.getElementById('guide-tabs');
+const guideContentEl    = document.getElementById('guide-content');
+
+const lessonModal    = document.getElementById('lesson-modal');
+const lessonClose    = document.getElementById('lesson-close');
+const progressFill   = document.getElementById('lesson-progress-fill');
+const progressLabel  = document.getElementById('lesson-progress-label');
+const heartsWrap     = document.getElementById('lesson-hearts');
+const instructionEl  = document.getElementById('lesson-instruction');
+const charRow        = document.getElementById('lesson-character-row');
+const phraseEl       = document.getElementById('lesson-phrase');
+const hintLabelEl    = document.getElementById('phrase-hint-label');
+const exerciseArea   = document.getElementById('exercise-area');
+const feedbackEl     = document.getElementById('lesson-feedback');
+const feedbackIcon   = document.getElementById('feedback-icon');
+const feedbackTitle  = document.getElementById('feedback-title');
+const feedbackAns    = document.getElementById('feedback-answer');
+const btnCheck       = document.getElementById('btn-check');
+const btnSkip        = document.getElementById('btn-skip');
+const audioBtnEl     = document.getElementById('lesson-audio-btn');
+
+const completionModal = document.getElementById('completion-modal');
+const loseModal        = document.getElementById('lose-modal');
+
+const MAX_HEARTS = 3;
+
+/* ================================================================
+   ESTADÍSTICAS / PESTAÑAS DE NIVEL
+================================================================ */
 function updateStatsBar() {
   const order = flatThemeOrder();
   document.getElementById('stat-streak').textContent = progress.streak || 0;
@@ -379,12 +433,23 @@ function updateStatsBar() {
   document.getElementById('stat-lessons-done').textContent = order.filter(t => progress.done[t]).length;
 }
 
-/* ----------------------------------------------------------------
-   RENDER DEL MAPA (nodos dinámicos por nivel)
----------------------------------------------------------------- */
+function setupLevelTabs() {
+  document.querySelectorAll('.level-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.level-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      document.querySelectorAll('.level-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(`panel-${tab.dataset.level}`)?.classList.add('active');
+    });
+  });
+}
+
+/* ================================================================
+   MAPA DE LECCIONES (camino tipo Duolingo, con identidad Egglish)
+================================================================ */
 function buildPath() {
-  const main = document.getElementById('path-main');
-  main.innerHTML = '';
+  pathMain.innerHTML = '';
   const order = flatThemeOrder();
 
   Object.keys(LEVELS).forEach(lvl => {
@@ -401,7 +466,7 @@ function buildPath() {
           <div class="unit-label">Sección ${unitIdx + 1}</div>
           <div class="unit-title">${unit.title}</div>
         </div>
-        <button class="unit-header-btn" data-unit-themes="${unit.themes.join(',')}">📖 GUÍA</button>
+        <button type="button" class="unit-header-btn" data-unit-themes="${unit.themes.join(',')}">📖 GUÍA</button>
       `;
       panel.appendChild(header);
 
@@ -417,14 +482,14 @@ function buildPath() {
 
         if (i > 0) {
           const connector = document.createElement('div');
-          connector.className = 'node-connector' + (progress.done[unit.themes[i-1]] ? ' done' : '');
+          connector.className = 'node-connector' + (progress.done[unit.themes[i - 1]] ? ' done' : '');
           track.appendChild(connector);
         }
 
         const btn = document.createElement('button');
+        btn.type = 'button';
         btn.className = 'lesson-node';
         btn.dataset.themeKey = themeKey;
-        btn.dataset.globalIdx = globalIdx;
 
         const isDone = !!progress.done[themeKey];
         const isFirst = globalIdx === 0;
@@ -440,10 +505,6 @@ function buildPath() {
           btn.classList.add('state-locked');
           btn.innerHTML = `<span class="node-icon">🔒</span>`;
         }
-        const tooltip = document.createElement('span');
-        tooltip.className = 'node-tooltip';
-        tooltip.textContent = theme.label;
-        btn.appendChild(tooltip);
 
         const themeLabel = document.createElement('span');
         themeLabel.className = 'node-theme-label';
@@ -457,32 +518,29 @@ function buildPath() {
       panel.appendChild(track);
     });
 
-    main.appendChild(panel);
+    pathMain.appendChild(panel);
   });
 
-  document.getElementById(`panel-${document.querySelector('.level-tab.active')?.dataset.level || 'a1'}`)?.classList.add('active');
+  const activeLevel = document.querySelector('.level-tab.active')?.dataset.level || 'a1';
+  document.getElementById(`panel-${activeLevel}`)?.classList.add('active');
 
-  main.querySelectorAll('.lesson-node').forEach(btn => {
+  pathMain.querySelectorAll('.lesson-node').forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.classList.contains('state-locked')) { showToast('🔒 Completa la lección anterior primero.'); return; }
       openLesson(btn.dataset.themeKey);
     });
   });
 
-  main.querySelectorAll('.unit-header-btn').forEach(btn => {
+  pathMain.querySelectorAll('.unit-header-btn').forEach(btn => {
     btn.addEventListener('click', () => openGuide(btn.dataset.unitThemes.split(',')));
   });
 
   updateStatsBar();
 }
 
-/* ----------------------------------------------------------------
-   GUÍA MODAL
----------------------------------------------------------------- */
-const guideModal   = document.getElementById('guide-modal');
-const guideTabsEl   = document.getElementById('guide-tabs');
-const guideContentEl = document.getElementById('guide-content');
-
+/* ================================================================
+   MODAL DE GUÍA
+================================================================ */
 function renderGuideContent(themeKey) {
   const theme = THEMES[themeKey];
   const g = theme.guide;
@@ -505,6 +563,7 @@ function openGuide(themeKeys) {
   themeKeys.forEach((key, i) => {
     const t = THEMES[key];
     const tab = document.createElement('button');
+    tab.type = 'button';
     tab.className = 'guide-tab-btn' + (i === 0 ? ' active' : '');
     tab.textContent = `${t.icon} ${t.label}`;
     tab.addEventListener('click', () => {
@@ -517,56 +576,34 @@ function openGuide(themeKeys) {
   renderGuideContent(themeKeys[0]);
   guideModal.classList.add('open');
 }
-document.getElementById('guide-close').addEventListener('click', () => guideModal.classList.remove('open'));
+
+guideModal.querySelector('#guide-close').addEventListener('click', () => guideModal.classList.remove('open'));
 guideModal.addEventListener('click', (e) => { if (e.target === guideModal) guideModal.classList.remove('open'); });
 
-/* ----------------------------------------------------------------
-   MOTOR DE LECCIÓN
----------------------------------------------------------------- */
-const lessonModal    = document.getElementById('lesson-modal');
-const lessonClose    = document.getElementById('lesson-close');
-const progressFill   = document.getElementById('lesson-progress-fill');
-const progressLabel  = document.getElementById('lesson-progress-label');
-const heartsWrap     = document.getElementById('lesson-hearts');
-const instructionEl  = document.getElementById('lesson-instruction');
-const charRow        = document.getElementById('lesson-character-row');
-const phraseEl       = document.getElementById('lesson-phrase');
-const hintLabelEl    = document.getElementById('phrase-hint-label');
-const exerciseArea   = document.getElementById('exercise-area');
-const feedbackEl     = document.getElementById('lesson-feedback');
-const feedbackIcon   = document.getElementById('feedback-icon');
-const feedbackTitle  = document.getElementById('feedback-title');
-const feedbackAns    = document.getElementById('feedback-answer');
-const btnCheck       = document.getElementById('btn-check');
-const btnSkip        = document.getElementById('btn-skip');
-const audioBtnEl     = document.getElementById('lesson-audio-btn');
-const completionModal = document.getElementById('completion-modal');
-const loseModal      = document.getElementById('lose-modal');
-
-const MAX_HEARTS = 3;
-
+/* ================================================================
+   MOTOR DE LECCIÓN — ESTADO CENTRALIZADO
+================================================================ */
 const lessonState = {
-  themeKey: '', questions: [], qIndex: 0, hearts: MAX_HEARTS,
-  phase: 'input', // input | correct | wrong
-  selectedWords: [], selectedChoice: null, selectedBool: null, filledBlank: null,
-  correctCount: 0, totalXp: 0, startTime: 0,
+  themeKey: '',
+  questions: [],
+  qIndex: 0,
+  hearts: MAX_HEARTS,
+  phase: 'input',          // 'input' | 'correct' | 'wrong'
+  selectedChoice: null,
+  selectedBool: null,
+  filledBlank: null,
+  order: { tiles: [], answerOrder: [] }, // solo para preguntas type:'order'
+  correctCount: 0,
+  totalXp: 0,
+  startTime: 0,
 };
-
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 function openLesson(themeKey) {
   const theme = THEMES[themeKey];
   if (!theme) { showToast('⚠️ Lección no disponible aún.'); return; }
 
   lessonState.themeKey = themeKey;
-  lessonState.questions = shuffleArray(theme.questions);
+  lessonState.questions = shuffleArray(theme.questions).slice(0, 10); // máximo 10 preguntas
   lessonState.qIndex = 0;
   lessonState.hearts = MAX_HEARTS;
   lessonState.phase = 'input';
@@ -587,17 +624,18 @@ function updateHeartsUI() {
   });
 }
 
+/* ---- Dispatcher de renderizado por pregunta ---- */
 function renderQuestion() {
   const q = lessonState.questions[lessonState.qIndex];
   lessonState.phase = 'input';
-  lessonState.selectedWords = [];
   lessonState.selectedChoice = null;
   lessonState.selectedBool = null;
   lessonState.filledBlank = null;
+  lessonState.order = { tiles: [], answerOrder: [] };
   feedbackEl.className = 'lesson-feedback';
 
   const total = lessonState.questions.length;
-  progressFill.style.width = ((lessonState.qIndex) / total * 100) + '%';
+  progressFill.style.width = (lessonState.qIndex / total * 100) + '%';
   progressLabel.textContent = `${lessonState.qIndex + 1} / ${total}`;
 
   exerciseArea.innerHTML = '';
@@ -609,7 +647,7 @@ function renderQuestion() {
     phraseEl.innerHTML = buildHintPhrase(q.en);
     renderOrderExercise(q);
   } else if (q.type === 'choice') {
-    instructionEl.textContent = 'Selecciona la respuesta correcta';
+    instructionEl.textContent = q.prompt;
     charRow.style.display = 'none';
     hintLabelEl.classList.add('hidden-el');
     renderChoiceExercise(q);
@@ -628,92 +666,201 @@ function renderQuestion() {
   updateCheckBtn();
 }
 
-/* ---- ORDENAR PALABRAS (drag & drop + click) ---- */
+/* ================================================================
+   EJERCICIO: ORDENAR PALABRAS
+   Arquitectura: cada palabra (incluyendo repetidas) es una "tile" con
+   un id único. El banco tiene orden fijo; el área de respuesta guarda
+   una lista de ids. Nunca se identifica una tile por su texto, así
+   que las palabras repetidas nunca se confunden entre sí.
+================================================================ */
 function renderOrderExercise(q) {
-  const wrap = document.createElement('div');
-  wrap.innerHTML = `
+  const words = shuffleArray([...q.es, ...q.distractors.slice(0, 4)]);
+  lessonState.order = {
+    tiles: words.map((text, i) => ({ id: `tile-${i}`, text, placed: false })),
+    answerOrder: [],
+  };
+
+  exerciseArea.innerHTML = `
     <div class="lesson-answer-zone" id="answer-zone"></div>
     <div class="drag-hint">✋ Toca o arrastra las palabras para ordenarlas</div>
     <div class="lesson-wordbank" id="wordbank"></div>
   `;
-  exerciseArea.appendChild(wrap);
-
-  const answerZone = wrap.querySelector('#answer-zone');
-  const wordbank = wrap.querySelector('#wordbank');
-
-  const allWords = shuffleArray([...q.es, ...q.distractors.slice(0, 4)]);
-  allWords.forEach(word => {
-    const btn = document.createElement('button');
-    btn.className = 'bank-word';
-    btn.textContent = word;
-    btn.addEventListener('click', () => {
-      if (lessonState.phase !== 'input' || btn.classList.contains('used')) return;
-      btn.classList.add('used');
-      lessonState.selectedWords.push({ word, bankBtn: btn });
-      renderAnswerTiles(answerZone);
-      updateCheckBtn();
-    });
-    wordbank.appendChild(btn);
-  });
-
-  answerZone._dragOver = null;
-  answerZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    const dragging = answerZone.querySelector('.dragging');
-    if (!dragging) return;
-    const after = [...answerZone.querySelectorAll('.answer-word:not(.dragging)')].find(el => {
-      const box = el.getBoundingClientRect();
-      return e.clientX < box.left + box.width / 2;
-    });
-    if (after) answerZone.insertBefore(dragging, after);
-    else answerZone.appendChild(dragging);
-  });
+  renderOrderZones();
 }
 
-function renderAnswerTiles(answerZone) {
+function tileById(id) {
+  return lessonState.order.tiles.find(t => t.id === id);
+}
+
+function renderOrderZones() {
+  const answerZone = document.getElementById('answer-zone');
+  const wordbank = document.getElementById('wordbank');
+  if (!answerZone || !wordbank) return;
+
   answerZone.innerHTML = '';
-  lessonState.selectedWords.forEach((sel, idx) => {
-    const tag = document.createElement('button');
-    tag.className = 'answer-word';
-    tag.textContent = sel.word;
-    tag.draggable = true;
-    tag.addEventListener('click', () => {
-      if (lessonState.phase !== 'input') return;
-      sel.bankBtn.classList.remove('used');
-      lessonState.selectedWords.splice(idx, 1);
-      renderAnswerTiles(answerZone);
-      updateCheckBtn();
-    });
-    tag.addEventListener('dragstart', () => tag.classList.add('dragging'));
-    tag.addEventListener('dragend', () => {
-      tag.classList.remove('dragging');
-      lessonState.selectedWords = [...answerZone.querySelectorAll('.answer-word')].map(el => {
-        return lessonState.selectedWords.find(s => s.word === el.textContent && s.bankBtn) || { word: el.textContent };
-      });
-      syncOrderFromDom(answerZone);
-    });
-    answerZone.appendChild(tag);
+  lessonState.order.answerOrder.forEach(id => {
+    const tile = tileById(id);
+    if (tile) answerZone.appendChild(createWordTile(tile, 'answer'));
+  });
+
+  wordbank.innerHTML = '';
+  lessonState.order.tiles.forEach(tile => {
+    wordbank.appendChild(createWordTile(tile, 'bank'));
+  });
+
+  updateCheckBtn();
+}
+
+function createWordTile(tile, origin) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = origin === 'bank' ? 'bank-word' : 'answer-word';
+  btn.textContent = tile.text;
+  btn.dataset.tileId = tile.id;
+  if (origin === 'bank' && tile.placed) btn.classList.add('placed');
+  attachTileDrag(btn, tile.id, origin);
+  return btn;
+}
+
+/* ---- Drag & drop robusto (Pointer Events = mouse + táctil) ---- */
+let dragCtx = null;
+
+function attachTileDrag(el, id, origin) {
+  el.addEventListener('pointerdown', (e) => {
+    if (lessonState.phase !== 'input') return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    dragCtx = { id, origin, sourceEl: el, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, moved: false, ghost: null };
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  el.addEventListener('pointermove', (e) => {
+    if (!dragCtx || dragCtx.pointerId !== e.pointerId) return;
+    const dx = e.clientX - dragCtx.startX;
+    const dy = e.clientY - dragCtx.startY;
+    if (!dragCtx.moved && Math.hypot(dx, dy) > 6) startTileDrag(e);
+    if (dragCtx.moved) moveTileDrag(e);
+  });
+
+  el.addEventListener('pointerup', (e) => {
+    if (!dragCtx || dragCtx.pointerId !== e.pointerId) return;
+    endTileDrag(e);
+  });
+
+  el.addEventListener('pointercancel', (e) => {
+    if (!dragCtx || dragCtx.pointerId !== e.pointerId) return;
+    cancelTileDrag();
   });
 }
 
-function syncOrderFromDom(answerZone) {
-  const domWords = [...answerZone.querySelectorAll('.answer-word')].map(el => el.textContent);
-  const newOrder = [];
-  const pool = [...lessonState.selectedWords];
-  domWords.forEach(w => {
-    const idx = pool.findIndex(p => p.word === w);
-    if (idx !== -1) { newOrder.push(pool[idx]); pool.splice(idx, 1); }
-  });
-  lessonState.selectedWords = newOrder;
+function startTileDrag(e) {
+  dragCtx.moved = true;
+  const el = dragCtx.sourceEl;
+  const rect = el.getBoundingClientRect();
+  dragCtx.offsetX = dragCtx.startX - rect.left;
+  dragCtx.offsetY = dragCtx.startY - rect.top;
+
+  const ghost = el.cloneNode(true);
+  ghost.classList.add('word-tile-ghost');
+  ghost.style.width = rect.width + 'px';
+  ghost.style.left = rect.left + 'px';
+  ghost.style.top = rect.top + 'px';
+  document.body.appendChild(ghost);
+  dragCtx.ghost = ghost;
+
+  el.style.opacity = '0.25';
+  el.style.pointerEvents = 'none';
 }
 
-/* ---- OPCIÓN MÚLTIPLE ---- */
+function moveTileDrag(e) {
+  if (!dragCtx.ghost) return;
+  dragCtx.ghost.style.left = (e.clientX - dragCtx.offsetX) + 'px';
+  dragCtx.ghost.style.top = (e.clientY - dragCtx.offsetY) + 'px';
+
+  const answerZone = document.getElementById('answer-zone');
+  if (answerZone) {
+    const rect = answerZone.getBoundingClientRect();
+    const pad = 24;
+    const inside = e.clientX >= rect.left - pad && e.clientX <= rect.right + pad &&
+                   e.clientY >= rect.top - pad && e.clientY <= rect.bottom + pad;
+    answerZone.classList.toggle('drag-over', inside);
+  }
+}
+
+function endTileDrag(e) {
+  if (!dragCtx) return;
+  const { id, origin, sourceEl, ghost, moved } = dragCtx;
+
+  if (moved) {
+    if (ghost) ghost.remove();
+    sourceEl.style.opacity = '';
+    sourceEl.style.pointerEvents = '';
+    document.getElementById('answer-zone')?.classList.remove('drag-over');
+    commitTileDrop(id, e.clientX, e.clientY);
+  } else {
+    toggleTile(id, origin);
+  }
+  dragCtx = null;
+}
+
+function cancelTileDrag() {
+  if (!dragCtx) return;
+  if (dragCtx.ghost) dragCtx.ghost.remove();
+  if (dragCtx.sourceEl) { dragCtx.sourceEl.style.opacity = ''; dragCtx.sourceEl.style.pointerEvents = ''; }
+  document.getElementById('answer-zone')?.classList.remove('drag-over');
+  dragCtx = null;
+}
+
+function commitTileDrop(id, x, y) {
+  if (lessonState.phase !== 'input') { renderOrderZones(); return; }
+  const order = lessonState.order;
+  const overEl = document.elementFromPoint(x, y);
+  const overAnswerZone = overEl && overEl.closest('#answer-zone');
+  const overTile = overEl && overEl.closest('.answer-word');
+
+  order.answerOrder = order.answerOrder.filter(tid => tid !== id);
+
+  if (overAnswerZone) {
+    let insertIndex = order.answerOrder.length;
+    if (overTile && overTile.dataset.tileId !== id) {
+      const idx = order.answerOrder.indexOf(overTile.dataset.tileId);
+      if (idx !== -1) {
+        const rect = overTile.getBoundingClientRect();
+        insertIndex = x < rect.left + rect.width / 2 ? idx : idx + 1;
+      }
+    }
+    order.answerOrder.splice(insertIndex, 0, id);
+    tileById(id).placed = true;
+  } else {
+    tileById(id).placed = false;
+  }
+
+  renderOrderZones();
+}
+
+function toggleTile(id, origin) {
+  if (lessonState.phase !== 'input') return;
+  const order = lessonState.order;
+  const tile = tileById(id);
+  if (origin === 'bank') {
+    if (tile.placed) return;
+    tile.placed = true;
+    order.answerOrder.push(id);
+  } else {
+    tile.placed = false;
+    order.answerOrder = order.answerOrder.filter(tid => tid !== id);
+  }
+  renderOrderZones();
+}
+
+/* ================================================================
+   EJERCICIO: OPCIÓN MÚLTIPLE
+================================================================ */
 function renderChoiceExercise(q) {
-  instructionEl.textContent = q.prompt;
   const list = document.createElement('div');
   list.className = 'choice-list';
   q.options.forEach((opt, i) => {
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.className = 'choice-option';
     btn.textContent = opt;
     btn.addEventListener('click', () => {
@@ -728,7 +875,9 @@ function renderChoiceExercise(q) {
   exerciseArea.appendChild(list);
 }
 
-/* ---- COMPLETAR ESPACIO ---- */
+/* ================================================================
+   EJERCICIO: COMPLETAR ESPACIO
+================================================================ */
 function renderBlankExercise(q) {
   const sentenceWrap = document.createElement('div');
   const parts = q.sentence.split('___');
@@ -736,16 +885,19 @@ function renderBlankExercise(q) {
   sentenceWrap.innerHTML = `${parts[0]}<span class="blank-slot" id="blank-slot">?</span>${parts[1] || ''}`;
   exerciseArea.appendChild(sentenceWrap);
 
+  const slot = sentenceWrap.querySelector('#blank-slot');
   const optionsWrap = document.createElement('div');
   optionsWrap.className = 'blank-options';
-  const slot = sentenceWrap.querySelector('#blank-slot');
 
   shuffleArray(q.options).forEach(opt => {
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.className = 'bank-word';
     btn.textContent = opt;
     btn.addEventListener('click', () => {
       if (lessonState.phase !== 'input') return;
+      optionsWrap.querySelectorAll('.bank-word').forEach(o => o.classList.remove('placed', 'selected'));
+      btn.classList.add('selected');
       lessonState.filledBlank = opt;
       slot.textContent = opt;
       slot.classList.add('filled');
@@ -756,7 +908,9 @@ function renderBlankExercise(q) {
   exerciseArea.appendChild(optionsWrap);
 }
 
-/* ---- VERDADERO / FALSO ---- */
+/* ================================================================
+   EJERCICIO: VERDADERO / FALSO
+================================================================ */
 function renderBooleanExercise(q) {
   const statement = document.createElement('div');
   statement.className = 'boolean-statement';
@@ -766,13 +920,11 @@ function renderBooleanExercise(q) {
   const btnWrap = document.createElement('div');
   btnWrap.className = 'boolean-buttons';
   const trueBtn = document.createElement('button');
-  trueBtn.className = 'boolean-btn true-opt';
-  trueBtn.textContent = '✅ Verdadero';
+  trueBtn.type = 'button'; trueBtn.className = 'boolean-btn'; trueBtn.textContent = '✅ Verdadero';
   const falseBtn = document.createElement('button');
-  falseBtn.className = 'boolean-btn false-opt';
-  falseBtn.textContent = '❌ Falso';
+  falseBtn.type = 'button'; falseBtn.className = 'boolean-btn'; falseBtn.textContent = '❌ Falso';
 
-  [ [trueBtn, true], [falseBtn, false] ].forEach(([btn, val]) => {
+  [[trueBtn, true], [falseBtn, false]].forEach(([btn, val]) => {
     btn.addEventListener('click', () => {
       if (lessonState.phase !== 'input') return;
       trueBtn.classList.remove('selected');
@@ -787,10 +939,12 @@ function renderBooleanExercise(q) {
   exerciseArea.appendChild(btnWrap);
 }
 
-/* ---- VALIDACIÓN ---- */
+/* ================================================================
+   VALIDACIÓN DE RESPUESTAS
+================================================================ */
 function hasAnswerReady() {
   const q = lessonState.questions[lessonState.qIndex];
-  if (q.type === 'order') return lessonState.selectedWords.length > 0;
+  if (q.type === 'order') return lessonState.order.answerOrder.length > 0;
   if (q.type === 'choice') return lessonState.selectedChoice !== null;
   if (q.type === 'blank') return lessonState.filledBlank !== null;
   if (q.type === 'boolean') return lessonState.selectedBool !== null;
@@ -813,11 +967,11 @@ function updateCheckBtn() {
 
 function isAnswerCorrect(q) {
   if (q.type === 'order') {
-    const userAnswer = lessonState.selectedWords.map(s => s.word).join(' ');
-    return userAnswer === q.es.join(' ');
+    const userAnswer = lessonState.order.answerOrder.map(id => tileById(id).text).join(' ');
+    return normalizeText(userAnswer) === normalizeText(q.es.join(' '));
   }
   if (q.type === 'choice') return lessonState.selectedChoice === q.answer;
-  if (q.type === 'blank') return lessonState.filledBlank === q.answer;
+  if (q.type === 'blank') return normalizeText(lessonState.filledBlank || '') === normalizeText(q.answer);
   if (q.type === 'boolean') return lessonState.selectedBool === q.answer;
   return false;
 }
@@ -830,6 +984,9 @@ function correctAnswerText(q) {
   return '';
 }
 
+/* ================================================================
+   FLUJO: COMPROBAR / AVANZAR / OMITIR / TERMINAR
+================================================================ */
 function checkAnswer() {
   if (lessonState.phase === 'correct' || lessonState.phase === 'wrong') { advanceQuestion(); return; }
 
@@ -859,7 +1016,7 @@ function checkAnswer() {
   updateCheckBtn();
 
   if (lessonState.hearts <= 0) {
-    setTimeout(() => { showLoseModal(); }, 1100);
+    setTimeout(() => showLoseModal(), 1100);
   }
 }
 
@@ -893,7 +1050,7 @@ function finishLesson() {
   const mm = Math.floor(elapsedSec / 60), ss = elapsedSec % 60;
   document.getElementById('stat-xp').textContent = '+' + lessonState.totalXp;
   document.getElementById('stat-correct').textContent = `${lessonState.correctCount}/${lessonState.questions.length}`;
-  document.getElementById('stat-time').textContent = `${mm}:${ss.toString().padStart(2,'0')}`;
+  document.getElementById('stat-time').textContent = `${mm}:${ss.toString().padStart(2, '0')}`;
   document.getElementById('stat-hearts').textContent = '❤️'.repeat(lessonState.hearts) + '🤍'.repeat(MAX_HEARTS - lessonState.hearts);
   const pct = Math.round((lessonState.correctCount / lessonState.questions.length) * 100);
   document.getElementById('completion-sub').textContent = `Dominaste el ${pct}% de esta lección. ¡Increíble trabajo!`;
@@ -901,10 +1058,11 @@ function finishLesson() {
 }
 
 function closeLesson(resetState = true) {
+  cancelTileDrag();
   lessonModal.classList.remove('open');
   document.body.style.overflow = '';
   feedbackEl.className = 'lesson-feedback';
-  if (resetState) { lessonState.phase = 'input'; }
+  if (resetState) lessonState.phase = 'input';
 }
 
 function showLoseModal() {
@@ -912,6 +1070,9 @@ function showLoseModal() {
   loseModal.classList.add('open');
 }
 
+/* ================================================================
+   EVENTOS DE LA LECCIÓN (un único listener por control, sin duplicados)
+================================================================ */
 document.getElementById('lose-retry').addEventListener('click', () => {
   loseModal.classList.remove('open');
   openLesson(lessonState.themeKey);
@@ -932,10 +1093,11 @@ document.getElementById('completion-continue').addEventListener('click', () => {
 
 audioBtnEl.addEventListener('click', () => {
   const text = phraseEl.textContent;
-  if (!text) return;
+  if (!text || !window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'en-US'; utt.rate = 0.9;
+  utt.lang = 'en-US';
+  utt.rate = 0.9;
   window.speechSynthesis.speak(utt);
 });
 
@@ -945,23 +1107,11 @@ btnCheck.addEventListener('click', () => {
 });
 btnSkip.addEventListener('click', skipQuestion);
 lessonClose.addEventListener('click', () => closeLesson());
+lessonModal.addEventListener('click', (e) => { if (e.target === lessonModal) closeLesson(); });
 
-/* ----------------------------------------------------------------
-   PESTAÑAS DE NIVEL
----------------------------------------------------------------- */
-document.querySelectorAll('.level-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.level-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
-    tab.classList.add('active'); tab.setAttribute('aria-selected','true');
-    document.querySelectorAll('.level-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById(`panel-${tab.dataset.level}`)?.classList.add('active');
-  });
-});
-
-/* ----------------------------------------------------------------
-   TOAST
----------------------------------------------------------------- */
-const toastEl = document.getElementById('toast');
+/* ================================================================
+   TOAST Y XP FLOTANTE
+================================================================ */
 let toastTimer;
 function showToast(msg, type = '', ms = 2400) {
   clearTimeout(toastTimer);
@@ -970,9 +1120,6 @@ function showToast(msg, type = '', ms = 2400) {
   toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms);
 }
 
-/* ----------------------------------------------------------------
-   XP FLOAT
----------------------------------------------------------------- */
 function floatXP(xp) {
   const el = document.createElement('div');
   el.className = 'xp-float';
@@ -981,23 +1128,8 @@ function floatXP(xp) {
   setTimeout(() => el.remove(), 1000);
 }
 
-/* ----------------------------------------------------------------
-   BOOT
----------------------------------------------------------------- */
+/* ================================================================
+   ARRANQUE
+================================================================ */
+setupLevelTabs();
 buildPath();
-
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('hamburger-btn');
-  const menu = document.getElementById('nav-menu');
-  if (btn && menu) {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      menu.classList.toggle('active');
-    });
-    document.addEventListener('click', (e) => {
-      if (menu.classList.contains('active') && !menu.contains(e.target) && !btn.contains(e.target)) {
-        menu.classList.remove('active');
-      }
-    });
-  }
-});

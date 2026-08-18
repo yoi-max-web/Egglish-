@@ -249,6 +249,7 @@
 
         .btn-primary:disabled {
             cursor: not-allowed;
+            opacity: 0.7;
         }
 
         /* Footer Link */
@@ -278,7 +279,7 @@
             border-bottom-color: var(--blue-soft-strong);
         }
 
-        /* Password strength meter — versión premium */
+        /* Password strength meter */
         .password-meter {
             margin-top: 2px;
             padding: 16px 18px;
@@ -387,7 +388,7 @@
             transform: scale(1.05);
         }
 
-        /* Modo oscuro — medidor de contraseña */
+        /* Modo oscuro */
         html.dark .password-meter {
             background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
             border-color: var(--border-color);
@@ -408,78 +409,26 @@
             background-color: rgba(239, 68, 68, 0.18);
         }
 
-        /* Responsive refinements */
+        /* Responsive */
         @media (max-width: 520px) {
-            body {
-                align-items: flex-start;
-                padding: 12px;
-            }
-
-            .registration-card {
-                padding: 26px 22px;
-                margin-top: 10px;
-                max-width: 100%;
-                border-radius: 18px;
-            }
-
-            .card-header {
-                margin-bottom: 24px;
-            }
-
-            .signup-form {
-                gap: 14px;
-            }
-
-            .input-field {
-                padding: 13px 15px;
-                font-size: 15px;
-                border-radius: 12px;
-            }
-
-            .password-meter {
-                padding: 13px 14px;
-                gap: 10px;
-                border-radius: 14px;
-            }
-
-            .password-meter__bar {
-                height: 6px;
-            }
-
-            .password-meter__text {
-                font-size: 13px;
-            }
-
-            .password-meter__hint {
-                font-size: 11.5px;
-            }
-
-            .password-requirements {
-                gap: 6px;
-            }
-
-            .password-requirements li {
-                font-size: 12px;
-                gap: 7px;
-                padding: 5px 6px;
-            }
-
-            .btn-primary {
-                padding: 15px;
-                font-size: 15px;
-                border-radius: 12px;
-            }
-
-            .card-footer {
-                margin-top: 22px;
-                padding-top: 16px;
-            }
+            body { align-items: flex-start; padding: 12px; }
+            .registration-card { padding: 26px 22px; margin-top: 10px; max-width: 100%; border-radius: 18px; }
+            .card-header { margin-bottom: 24px; }
+            .signup-form { gap: 14px; }
+            .input-field { padding: 13px 15px; font-size: 15px; border-radius: 12px; }
+            .password-meter { padding: 13px 14px; gap: 10px; border-radius: 14px; }
+            .password-meter__bar { height: 6px; }
+            .password-meter__text { font-size: 13px; }
+            .password-meter__hint { font-size: 11.5px; }
+            .password-requirements { gap: 6px; }
+            .password-requirements li { font-size: 12px; gap: 7px; padding: 5px 6px; }
+            .btn-primary { padding: 15px; font-size: 15px; border-radius: 12px; }
+            .card-footer { margin-top: 22px; padding-top: 16px; }
         }
     </style>
 </head>
 <body class="dark:bg-slate-900 transition-colors relative">
 
-    <!-- Botones flotantes: cerrar (izquierda) y tema (derecha) -->
     <a href="/index.html" aria-label="Cerrar y volver al inicio"
        class="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-white text-xl font-bold hover:bg-gray-100 dark:hover:bg-slate-700 no-underline shadow-sm">
       &times;
@@ -497,22 +446,21 @@
     </button>
 
     <main class="registration-card" style="margin-top: 56px;">
-
         <header class="card-header">
             <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logito " width="46" height="46">
             <h1>Egglish</h1>
         </header>
 
-        <form class="signup-form" id="signup-form" onsubmit="event.preventDefault();" novalidate>
+        <form class="signup-form" id="signup-form" novalidate>
             <input type="text" id="reg-nombre" class="input-field" placeholder="Nombre completo" required>
             <div>
                 <input type="email" id="reg-email" class="input-field" placeholder="Correo electrónico" required>
-                <p id="email-error" class="field-error hidden">Ingresa un correo electrónico válido (debe contener @ y un dominio, ej: nombre@ejemplo.com).</p>
+                <p id="email-error" class="field-error hidden">Ingresa un correo electrónico válido.</p>
             </div>
-            <div>
-                <input type="number" id="reg-edad" class="input-field" placeholder="Edad" min="1" max="18" step="1" required>
-                <p id="edad-error" class="field-error hidden">La edad debe ser un número entero entre 1 y 18.</p>
-            </div>
+           <div>
+    <input type="number" id="reg-edad" class="input-field" placeholder="Edad" min="8" max="18" step="1" required>
+    <p id="edad-error" class="field-error hidden">La edad debe ser un número entero entre 8 y 18.</p>
+</div>
             <div class="password-field-wrapper">
                 <input id="reg-password" type="password" class="input-field" placeholder="Contraseña" required>
                 <button type="button" class="password-toggle" id="password-toggle" aria-label="Mostrar contraseña">
@@ -540,15 +488,18 @@
                 </ul>
             </div>
 
-            <button type="submit" class="btn-primary">Crear cuenta</button>
+            <!-- Agregamos un div para mostrar errores de Firebase -->
+            <div id="form-error" class="field-error hidden" style="text-align: center; font-size: 14px;"></div>
+
+            <button type="submit" class="btn-primary" id="btn-submit">Crear cuenta</button>
         </form>
 
         <footer class="card-footer">
             <a href="/entrar.html" class="login-link">Ya tengo una cuenta</a>
         </footer>
-
     </main>
 
+    <!-- Script de interfaz (Dark Mode) -->
     <script>
       (function () {
         const root = document.documentElement;
@@ -568,15 +519,27 @@
       })();
     </script>
 
-    <script>
-      (function () {
+    <!-- SCRIPT DE LÓGICA CON FIREBASE UNIFICADO -->
+    <script type="module">
+        import { registerUser } from '/Secciones/Js/auth.js';
+
         const form = document.getElementById('signup-form');
         const emailInput = document.getElementById('reg-email');
         const emailError = document.getElementById('email-error');
         const edadInput = document.getElementById('reg-edad');
         const edadError = document.getElementById('edad-error');
+        const formError = document.getElementById('form-error');
+        const btnSubmit = document.getElementById('btn-submit');
+        
+        // Elementos de la contraseña
+        const passwordInput = document.getElementById('reg-password');
+        const passwordToggle = document.getElementById('password-toggle');
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthText = document.getElementById('password-strength-text');
+        const strengthHint = document.getElementById('password-strength-hint');
+        const requirementsList = document.getElementById('password-requirements');
+        const reqItems = requirementsList.querySelectorAll('li');
 
-        // Regex de correo razonablemente estricta: usuario@dominio.tld
         const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
 
         function validarEmail() {
@@ -591,30 +554,132 @@
           const valor = edadInput.value.trim();
           const numero = Number(valor);
           const esEntero = /^\d+$/.test(valor);
-          const esValido = esEntero && numero >= 1 && numero <= 18;
+          const esValido = esEntero && numero >= 8 && numero <= 18;
           edadInput.classList.toggle('is-error', !esValido);
           edadError.classList.toggle('hidden', esValido);
           return esValido;
         }
 
+        function validarPassword() {
+          const val = passwordInput.value;
+
+          const reqs = [
+            val.length >= 8,
+            /[A-Z]/.test(val),
+            /[a-z]/.test(val),
+            /[0-9]/.test(val),
+            /[^A-Za-z0-9]/.test(val)
+          ];
+
+          let validCount = 0;
+
+          reqs.forEach((isMet, index) => {
+            const li = reqItems[index];
+            const icon = li.querySelector('.req-icon');
+            if (isMet) {
+              li.classList.add('is-valid');
+              li.classList.remove('is-invalid');
+              icon.textContent = '✓';
+              validCount++;
+            } else {
+              li.classList.remove('is-valid');
+              li.classList.add('is-invalid');
+              icon.textContent = '✖';
+            }
+          });
+
+          const percentage = (validCount / reqs.length) * 100;
+          strengthBar.style.width = percentage + '%';
+
+          if (validCount === 0) {
+            strengthBar.style.backgroundColor = '#ef4444';
+            strengthText.textContent = 'Muy débil';
+            strengthText.style.color = '#ef4444';
+            strengthHint.textContent = 'Completa los requisitos para continuar.';
+          } else if (validCount <= 2) {
+            strengthBar.style.backgroundColor = '#f97316';
+            strengthText.textContent = 'Débil';
+            strengthText.style.color = '#f97316';
+            strengthHint.textContent = 'Aún te faltan varios requisitos.';
+          } else if (validCount <= 4) {
+            strengthBar.style.backgroundColor = '#eab308';
+            strengthText.textContent = 'Media';
+            strengthText.style.color = '#eab308';
+            strengthHint.textContent = '¡Vas por buen camino!';
+          } else {
+            strengthBar.style.backgroundColor = '#16a34a';
+            strengthText.textContent = 'Fuerte';
+            strengthText.style.color = '#16a34a';
+            strengthHint.textContent = '¡Contraseña segura!';
+          }
+
+          return validCount === reqs.length;
+        }
+
+        // Toggle Password
+        passwordToggle.addEventListener('click', function () {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+        });
+
+        // Eventos
         emailInput.addEventListener('input', validarEmail);
         emailInput.addEventListener('blur', validarEmail);
         edadInput.addEventListener('input', validarEdad);
         edadInput.addEventListener('blur', validarEdad);
+        passwordInput.addEventListener('input', validarPassword);
 
-        form.addEventListener('submit', function (e) {
+        // ==== ENVÍO DEL FORMULARIO Y CONEXIÓN CON FIREBASE ====
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          formError.classList.add('hidden'); // Ocultar errores previos
+          
           const emailOk = validarEmail();
           const edadOk = validarEdad();
-          if (!emailOk || !edadOk) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
+          const passwordOk = validarPassword();
+          
+          if (!emailOk || !edadOk || !passwordOk) {
             if (!emailOk) emailInput.focus();
             else if (!edadOk) edadInput.focus();
+            else if (!passwordOk) passwordInput.focus();
+            return; 
           }
-        }, true);
-      })();
-    </script>
+          
+          // Extraer los datos del formulario
+          const name = document.getElementById('reg-nombre').value.trim();
+          const email = emailInput.value.trim();
+          const age = Number(edadInput.value.trim());
+          const password = passwordInput.value;
 
-  <script type="module" src="/Secciones/Js/registro-logic.js"></script>
+          // Estado de carga (Loading)
+          const originalText = btnSubmit.textContent;
+          btnSubmit.textContent = 'Creando cuenta...';
+          btnSubmit.disabled = true;
+
+          try {
+            // Llamar a tu función en auth.js que guarda en Firebase
+            const result = await registerUser({ name, email, age, password });
+
+            if (result.ok) {
+              // Si fue exitoso, Firebase ya inició sesión. Ahora SÍ redirigimos.
+              window.location.href = 'perfil.html';
+            } else {
+              // Si Firebase devuelve un error (ej. correo duplicado)
+              formError.textContent = result.error;
+              formError.classList.remove('hidden');
+              
+              // Restaurar botón
+              btnSubmit.textContent = originalText;
+              btnSubmit.disabled = false;
+            }
+          } catch (error) {
+             console.error("Error inesperado en el registro", error);
+             formError.textContent = "Error inesperado. Inténtalo de nuevo.";
+             formError.classList.remove('hidden');
+             btnSubmit.textContent = originalText;
+             btnSubmit.disabled = false;
+          }
+        });
+    </script>
 </body>
 </html>

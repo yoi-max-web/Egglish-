@@ -68,7 +68,12 @@
           color: #ffffff !important;
       }
       .dark .guide-card,
-      .dark .completion-card {
+      .dark .completion-card,
+      .dark .lose-card {
+          background-color: #1f2937 !important;
+          color: #ffffff !important;
+      }
+      .dark .toast {
           background-color: #1f2937 !important;
           color: #ffffff !important;
       }
@@ -223,9 +228,42 @@
     <div class="completion-card">
       <div class="completion-chick">🐣</div>
       <div class="completion-title">¡Lección Completada!</div>
-      <div class="completion-sub" id="completion-sub">Has dominado esta lección</div>
+      <div class="completion-sub" id="completion-sub">Has dominado esta lección. ¡Increíble trabajo!</div>
+      <div class="completion-stats">
+        <div class="stat-box">
+          <div class="stat-value" id="stat-xp">+0</div>
+          <div class="stat-label">XP ganado</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-correct">0/10</div>
+          <div class="stat-label">Aciertos</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-time">0:00</div>
+          <div class="stat-label">Tiempo</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-hearts">❤️❤️❤️</div>
+          <div class="stat-label">Vidas</div>
+        </div>
+      </div>
+      <button class="completion-btn" id="completion-continue">¡CONTINUAR!</button>
     </div>
   </div>
+
+  <!-- LOSE MODAL (sin corazones) -->
+  <div class="lose-modal" id="lose-modal">
+    <div class="lose-card">
+      <div class="lose-chick">🥚</div>
+      <div class="lose-title">¡Sin vidas!</div>
+      <div class="lose-sub">Te quedaste sin corazones. No te preocupes, puedes reiniciar esta lección e intentarlo de nuevo.</div>
+      <button class="lose-btn" id="lose-retry">🔄 INTENTAR DE NUEVO</button>
+      <button class="lose-btn-secondary" id="lose-exit">Salir de la lección</button>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
 
   <!-- FOOTER -->
   <footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900 mt-10">
