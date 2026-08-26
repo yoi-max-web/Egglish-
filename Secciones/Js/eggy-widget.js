@@ -13,7 +13,7 @@
 
 "use strict";
 
-import { preguntarGemini } from '/gemini.js';
+import { preguntarGemini } from '/Secciones/Js/gemini.js';
 
 /* ============================================================
    ESTILOS
