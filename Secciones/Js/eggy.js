@@ -8,6 +8,8 @@
 
 "use strict";
 
+import { preguntarGemini } from "/Secciones/Js/gemini.js";
+
 /* ============================================================
    IMPORTACIONES
    ─────────────────────────────────────────────────────────────
