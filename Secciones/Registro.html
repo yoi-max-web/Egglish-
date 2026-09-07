@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Egglish - Crear Cuenta</title>
+
+    <!-- Import Nunito Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (solo para botones de tema y cerrar) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+    </script>
+    <script>
+      if (localStorage.getItem('egglish-theme') === 'dark' ||
+          (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+
+    <style>
+        :root {
+            /* Paleta original — sin cambios */
+            --blue: #1cb0f6;
+            --blue-shadow: #0090d9;
+            --border-color: #e5e7eb;
+            --text-main: #374151;
+            --text-placeholder: #9ca3af;
+            --bg-page: #f0f4f8;
+            --bg-card: #ffffff;
+            --bg-input: #f9fafb;
+
+            /* Tokens auxiliares — solo para elevación/espaciado, no alteran la identidad de color */
+            --blue-soft: rgba(28, 176, 246, 0.14);
+            --blue-soft-strong: rgba(28, 176, 246, 0.22);
+            --success: #16a34a;
+            --success-soft: rgba(22, 163, 74, 0.1);
+            --danger: #ef4444;
+            --danger-soft: rgba(239, 68, 68, 0.08);
+            --shadow-card: 0 24px 48px -16px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
+            --shadow-input-focus: 0 0 0 4px var(--blue-soft);
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        html.dark {
+            --border-color: #334155;
+            --text-main: #f1f5f9;
+            --text-placeholder: #94a3b8;
+            --bg-page: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #0f172a;
+        }
+
+        html.dark body {
+            background-image: none;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            background-image: radial-gradient(circle at 15% 8%, rgba(28, 176, 246, 0.06), transparent 45%),
+                               radial-gradient(circle at 85% 92%, rgba(28, 176, 246, 0.05), transparent 45%);
+            font-family: 'Nunito', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Main Container */
+        .registration-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
+            padding: 28px 28px 20px; /* reducido para caber mejor en pantallas pequeñas */
+            width: min(100%, 560px);
+            max-width: 560px;
+            box-shadow: var(--shadow-card);
+        }
+
+        /* Branding Header */
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 0;
+            margin-bottom: 36px;
+            width: 100%;
+        }
+
+        .logo-placeholder {
+            width: 48px;
+            height: 48px;
+        }
+
+        .card-header img {
+            width: 46px;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 4px 10px rgba(28, 176, 246, 0.22));
+        }
+
+        .card-header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        /* Form Layout */
+        .signup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* Input Fields */
+        .input-field {
+            width: 100%;
+            padding: 15px 18px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            background-color: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: 14px;
+            outline: none;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
+            transition: border-color 0.2s var(--ease), background-color 0.2s var(--ease),
+                        box-shadow 0.2s var(--ease), transform 0.15s var(--ease);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-placeholder);
+            font-weight: 400;
+        }
+
+        .input-field:hover {
+            border-color: #d1d5db;
+        }
+
+        .input-field:focus {
+            border-color: var(--blue);
+            background-color: var(--bg-card);
+            box-shadow: var(--shadow-input-focus);
+        }
+
+        .input-field.is-error {
+            border-color: var(--danger);
+        }
+
+        .field-error {
+            margin-top: 6px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--danger);
+        }
+
+        .field-error.hidden {
+            display: none;
+        }
+
+        .password-field-wrapper {
+            position: relative;
+            display: block;
+        }
+
+        .password-field-wrapper .input-field {
+            padding-right: 52px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            color: #6b7280;
+            transition: background-color 0.2s var(--ease), transform 0.15s var(--ease);
+        }
+
+        .password-toggle:hover {
+            background-color: #f3f4f6;
+        }
+
+        .password-toggle:active {
+            transform: translateY(-50%) scale(0.92);
+        }
+
+        .password-toggle svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+
+        /* Fat 3D Button */
+        .btn-primary {
+            width: 100%;
+            padding: 17px;
+            margin-top: 6px;
+            background-color: var(--blue);
+            color: #ffffff;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 var(--blue-shadow);
+            transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease),
+                        opacity 0.2s var(--ease), filter 0.2s var(--ease);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            filter: brightness(1.04);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 0 var(--blue-shadow);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            box-shadow: 0 0 0 transparent;
+            transform: translateY(2px);
+        }
+
+        .btn-primary:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Footer Link */
+        .card-footer {
+            margin-top: 28px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #f0f2f5;
+        }
+
+        .login-link {
+            display: inline-block;
+            color: var(--blue);
+            font-size: 15px;
+            font-weight: 800;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: transparent;
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+        }
+
+        .login-link:hover {
+            color: var(--blue-shadow);
+            border-bottom-color: var(--blue-soft-strong);
+        }
+
+        /* Password strength meter */
+        .password-meter {
+            margin-top: 2px;
+            padding: 16px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background: linear-gradient(180deg, #fbfcfd 0%, var(--bg-input) 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.25s var(--ease);
+        }
+
+        .password-meter__bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .password-meter__bar span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            transition: width 0.35s var(--ease), background-color 0.35s var(--ease);
+            background-color: #ef4444;
+        }
+
+        .password-meter__meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .password-meter__text {
+            font-size: 14px;
+            font-weight: 800;
+            color: #ef4444;
+            transition: color 0.25s var(--ease);
+        }
+
+        .password-meter__hint {
+            font-size: 12.5px;
+            color: #6b7280;
+            line-height: 1.4;
+            transition: color 0.25s var(--ease);
+        }
+
+        .password-requirements {
+            list-style: none;
+            display: grid;
+            gap: 8px;
+            margin: 4px 0 0;
+            padding: 0;
+        }
+
+        .password-requirements li {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #6b7280;
+            padding: 6px 8px;
+            border-radius: 9px;
+            transition: color 0.25s var(--ease), background-color 0.25s var(--ease);
+        }
+
+        @media (min-width: 520px) {
+            .password-requirements {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .password-requirements li.is-valid {
+            color: var(--success);
+            background-color: var(--success-soft);
+        }
+
+        .password-requirements li.is-invalid {
+            color: #6b7280;
+            background-color: transparent;
+        }
+
+        .req-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800;
+            background-color: var(--danger-soft);
+            color: var(--danger);
+            transition: background-color 0.25s var(--ease), color 0.25s var(--ease), transform 0.25s var(--ease);
+        }
+
+        .password-requirements li.is-valid .req-icon {
+            background-color: rgba(22, 163, 74, 0.16);
+            color: var(--success);
+            transform: scale(1.05);
+        }
+
+        /* Modo oscuro */
+        html.dark .password-meter {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-color: var(--border-color);
+        }
+        html.dark .password-meter__bar {
+            background: #334155;
+        }
+        html.dark .password-meter__hint {
+            color: #cbd5e1;
+        }
+        html.dark .password-requirements li {
+            color: #e2e8f0;
+        }
+        html.dark .password-requirements li.is-invalid {
+            color: #cbd5e1;
+        }
+        html.dark .req-icon {
+            background-color: rgba(239, 68, 68, 0.18);
+        }
+
+        /* Responsive */
+        @media (max-width: 520px) {
+            body { align-items: flex-start; padding: 12px; }
+            .registration-card { padding: 26px 22px; margin-top: 10px; max-width: 100%; border-radius: 18px; }
+            .card-header { margin-bottom: 24px; }
+            .signup-form { gap: 14px; }
+            .input-field { padding: 13px 15px; font-size: 15px; border-radius: 12px; }
+            .password-meter { padding: 13px 14px; gap: 10px; border-radius: 14px; }
+            .password-meter__bar { height: 6px; }
+            .password-meter__text { font-size: 13px; }
+            .password-meter__hint { font-size: 11.5px; }
+            .password-requirements { gap: 6px; }
+            .password-requirements li { font-size: 12px; gap: 7px; padding: 5px 6px; }
+            .btn-primary { padding: 15px; font-size: 15px; border-radius: 12px; }
+            .card-footer { margin-top: 22px; padding-top: 16px; }
+        }
+    </style>
+</head>
+<body class="dark:bg-slate-900 transition-colors relative">
+
+    <a href="/index.html" aria-label="Cerrar y volver al inicio"
+       class="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-white text-xl font-bold hover:bg-gray-100 dark:hover:bg-slate-700 no-underline shadow-sm">
+      &times;
+    </a>
+
+    <button id="dark-mode-toggle" type="button" aria-label="Cambiar modo oscuro" aria-pressed="false"
+       class="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700 shadow-sm">
+      <svg id="dark-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700 dark:text-white">
+        <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+        <g id="icon-sun" class="hidden">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+        </g>
+      </svg>
+    </button>
+
+    <main class="registration-card" style="margin-top: 56px;">
+        <header class="card-header">
+            <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logito " width="46" height="46">
+            <h1>Egglish</h1>
+        </header>
+
+        <form class="signup-form" id="signup-form" novalidate>
+            <input type="text" id="reg-nombre" class="input-field" placeholder="Nombre completo" required>
+            <div>
+                <input type="email" id="reg-email" class="input-field" placeholder="Correo electrónico" required>
+                <p id="email-error" class="field-error hidden">Ingresa un correo electrónico válido.</p>
+            </div>
+           <div>
+    <input type="number" id="reg-edad" class="input-field" placeholder="Edad" min="8" max="18" step="1" required>
+    <p id="edad-error" class="field-error hidden">La edad debe ser un número entero entre 8 y 18.</p>
+</div>
+            <div class="password-field-wrapper">
+                <input id="reg-password" type="password" class="input-field" placeholder="Contraseña" required>
+                <button type="button" class="password-toggle" id="password-toggle" aria-label="Mostrar contraseña">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="password-meter" aria-live="polite">
+                <div class="password-meter__bar" aria-hidden="true">
+                    <span id="password-strength-bar"></span>
+                </div>
+                <div class="password-meter__meta">
+                    <span class="password-meter__text" id="password-strength-text">Muy débil</span>
+                    <span class="password-meter__hint" id="password-strength-hint">Completa los requisitos para continuar.</span>
+                </div>
+                <ul class="password-requirements" id="password-requirements">
+                    <li><span class="req-icon">✖</span><span>Mínimo 8 caracteres</span></li>
+                    <li><span class="req-icon">✖</span><span>Al menos una letra mayúscula</span></li>
+                    <li><span class="req-icon">✖</span><span>Al menos una letra minúscula</span></li>
+                    <li><span class="req-icon">✖</span><span>Al menos un número</span></li>
+                    <li><span class="req-icon">✖</span><span>Al menos un símbolo o carácter especial</span></li>
+                </ul>
+            </div>
+
+            <!-- Agregamos un div para mostrar errores de Firebase -->
+            <div id="form-error" class="field-error hidden" style="text-align: center; font-size: 14px;"></div>
+
+            <button type="submit" class="btn-primary" id="btn-submit">Crear cuenta</button>
+        </form>
+
+        <footer class="card-footer">
+            <a href="/entrar.html" class="login-link">Ya tengo una cuenta</a>
+        </footer>
+    </main>
+
+    <!-- Script de interfaz (Dark Mode) -->
+    <script>
+      (function () {
+        const root = document.documentElement;
+        const darkToggle = document.getElementById('dark-mode-toggle');
+        function syncDarkModeUI() {
+          const isDark = root.classList.contains('dark');
+          document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+          document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+          darkToggle.setAttribute('aria-pressed', String(isDark));
+        }
+        darkToggle.addEventListener('click', () => {
+          root.classList.toggle('dark');
+          localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
+          syncDarkModeUI();
+        });
+        syncDarkModeUI();
+      })();
+    </script>
+
+    <!-- SCRIPT DE LÓGICA CON FIREBASE UNIFICADO -->
+    <script type="module">
+        import { registerUser } from '/Secciones/Js/auth.js';
+
+        const form = document.getElementById('signup-form');
+        const emailInput = document.getElementById('reg-email');
+        const emailError = document.getElementById('email-error');
+        const edadInput = document.getElementById('reg-edad');
+        const edadError = document.getElementById('edad-error');
+        const formError = document.getElementById('form-error');
+        const btnSubmit = document.getElementById('btn-submit');
+        
+        // Elementos de la contraseña
+        const passwordInput = document.getElementById('reg-password');
+        const passwordToggle = document.getElementById('password-toggle');
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthText = document.getElementById('password-strength-text');
+        const strengthHint = document.getElementById('password-strength-hint');
+        const requirementsList = document.getElementById('password-requirements');
+        const reqItems = requirementsList.querySelectorAll('li');
+
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+        function validarEmail() {
+          const valor = emailInput.value.trim();
+          const esValido = EMAIL_REGEX.test(valor);
+          emailInput.classList.toggle('is-error', !esValido);
+          emailError.classList.toggle('hidden', esValido);
+          return esValido;
+        }
+
+        function validarEdad() {
+          const valor = edadInput.value.trim();
+          const numero = Number(valor);
+          const esEntero = /^\d+$/.test(valor);
+          const esValido = esEntero && numero >= 8 && numero <= 18;
+          edadInput.classList.toggle('is-error', !esValido);
+          edadError.classList.toggle('hidden', esValido);
+          return esValido;
+        }
+
+        function validarPassword() {
+          const val = passwordInput.value;
+
+          const reqs = [
+            val.length >= 8,
+            /[A-Z]/.test(val),
+            /[a-z]/.test(val),
+            /[0-9]/.test(val),
+            /[^A-Za-z0-9]/.test(val)
+          ];
+
+          let validCount = 0;
+
+          reqs.forEach((isMet, index) => {
+            const li = reqItems[index];
+            const icon = li.querySelector('.req-icon');
+            if (isMet) {
+              li.classList.add('is-valid');
+              li.classList.remove('is-invalid');
+              icon.textContent = '✓';
+              validCount++;
+            } else {
+              li.classList.remove('is-valid');
+              li.classList.add('is-invalid');
+              icon.textContent = '✖';
+            }
+          });
+
+          const percentage = (validCount / reqs.length) * 100;
+          strengthBar.style.width = percentage + '%';
+
+          if (validCount === 0) {
+            strengthBar.style.backgroundColor = '#ef4444';
+            strengthText.textContent = 'Muy débil';
+            strengthText.style.color = '#ef4444';
+            strengthHint.textContent = 'Completa los requisitos para continuar.';
+          } else if (validCount <= 2) {
+            strengthBar.style.backgroundColor = '#f97316';
+            strengthText.textContent = 'Débil';
+            strengthText.style.color = '#f97316';
+            strengthHint.textContent = 'Aún te faltan varios requisitos.';
+          } else if (validCount <= 4) {
+            strengthBar.style.backgroundColor = '#eab308';
+            strengthText.textContent = 'Media';
+            strengthText.style.color = '#eab308';
+            strengthHint.textContent = '¡Vas por buen camino!';
+          } else {
+            strengthBar.style.backgroundColor = '#16a34a';
+            strengthText.textContent = 'Fuerte';
+            strengthText.style.color = '#16a34a';
+            strengthHint.textContent = '¡Contraseña segura!';
+          }
+
+          return validCount === reqs.length;
+        }
+
+        // Toggle Password
+        passwordToggle.addEventListener('click', function () {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+        });
+
+        // Eventos
+        emailInput.addEventListener('input', validarEmail);
+        emailInput.addEventListener('blur', validarEmail);
+        edadInput.addEventListener('input', validarEdad);
+        edadInput.addEventListener('blur', validarEdad);
+        passwordInput.addEventListener('input', validarPassword);
+
+        // ==== ENVÍO DEL FORMULARIO Y CONEXIÓN CON FIREBASE ====
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          formError.classList.add('hidden'); // Ocultar errores previos
+          
+          const emailOk = validarEmail();
+          const edadOk = validarEdad();
+          const passwordOk = validarPassword();
+          
+          if (!emailOk || !edadOk || !passwordOk) {
+            if (!emailOk) emailInput.focus();
+            else if (!edadOk) edadInput.focus();
+            else if (!passwordOk) passwordInput.focus();
+            return; 
+          }
+          
+          // Extraer los datos del formulario
+          const name = document.getElementById('reg-nombre').value.trim();
+          const email = emailInput.value.trim();
+          const age = Number(edadInput.value.trim());
+          const password = passwordInput.value;
+
+          // Estado de carga (Loading)
+          const originalText = btnSubmit.textContent;
+          btnSubmit.textContent = 'Creando cuenta...';
+          btnSubmit.disabled = true;
+
+          try {
+            // Llamar a tu función en auth.js que guarda en Firebase
+            const result = await registerUser({ name, email, age, password });
+
+            if (result.ok) {
+              // Si fue exitoso, Firebase ya inició sesión. Ahora SÍ redirigimos.
+              window.location.href = 'perfil.html';
+            } else {
+              // Si Firebase devuelve un error (ej. correo duplicado)
+              formError.textContent = result.error;
+              formError.classList.remove('hidden');
+              
+              // Restaurar botón
+              btnSubmit.textContent = originalText;
+              btnSubmit.disabled = false;
+            }
+          } catch (error) {
+             console.error("Error inesperado en el registro", error);
+             formError.textContent = "Error inesperado. Inténtalo de nuevo.";
+             formError.classList.remove('hidden');
+             btnSubmit.textContent = originalText;
+             btnSubmit.disabled = false;
+          }
+        });
+    </script>
+</body>
+</html>

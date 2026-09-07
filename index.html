@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Egglish – Inicio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            'egg-blue': '#1cb0f6',
+            'egg-blue-d': '#0090d9',
+            'egg-yellow': '#f5a623',
+            'egg-yellow-d': '#d48800',
+            'egg-green': '#58cc02',
+            'egg-green-d': '#46a302',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    /*
+      Notas de migración:
+      - Las utilidades de Tailwind cubren layout, color, tipografía y espaciado.
+      - Se conservan solo las reglas que Tailwind no resuelve limpiamente por
+        defecto: la animación del pollito del hero y las "sombras duras"
+        (box-shadow sólido, estilo "botón físico") que dan el efecto 3D.
+      - shadow-hard-* se usa en vez de shadow-lg/shadow-xl porque Tailwind no
+        trae por defecto una sombra sólida sin blur; el blur diluiría el
+        estilo "botón físico" del diseño original.
+    */
+    @keyframes bounce-chick {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .animate-bounce-chick {
+      animation: bounce-chick 2s infinite ease-in-out;
+    }
+    .shadow-hard-yellow { box-shadow: 0 4px 0 #d48800; }
+    .shadow-hard-blue   { box-shadow: 0 12px 0 #0090d9; }
+    .shadow-hard-soft   { box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+    .shadow-hard-node   { box-shadow: 0 8px 0 rgba(0,0,0,0.05); }
+    .bg-cta-dots {
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 25%),
+        radial-gradient(circle at 85% 30%, rgba(255,255,255,.12) 0%, rgba(255,255,255,0) 35%),
+        radial-gradient(circle at 35% 85%, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 30%),
+        radial-gradient(circle at 75% 75%, rgba(255,255,255,.1) 0%, rgba(255,255,255,0) 20%);
+    }
+    html, body, header, nav, section, footer, div, a, button {
+      transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+    }
+  </style>
+  <script>
+    /* Aplica el modo oscuro ANTES de pintar la página para evitar parpadeo */
+    if (localStorage.getItem('egglish-theme') === 'dark' ||
+        (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+</head>
+<body class="min-h-screen flex flex-col bg-[#f0f4f8] dark:bg-gray-950 text-[#1a1a2e] dark:text-gray-100 font-sans pt-[68px]">
+
+  <!--
+    ============================================================
+    HEADER / NAV
+    ============================================================
+    Simplificado a pedido: solo logo + botón "Empieza ahora" +
+    interruptor de modo oscuro. Se retiraron los links de navegación
+    (Inicio/Lecciones/Escucha/Juegos/Perfil), Entrar y Registrarse,
+    y el menú móvil (ya no hace falta, no hay nada que colapsar).
+
+    NOTA: el import de guards.js al final del documento dependía de
+    #nav-menu / #mobile-btn para su lógica de sesión/rutas. Al quitar
+    esos elementos se removió también ese import para no romper la
+    página con errores de consola; si necesitas esa protección de
+    rutas, dime y la reintegro apuntando al nuevo botón.
+  -->
+  <header>
+    <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
+      <a href="/index.html" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
+        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+        <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
+      </a>
+
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <button
+          id="dark-mode-toggle"
+          type="button"
+          aria-label="Cambiar modo oscuro"
+          aria-pressed="false"
+          class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
+        >
+          <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
+            <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+            <g id="icon-sun" class="hidden">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            </g>
+          </svg>
+        </button>
+
+      </div>
+    </nav>
+  </header>
+
+  <main class="flex-1">
+
+    <!--
+      ============================================================
+      HERO SECTION — layout de 2 columnas pedido
+      ============================================================
+      - min-h-screen: ocupa el viewport completo bajo el navbar.
+      - flex-col en móvil (apilado) -> md:flex-row (2 columnas) en tablet+.
+      - Columna izquierda: imagen del pollito, centrada, protagonista en desktop.
+      - Columna derecha: texto + botones, centrados verticalmente.
+    -->
+    <section class="min-h-screen w-full flex flex-col md:flex-row items-center bg-white dark:bg-gray-950">
+
+      <!-- Columna Izquierda: Pollito (único protagonista, mascotas adicionales removidas a pedido) -->
+      <div class="w-full md:w-1/2 min-h-[45vh] md:min-h-screen flex items-center justify-center bg-egg-blue dark:bg-blue-950 px-4 md:px-12 py-12 md:py-0 order-1">
+        <div class="relative w-72 h-72 sm:w-96 sm:h-96 md:w-[26rem] md:h-[26rem] lg:w-[30rem] lg:h-[30rem] flex items-center justify-center">
+
+          <!-- Pollito: único protagonista de la columna, se quitaron las mascotas adicionales -->
+          <img
+            src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png"
+            alt="Pollito de Egglish"
+            class="relative z-10 animate-bounce-chick w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
+          />
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Contenido -->
+      <div class="w-full md:w-1/2 flex flex-col justify-center px-4 md:px-12 py-12 md:py-0 order-2 max-w-screen-md mx-auto md:mx-0 text-center md:text-left bg-white dark:bg-gray-950">
+        <h1 class="animate__animated animate__pulse animate__infinite text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-[#1a1a2e] dark:text-white">
+          Domina el inglés jugando
+        </h1>
+        <p class="text-lg md:text-xl font-semibold text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto md:mx-0">
+          La forma más rápida, divertida y efectiva de aprender.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center md:items-start gap-4">
+          <a
+            href="/entrar.html"
+            class="w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-white bg-egg-green hover:bg-egg-green-d transition-colors shadow-hard-soft"
+          >
+            Empezar a Jugar 
+          </a>
+          <a
+            href="/Secciones/Registro.html"
+            class="w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-egg-blue border-2 border-egg-blue hover:bg-blue-50 transition-colors"
+          >
+            Crear cuenta gratis
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!--
+      ============================================================
+      FEATURES
+      ============================================================
+    -->
+    <section class="px-4 md:px-12 py-20 max-w-screen-xl mx-auto text-center bg-white dark:bg-gray-950">
+      <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">¿Por qué elegir Egglish?</h2>
+      <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold mb-12">Diseñado para que aprendas sin darte cuenta.</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10 flex flex-col items-center">
+          <div class="w-[70px] h-[70px] rounded-2xl flex items-center justify-center mb-5 bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-200 dark:border-yellow-800 text-3xl">🥚</div>
+          <h3 class="text-xl font-extrabold mb-3 text-[#1a1a2e] dark:text-white">Lecciones Cortas</h3>
+          <p class="text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Aprende jugando con lecciones divertidas que duran menos de 10 minutos.</p>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10 flex flex-col items-center">
+          <div class="w-[70px] h-[70px] rounded-2xl flex items-center justify-center mb-5 bg-orange-50 dark:bg-orange-900/30 border-2 border-orange-200 dark:border-orange-800 text-3xl">⚡</div>
+          <h3 class="text-xl font-extrabold mb-3 text-[#1a1a2e] dark:text-white">Práctica Diaria</h3>
+          <p class="text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Mantén a tu pollito feliz practicando vocabulario todos los días.</p>
+        </div>
+        <div class="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-10 flex flex-col items-center">
+          <div class="w-[70px] h-[70px] rounded-2xl flex items-center justify-center mb-5 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800 text-3xl">🎯</div>
+          <h3 class="text-xl font-extrabold mb-3 text-[#1a1a2e] dark:text-white">Logros y Metas</h3>
+          <p class="text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Gana plumas doradas, sube de nivel y desbloquea accesorios.</p>
+        </div>
+      </div>
+    </section>
+
+    <!--
+      ============================================================
+      CAMINO / PATH
+      ============================================================
+    -->
+    <section class="bg-gray-50 dark:bg-gray-900 px-4 md:px-12 py-20 border-t border-gray-200 dark:border-gray-800">
+      <div class="max-w-screen-xl mx-auto text-center mb-14">
+        <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">Tu camino hacia la fluidez</h2>
+        <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold">Mira cómo tu pollito crece con cada paso.</p>
+      </div>
+
+      <div class="relative max-w-screen-md mx-auto flex flex-col items-center gap-16">
+
+        <div class="absolute left-1/2 md:left-[60px] top-[60px] bottom-[60px] w-1 -translate-x-1/2 md:translate-x-0 bg-gradient-to-b from-orange-200 via-orange-300 to-blue-300 dark:from-orange-800 dark:via-orange-700 dark:to-blue-800 rounded-full -z-10"></div>
+
+        <div class="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-10 text-center md:text-left">
+          <div class="relative z-10 w-[120px] h-[120px] bg-white dark:bg-gray-950 rounded-[30px] flex items-center justify-center shadow-hard-node border-4 border-orange-200 dark:border-orange-800 shrink-0">
+            <img src="https://em-content.zobj.net/source/twitter/376/egg_1f95a.png" alt="Huevo" class="w-[70px] h-[70px] object-contain">
+          </div>
+          <div class="flex-1 max-w-sm">
+            <h3 class="text-2xl font-black mb-2 text-[#1a1a2e] dark:text-white">1. El Cascarón</h3>
+            <p class="text-gray-500 dark:text-gray-400 font-semibold leading-snug">Empieza con lo básico: saludos, colores y números mientras tu huevo se prepara.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-10 text-center md:text-left">
+          <div class="relative z-10 w-[120px] h-[120px] bg-white dark:bg-gray-950 rounded-[30px] flex items-center justify-center shadow-hard-node border-4 border-orange-300 dark:border-orange-700 shrink-0">
+            <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Pollito saliendo" class="w-[70px] h-[70px] object-contain">
+          </div>
+          <div class="flex-1 max-w-sm">
+            <h3 class="text-2xl font-black mb-2 text-[#1a1a2e] dark:text-white">2. Primeros Pasos</h3>
+            <p class="text-gray-500 dark:text-gray-400 font-semibold leading-snug">Construye oraciones simples y gana confianza para presentarte al mundo.</p>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-10 text-center md:text-left">
+          <div class="relative z-10 w-[120px] h-[120px] bg-white dark:bg-gray-950 rounded-[30px] flex items-center justify-center shadow-hard-node border-4 border-blue-200 dark:border-blue-800 shrink-0">
+            <img src="/imgs/Bigger-removebg-preview.png" alt="Pollito" class="w-[70px] h-[70px] object-contain">
+          </div>
+          <div class="flex-1 max-w-sm">
+            <h3 class="text-2xl font-black mb-2 text-[#1a1a2e] dark:text-white">3. Volando Alto</h3>
+            <p class="text-gray-500 dark:text-gray-400 font-semibold leading-snug">Mantén conversaciones complejas. ¡Tu pollito ahora es un águila del idioma!</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!--
+      ============================================================
+      CTA FINAL
+      ============================================================
+    -->
+    <section class="px-4 md:px-12 py-16 flex justify-center">
+      <div class="bg-cta-dots relative bg-egg-blue rounded-[32px] px-6 md:px-10 py-16 text-center w-full max-w-screen-md shadow-hard-blue overflow-hidden">
+        <img src="/imgs/Bigger-removebg-preview.png" alt="Pollito" class="w-[110px] h-auto mx-auto mb-4 drop-shadow-lg">
+        <h2 class="text-3xl md:text-5xl font-black text-white mb-4">¿Qué esperas?</h2>
+        <p class="text-lg font-bold text-white/90 mb-9">Únete a miles de estudiantes y haz del inglés tu momento favorito del día.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!--
+    ============================================================
+    FOOTER
+    ============================================================
+  -->
+  <footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
+    <div class="max-w-screen-xl mx-auto">
+
+      <!-- Grid de columnas simplificado (3 columnas), paleta azul/amarillo de Egglish -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10 mb-14 text-left">
+
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Sobre nosotros</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="soporte.html#mision" class="text-sm font-bold text-white/90 hover:text-white no-underline">Misión</a></li>
+            <li><a href="soporte.html#metodo" class="text-sm font-bold text-white/90 hover:text-white no-underline">Método de enseñanza</a></li>
+            <li><a href="soporte.html#creadores" class="text-sm font-bold text-white/90 hover:text-white no-underline">Creadores</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Ayuda y soporte</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="soporte.html#ayuda" class="text-sm font-bold text-white/90 hover:text-white no-underline">Centro de ayuda</a></li>
+            <li><a href="soporte.html#contacto" class="text-sm font-bold text-white/90 hover:text-white no-underline">Contáctanos</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Términos y privacidad</h4>
+          <ul class="flex flex-col gap-2.5 mb-6">
+            <li><a href="soporte.html#terminos" class="text-sm font-bold text-white/90 hover:text-white no-underline">Términos</a></li>
+            <li><a href="soporte.html#terminos" class="text-sm font-bold text-white/90 hover:text-white no-underline">Privacidad</a></li>
+          </ul>
+          <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Social</h4>
+          <ul class="flex flex-col gap-2.5">
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li>
+            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Fila inferior: logo + copyright, separada por línea -->
+      <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+        <div class="flex items-center gap-2.5">
+          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/>
+          <span class="font-black text-lg text-white">Egglish</span>
+        </div>
+        <p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!--
+    ============================================================
+    MODO OSCURO
+    ============================================================
+    Guarda la preferencia en localStorage y actualiza el ícono/aria-pressed
+    del botón. El bloque <script> en el <head> ya aplica la clase 'dark'
+    apenas carga la página para que no haya parpadeo de tema.
+  -->
+  <script>
+    const darkToggle = document.getElementById('dark-mode-toggle');
+    const darkIcon = document.getElementById('dark-mode-icon');
+    const root = document.documentElement;
+
+    function syncDarkModeUI() {
+      const isDark = root.classList.contains('dark');
+      const moon = document.getElementById('icon-moon');
+      const sun = document.getElementById('icon-sun');
+      moon.classList.toggle('hidden', isDark);
+      sun.classList.toggle('hidden', !isDark);
+      darkToggle.setAttribute('aria-pressed', String(isDark));
+    }
+
+    darkToggle.addEventListener('click', () => {
+      root.classList.toggle('dark');
+      localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
+      syncDarkModeUI();
+    });
+
+    syncDarkModeUI();
+  </script>
+</body>
+</html>
