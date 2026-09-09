@@ -339,7 +339,11 @@ const THEMES = {
 /* ================================================================
    PROGRESO (persistencia local)
 ================================================================ */
-const STORAGE_KEY = 'egglish_lecciones_v3';
+const cachedUid = (() => {
+  try { return JSON.parse(localStorage.getItem('egglish_session') || 'null')?.uid || 'anonimo'; }
+  catch (e) { return 'anonimo'; }
+})();
+const STORAGE_KEY = `egglish_lecciones_v3_${cachedUid}`;
 
 function loadProgress() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { done: {}, xp: 0, streak: 0, lastDay: null }; }

@@ -11,13 +11,6 @@ import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/f
 
 const SESSION_KEY = 'egglish_session';
 
-function getCachedUid() {
-  try {
-    const cached = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
-    return cached?.uid || null;
-  } catch { return null; }
-}
-
 /**
  * Devuelve el uid del usuario actual, esperando si hace falta a que
  * Firebase Auth termine de restaurar la sesión.
@@ -48,12 +41,12 @@ function getUid() {
     };
 
     unsubscribe = onAuthStateChanged(auth, (user) => {
-      finish(user ? user.uid : getCachedUid());
+      finish(user ? user.uid : null);
     });
 
-    // Red de seguridad: si Firebase no responde a tiempo, no dejamos
-    // la promesa colgada — probamos con el uid cacheado localmente.
-    const timer = setTimeout(() => finish(getCachedUid()), 4000);
+    // Si Firebase no responde a tiempo, no escribimos con una identidad
+    // antigua que pudiera haber quedado en localStorage.
+    const timer = setTimeout(() => finish(null), 4000);
   });
 }
 
@@ -78,6 +71,7 @@ function sincronizarCacheLocal({ exp, campo, incremento, racha }) {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return;
     const session = JSON.parse(raw);
+    if (!session?.uid || session.uid !== auth.currentUser?.uid) return;
     session.exp = (session.exp || 0) + exp;
     session.racha = racha;
     session.ultimaActividad = new Date().toISOString();

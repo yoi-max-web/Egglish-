@@ -8,7 +8,6 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 // Sesión "en memoria" del usuario actual, usada por el handler de subida de foto
 let currentSession = null;
 
-function getCachedSession() { try { const raw = localStorage.getItem(SESSION_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; } }
 function saveCachedSession(data) { try { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {} }
 function clearCachedSession() { localStorage.removeItem(SESSION_KEY); localStorage.removeItem('egglish_join_date'); }
 
@@ -335,19 +334,9 @@ function fillProfile(session) {
 
 document.addEventListener('DOMContentLoaded', () => {
   bindAvatarUpload();
-
-  const cached = getCachedSession();
-  if (cached) {
-    currentSession = cached;
-    const localAvatar = getLocalAvatar(cached.uid);
-    if (localAvatar) currentSession.fotoURL = localAvatar;
-    adaptNavbar(cached);
-    fillProfile(currentSession);
-    fillStats(currentSession);
-    renderAchievements(currentSession);
-  } else {
-    adaptNavbar(null);
-  }
+  // No pintar la caché aquí: podría pertenecer a la cuenta anterior.
+  // Auth confirma la identidad y los datos reales en el listener inferior.
+  adaptNavbar(null);
 });
 
 onAuthStateChanged(auth, async (user) => {

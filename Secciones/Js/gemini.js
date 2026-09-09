@@ -15,7 +15,7 @@
 
 // URL de producción de la Serverless Function en Vercel.
 // Ejemplo: "https://egglish-backend.vercel.app/api/chat"
-const BACKEND_URL = "https://egglish-backend.vercel.app/api/chat";
+const BACKEND_URL = "/api/chat";
 
 /**
  * Envía el mensaje del usuario al backend (Vercel) y devuelve
@@ -26,7 +26,7 @@ const BACKEND_URL = "https://egglish-backend.vercel.app/api/chat";
  * @throws  {Error}                 - Si la petición falla o el
  *                                    servidor responde con error
  */
-export async function preguntarGemini(texto) {
+export async function preguntarGemini(texto, history = []) {
   let response;
 
   try {
@@ -35,7 +35,7 @@ export async function preguntarGemini(texto) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ texto }),
+      body: JSON.stringify({ texto, history }),
     });
   } catch (networkError) {
     // Problemas de red, CORS, backend caído, etc.
