@@ -28,11 +28,6 @@ const eggyOverlay    = document.getElementById('eggy-overlay');
 const historyItems   = document.querySelectorAll('.eggy-history-item');
 const chipBtns       = document.querySelectorAll('.eggy-chip');
 
-// Pantalla de arranque del motor local
-const bootOverlay    = document.getElementById('eggy-boot-overlay');
-const bootText       = document.getElementById('eggy-boot-text');
-const bootFill       = document.getElementById('eggy-boot-fill');
-
 /* ============================================================
    ESTADO INTERNO
    ============================================================ */
@@ -71,53 +66,33 @@ function moveThinkingToEnd() {
 }
 
 /* ============================================================
-   PANTALLA DE ARRANQUE (carga del modelo local)
+   ARRANQUE DEL MOTOR LOCAL (sin pantalla de carga)
    ============================================================ */
 
-function setBootStatus(text, progress = 0) {
-  if (bootText) bootText.textContent = text;
-  if (bootFill) bootFill.style.width = `${Math.max(0, Math.min(1, progress)) * 100}%`;
-}
-
-function hideBootOverlay() {
-  bootOverlay?.classList.add('is-hidden');
-}
-
-function showBootError(message) {
-  if (bootOverlay) {
-    bootOverlay.classList.add('is-error');
-    bootOverlay.classList.remove('is-hidden');
-  }
-  setBootStatus(message, 0);
-}
-
 /**
- * Descarga/inicializa el modelo local. Mientras esto ocurre, el
- * input y el botón de enviar permanecen bloqueados.
+ * Descarga/inicializa el modelo local en segundo plano.
+ * El chat se muestra de inmediato; el input queda desactivado
+ * solo mientras el motor termina de prepararse, sin overlay.
  */
 async function bootEngine() {
   eggyTextarea.disabled = true;
   eggySendBtn.disabled  = true;
-
-  setBootStatus('Preparando a Eggy... esto solo ocurre la primera vez.', 0);
+  eggyTextarea.placeholder = 'Eggy se está preparando...';
 
   try {
-    await initEngine(({ progress, text }) => {
-      setBootStatus(text, progress);
+    await initEngine(() => {
+      // Progreso de carga silencioso (sin overlay visual).
     });
 
     engineReady = true;
-    hideBootOverlay();
 
     eggyTextarea.disabled = false;
     eggyTextarea.placeholder = 'Pregúntale algo a Eggy...';
     updateSendBtn();
     eggyTextarea.focus();
-
-    injectWelcomeMessage();
   } catch (error) {
     console.error('[Eggy] No se pudo iniciar el motor local:', error);
-    showBootError(`No fue posible cargar el modelo de IA local. ${error?.message || 'Revisa la consola del navegador.'}`);
+    appendMessage('eggy', `❌ No fue posible cargar el modelo de IA local. ${error?.message || 'Revisa la consola del navegador.'}`);
   }
 }
 
@@ -431,7 +406,8 @@ document.addEventListener('keydown', (e) => {
 function init() {
   updateSendBtn();
   moveThinkingToEnd();
-  bootEngine(); // dispara la descarga/carga del modelo local
+  injectWelcomeMessage(); // el chat se muestra de inmediato
+  bootEngine(); // carga el modelo local en segundo plano, sin overlay
 }
 
 init();
