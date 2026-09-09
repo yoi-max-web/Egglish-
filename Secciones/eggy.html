@@ -41,34 +41,7 @@
     .menu-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; border: none; background: none; }
     .menu-toggle span { width: 25px; height: 3px; background: var(--text); border-radius: 2px; }
 
-    /* ─────────────────────────────────────────────────
-       PANTALLA DE ARRANQUE — descarga/carga del modelo
-       de IA local (WebLLM). Cubre el chat hasta que el
-       motor WebGPU esté completamente listo.
-       ───────────────────────────────────────────────── */
     #eggy-main { position: relative; }
-    .eggy-boot-overlay {
-      position: absolute; inset: 0; z-index: 50;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 14px; text-align: center; padding: 32px;
-      background: rgba(240, 244, 248, 0.97);
-      backdrop-filter: blur(2px);
-    }
-    .eggy-boot-overlay.is-hidden { display: none; }
-    .eggy-boot-overlay__chick { width: 64px; height: 64px; object-fit: contain; }
-    .eggy-boot-overlay__title { font-size: 1.1rem; font-weight: 900; color: var(--text, #1a1a2e); margin: 0; }
-    .eggy-boot-overlay__text { font-size: .85rem; font-weight: 700; color: var(--mid, #4b5563); max-width: 320px; margin: 0; }
-    .eggy-boot-overlay__bar {
-      width: 240px; max-width: 70vw; height: 10px; border-radius: 999px;
-      background: var(--border, #e5e7eb); overflow: hidden;
-    }
-    .eggy-boot-overlay__bar-fill {
-      height: 100%; width: 0%; border-radius: 999px;
-      background: var(--blue, #1cb0f6); transition: width .25s ease;
-    }
-    .eggy-boot-overlay__hint { font-size: .72rem; font-weight: 600; color: #9ca3af; max-width: 300px; margin: 0; }
-    .eggy-boot-overlay.is-error .eggy-boot-overlay__bar { display: none; }
-    .eggy-boot-overlay.is-error .eggy-boot-overlay__text { color: #dc2626; }
   </style>
 
   <!-- Estilos exclusivos de la sección Eggy -->
@@ -219,26 +192,6 @@
           <span class="eggy-main__topbar-name">Eggy IA</span>
           <span class="eggy-main__topbar-status">En línea y listo para enseñar</span>
         </div>
-      </div>
-
-      <!-- ─────────────────────────────────────────────────
-           PANTALLA DE ARRANQUE — motor de IA local (WebLLM)
-           Se oculta automáticamente cuando el modelo termina
-           de descargarse/cargarse en el navegador del usuario.
-           ───────────────────────────────────────────────── -->
-      <div class="eggy-boot-overlay" id="eggy-boot-overlay">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png"
-             alt="Eggy" class="eggy-boot-overlay__chick"/>
-        <h2 class="eggy-boot-overlay__title">Preparando a Eggy…</h2>
-        <p class="eggy-boot-overlay__text" id="eggy-boot-text">Iniciando el motor de IA local…</p>
-        <div class="eggy-boot-overlay__bar">
-          <div class="eggy-boot-overlay__bar-fill" id="eggy-boot-fill"></div>
-        </div>
-        <p class="eggy-boot-overlay__hint">
-          Esto ocurre solo la primera vez: el modelo se descarga y se guarda en el
-          caché de tu navegador. Todo el chat corre en tu dispositivo, sin enviar
-          nada a ningún servidor.
-        </p>
       </div>
 
       <!-- ─── Zona de mensajes con scroll ─── -->

@@ -6,7 +6,6 @@
     <title>Egglish - Práctica de Escucha</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<script type="module" src="/Secciones/Js/eggy-widget.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Tailwind CSS (mismo config que juegos.html: colores egg-* + darkMode por clase) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -2220,6 +2219,242 @@
       .finally(() => { window.location.href = link.href; });
   }, true);
 </script>
+
+<!-- ══════════════ CHATBOT FLOTANTE (CHATBASE) ══════════════ -->
+<style>
+  #egg-chat-bubble {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #1cb0f6;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    /* z-index más alto que el de #egg-chat-window (9999): así, incluso en el
+       modo pantalla completa de celular, la burbuja (que tiene el ícono de
+       cerrar ✕ cuando el chat está abierto) queda SIEMPRE encima de la
+       ventana del chat y se puede tocar para cerrarlo. Antes tenían el mismo
+       z-index y, al dibujarse la ventana después en el HTML, tapaba la
+       burbuja y era imposible cerrar el chat en celulares. */
+    z-index: 10000;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #egg-chat-bubble:hover {
+    transform: scale(1.06);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  }
+  #egg-chat-bubble svg {
+    width: 28px;
+    height: 28px;
+    stroke: #fff;
+  }
+  #egg-chat-window {
+    position: fixed;
+    bottom: 96px;
+    right: 24px;
+    width: 340px;
+    max-width: calc(100vw - 32px);
+    /* Ventana más compacta que antes. Usamos --vvh (altura real visible,
+       actualizada por JS con la Visual Viewport API) en vez de 100vh: así,
+       si el teclado del móvil se abre, la ventana se encoge en vez de
+       quedar "tapada" y esconder el input de texto/audio en la parte de
+       abajo. --vvh cae a 100dvh si el navegador no soporta esa API. */
+    height: min(560px, calc(var(--vvh, 100dvh) - 120px));
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 9999;
+    display: none;
+    background: #fff;
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  /* Pantalla realmente angosta (teléfono en vertical): ahí sí el chat se abre
+     a pantalla completa para garantizar que el campo de texto siempre sea
+     visible. OJO: esto se basa solo en el ANCHO, no en el alto — una ventana
+     de escritorio corta (pero ancha) NO debe activar el modo pantalla completa,
+     solo debe encogerse verticalmente (ver height arriba, con margen de 120px). */
+  @media (max-width: 480px) {
+    #egg-chat-window {
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      bottom: auto;
+      width: auto;
+      height: calc(var(--vvh, 100dvh) - 24px);
+      max-width: none;
+    }
+    #egg-chat-bubble {
+      right: 16px;
+      bottom: 16px;
+    }
+  }
+  #egg-chat-window.open {
+    display: block;
+  }
+  #egg-chat-window.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  /* Contenedor interno: el iframe se ajusta EXACTO a este tamaño, sin min-height,
+     así nunca se recorta el encabezado del bot ni ninguna parte del contenido. */
+  #egg-chat-body {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  #egg-chat-body iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  #egg-chat-body iframe.loaded {
+    opacity: 1;
+  }
+  #egg-chat-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #fff;
+    transition: opacity 0.25s ease;
+  }
+  #egg-chat-loading.hidden-loading {
+    opacity: 0;
+    pointer-events: none;
+  }
+  #egg-chat-spinner {
+    width: 34px;
+    height: 34px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #1cb0f6;
+    border-radius: 50%;
+    animation: egg-spin 0.8s linear infinite;
+  }
+  @keyframes egg-spin {
+    to { transform: rotate(360deg); }
+  }
+  #egg-chat-loading span {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #6b7280;
+  }
+</style>
+
+<button id="egg-chat-bubble" type="button" aria-label="Abrir chat de ayuda" aria-expanded="false" aria-controls="egg-chat-window">
+  <svg id="egg-chat-icon-open" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+  </svg>
+  <svg id="egg-chat-icon-close" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden">
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+</button>
+
+<div id="egg-chat-window" role="dialog" aria-label="Chat de ayuda">
+  <div id="egg-chat-body">
+    <div id="egg-chat-loading">
+      <div id="egg-chat-spinner"></div>
+      <span>Cargando chat…</span>
+    </div>
+    <!-- El iframe se inserta con JS solo cuando el usuario abre el chat por -->
+    <!-- primera vez (lazy-load), así la página principal carga más rápido -->
+    <!-- y el chat no se "reinicia" cada vez que se abre y cierra. -->
+  </div>
+</div>
+
+<script>
+  (function () {
+    const bubble = document.getElementById('egg-chat-bubble');
+    const win = document.getElementById('egg-chat-window');
+    const body = document.getElementById('egg-chat-body');
+    const loading = document.getElementById('egg-chat-loading');
+    const iconOpen = document.getElementById('egg-chat-icon-open');
+    const iconClose = document.getElementById('egg-chat-icon-close');
+    if (!bubble || !win || !body || !loading) return;
+
+    let isOpen = false;
+    let iframeCreated = false;
+
+    // Mantiene --vvh = altura real visible de la pantalla (excluye el
+    // teclado del móvil cuando está abierto). Sin esto, en iOS/Android
+    // la ventana del chat puede quedar más alta que el área visible y el
+    // input de texto/audio de Chatbase queda tapado por el teclado.
+    function syncViewportHeight() {
+      const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      document.documentElement.style.setProperty('--vvh', vh + 'px');
+    }
+    syncViewportHeight();
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncViewportHeight);
+      window.visualViewport.addEventListener('scroll', syncViewportHeight);
+    } else {
+      window.addEventListener('resize', syncViewportHeight);
+    }
+
+    function ensureIframe() {
+      if (iframeCreated) return;
+      iframeCreated = true;
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://www.chatbase.co/chatbot-iframe/-Wg5knMaJ19dwVd0Kr9x9';
+      iframe.setAttribute('allow', 'microphone');
+      iframe.setAttribute('frameborder', '0');
+      iframe.addEventListener('load', () => {
+        // Pequeño margen para que el bot termine de pintar su interfaz
+        // antes de esconder el spinner y evitar el "flash" en blanco.
+        setTimeout(() => {
+          iframe.classList.add('loaded');
+          loading.classList.add('hidden-loading');
+        }, 300);
+      });
+      body.appendChild(iframe);
+    }
+
+    function openChat() {
+      isOpen = true;
+      ensureIframe();
+      win.classList.add('open');
+      requestAnimationFrame(() => win.classList.add('show'));
+      iconOpen.classList.add('hidden');
+      iconClose.classList.remove('hidden');
+      bubble.setAttribute('aria-expanded', 'true');
+      bubble.setAttribute('aria-label', 'Cerrar chat de ayuda');
+    }
+
+    function closeChat() {
+      isOpen = false;
+      win.classList.remove('show');
+      iconOpen.classList.remove('hidden');
+      iconClose.classList.add('hidden');
+      bubble.setAttribute('aria-expanded', 'false');
+      bubble.setAttribute('aria-label', 'Abrir chat de ayuda');
+      setTimeout(() => {
+        if (!isOpen) win.classList.remove('open');
+      }, 200);
+    }
+
+    bubble.addEventListener('click', () => {
+      isOpen ? closeChat() : openChat();
+    });
+  })();
+</script>
+
 
 </body>
 </html>
