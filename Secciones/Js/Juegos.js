@@ -228,8 +228,10 @@ function handleMC(btn, chosen, correct, grid) {
     score += 10;
     document.getElementById('mc-score').textContent = score;
     btn.classList.add('correct');
+    if (window.SoundManager) SoundManager.playCorrect();
   } else {
     btn.classList.add('wrong','shake');
+    if (window.SoundManager) SoundManager.playWrong();
   }
   showExplain('mc', isCorrect, DATA._mcSession[currentQ]);
 }
@@ -318,11 +320,13 @@ function handleMatch(btn) {
     document.getElementById('match-score').textContent = score;
     document.getElementById('match-feedback').textContent = '✅ ¡Correcto!';
     document.getElementById('match-feedback').style.color = '#58cc02';
+    if (window.SoundManager) SoundManager.playCorrect();
     if (matchDone >= matchPairs.length) setTimeout(() => showResults('Conecta Palabras'), 800);
   } else {
     [a,b].forEach(x => { x.classList.remove('selected'); x.classList.add('wrong'); });
     document.getElementById('match-feedback').textContent = '❌ Inténtalo de nuevo';
     document.getElementById('match-feedback').style.color = '#ff4b4b';
+    if (window.SoundManager) SoundManager.playWrong();
     setTimeout(() => {
       [a,b].forEach(x => x.classList.remove('wrong'));
       document.getElementById('match-feedback').textContent = '';
@@ -396,11 +400,13 @@ function checkFill() {
     row.style.border = '2.5px solid #58cc02';
     score += 10;
     document.getElementById('fill-score').textContent = score;
+    if (window.SoundManager) SoundManager.playCorrect();
   } else {
     row.style.border = '2.5px solid #ff4b4b';
     row.style.animation = 'none';
     // Show correct answer momentarily
     row.innerHTML = `<span style="color:#ff4b4b;font-weight:800">✗ Respuesta: ${q.ans.join(' ')}</span>`;
+    if (window.SoundManager) SoundManager.playWrong();
   }
   document.getElementById('fill-check-btn').disabled = true;
   showExplain('fill', correct, q);
@@ -476,8 +482,10 @@ function handleListen(btn, chosen, correct, grid) {
   if (isCorrect) {
     score += 10;
     document.getElementById('listen-score').textContent = score;
+    if (window.SoundManager) SoundManager.playCorrect();
   } else {
     btn.classList.add('shake');
+    if (window.SoundManager) SoundManager.playWrong();
   }
   showExplain('listen', isCorrect, listenSession[currentQ]);
 }
@@ -559,9 +567,11 @@ function checkTranslate() {
     row.style.border = '2.5px solid #58cc02';
     score += 10;
     document.getElementById('translate-score').textContent = score;
+    if (window.SoundManager) SoundManager.playCorrect();
   } else {
     row.style.border = '2.5px solid #ff4b4b';
     row.innerHTML = `<span style="color:#ff4b4b;font-weight:800">✗ Respuesta: ${q.ans.join(' ')}</span>`;
+    if (window.SoundManager) SoundManager.playWrong();
   }
   document.getElementById('translate-check-btn').disabled = true;
   showExplain('translate', correct, q);
@@ -586,6 +596,10 @@ function showResults(gameName) {
   lastGameName = gameName;
   const maxScore = totalQ * 10;
   const pct = score / maxScore;
+
+  if (window.SoundManager) {
+    SoundManager.playVictory();
+  }
 
   let title, sub;
   if (pct === 1)       { title = '🎉 ¡Perfecto!';       sub = '¡Respuestas perfectas! Eres increíble.'; }

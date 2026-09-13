@@ -8,61 +8,9 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 // Sesión "en memoria" del usuario actual, usada por el handler de subida de foto
 let currentSession = null;
 
+function getCachedSession() { try { const raw = localStorage.getItem(SESSION_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; } }
 function saveCachedSession(data) { try { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {} }
-function clearCachedSession() { localStorage.removeItem(SESSION_KEY); localStorage.removeItem('egglish_join_date'); }
-
-// ── Avatar guardado LOCALMENTE en el dispositivo (no en Firebase) ──────
-// Firebase Storage no está disponible/configurado en este proyecto, así
-// que la foto de perfil se guarda como imagen comprimida (base64) en
-// localStorage, ligada al uid del usuario. Esto significa que la foto
-// solo se ve en este dispositivo/navegador, no se sincroniza entre
-// dispositivos (porque nunca se sube a ningún servidor).
-const AVATAR_PREFIX = 'egglish_avatar_';
-
-function getLocalAvatar(uid) {
-  if (!uid) return null;
-  try { return localStorage.getItem(AVATAR_PREFIX + uid); } catch { return null; }
-}
-
-function saveLocalAvatar(uid, dataUrl) {
-  if (!uid) return false;
-  try { localStorage.setItem(AVATAR_PREFIX + uid, dataUrl); return true; }
-  catch (e) {
-    console.warn('No se pudo guardar el avatar en localStorage:', e);
-    return false;
-  }
-}
-
-/**
- * Lee un archivo de imagen y lo redimensiona/comprime con un <canvas>
- * antes de convertirlo a base64. Esto es necesario porque localStorage
- * tiene un límite de ~5MB por sitio, y una foto de cámara sin comprimir
- * puede pesar varios MB por sí sola.
- */
-function readAndResizeImage(file, maxSize = 320, quality = 0.82) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('No se pudo leer el archivo.'));
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('El archivo no es una imagen válida.'));
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > height && width > maxSize) { height = Math.round(height * (maxSize / width)); width = maxSize; }
-        else if (height > maxSize) { width = Math.round(width * (maxSize / height)); height = maxSize; }
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', quality));
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
+function clearCachedSession() { localStorage.removeItem(SESSION_KEY); localStorage.removeItem('egglish_join_date'); localStorage.removeItem('egglish_tip_index'); }
 
 function getAvatarColor(name) {
   const colors = ['#1cb0f6', '#58cc02', '#f5a623', '#ff4b4b', '#9b59b6', '#e67e22', '#2ecc71', '#e74c3c'];
@@ -75,13 +23,12 @@ function generateUsername(name) {
   return '@' + name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 }
 
-function getJoinDate() {
-  const raw = localStorage.getItem('egglish_join_date');
-  if (raw) return raw;
-  const now = new Date();
-  const formatted = `📅 Se unió en ${now.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
-  localStorage.setItem('egglish_join_date', formatted);
-  return formatted;
+// La fecha de registro real viene de Firebase Auth (user.metadata.creationTime),
+// se guarda en la sesión cacheada como `fechaRegistro` (ISO) y se formatea aquí.
+function formatJoinDate(fechaRegistroISO) {
+  const date = fechaRegistroISO ? new Date(fechaRegistroISO) : null;
+  if (!date || isNaN(date.getTime())) return '📅 Se unió recientemente';
+  return `📅 Se unió en ${date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
 }
 
 // ── Racha (Streak) ─────────────────────
@@ -188,6 +135,64 @@ const ACHIEVEMENTS_CONFIG = [
   },
 ];
 
+// Retos adicionales: se mantienen ocultos hasta que el usuario pulsa "VER TODO",
+// para no saturar la vista inicial. También usan campos 100% reales.
+const ACHIEVEMENTS_EXTRA = [
+  {
+    id: 'todoterreno',
+    name: 'Todoterreno',
+    icon: '🚀',
+    colorClass: 'blue-light-bg',
+    field: 'totalActividades', // suma de leccionesCompletadas + escuchaCompletados + juegosGanados
+    tiers: [
+      { level: 1, threshold: 10,  desc: 'Completa 10 actividades en total (lecciones, escucha o juegos).' },
+      { level: 2, threshold: 30,  desc: 'Completa 30 actividades en total.' },
+      { level: 3, threshold: 60,  desc: 'Completa 60 actividades en total.' },
+      { level: 4, threshold: 120, desc: 'Completa 120 actividades en total.' },
+    ],
+  },
+  {
+    id: 'racha-hierro',
+    name: 'Racha de hierro',
+    icon: '🛡️',
+    colorClass: 'orange-bg',
+    field: 'racha',
+    tiers: [
+      { level: 1, threshold: 60,  desc: 'Alcanza una racha de 60 días.' },
+      { level: 2, threshold: 90,  desc: 'Alcanza una racha de 90 días.' },
+      { level: 3, threshold: 180, desc: 'Alcanza una racha de 180 días.' },
+      { level: 4, threshold: 365, desc: 'Alcanza una racha de 365 días.' },
+    ],
+  },
+  {
+    id: 'leyenda-puntos',
+    name: 'Leyenda de puntos',
+    icon: '👑',
+    colorClass: 'yellow-bg',
+    field: 'exp',
+    tiers: [
+      { level: 1, threshold: 8000,  desc: 'Gana 8000 puntos.' },
+      { level: 2, threshold: 15000, desc: 'Gana 15000 puntos.' },
+      { level: 3, threshold: 25000, desc: 'Gana 25000 puntos.' },
+      { level: 4, threshold: 40000, desc: 'Gana 40000 puntos.' },
+    ],
+  },
+];
+
+// true mientras el usuario tenga desplegados los retos extra ("VER TODO")
+let mostrarRetosExtra = false;
+
+// Calcula campos derivados 100% a partir de datos reales ya guardados
+// (no inventa nada: solo suma contadores que ya existen en el documento).
+function computeDerivedFields(session) {
+  if (!session) return session;
+  session.totalActividades =
+    (Number(session.leccionesCompletadas) || 0) +
+    (Number(session.escuchaCompletados) || 0) +
+    (Number(session.juegosGanados) || 0);
+  return session;
+}
+
 function renderAchievement(cfg, rawValue) {
   const value = Number(rawValue) || 0;
   const tiers = cfg.tiers;
@@ -205,13 +210,15 @@ function renderAchievement(cfg, rawValue) {
   const barClass = maxed ? 'progress-bar--yellow' : 'progress-bar--blue';
   const iconCompletedClass = maxed ? 'achievement-icon--completed' : '';
   const checkBadge = maxed ? '<span class="check-badge">✅</span>' : '';
+  const itemClass = maxed ? 'achievement-item achievement-item--maxed' : 'achievement-item';
+  const nameClass = maxed ? 'achievement-name achievement-name--done' : 'achievement-name';
 
   return `
-    <div class="achievement-item">
+    <div class="${itemClass}">
       <div class="achievement-icon ${iconCompletedClass} ${cfg.colorClass}">${cfg.icon}${checkBadge}</div>
       <div class="achievement-info">
         <div class="achievement-top-row">
-          <span class="achievement-name">${cfg.name}</span>
+          <span class="${nameClass}">${cfg.name}</span>
           <span class="achievement-level">Nivel ${activeTier.level}</span>
         </div>
         <p class="achievement-desc">${activeTier.desc}</p>
@@ -224,10 +231,148 @@ function renderAchievement(cfg, rawValue) {
   `;
 }
 
+// Devuelve TODAS las insignias ganadas hasta ahora: una por cada NIVEL
+// alcanzado en cada reto (no solo cuando el reto se completa del todo).
+// Así, subir de nivel 1 a nivel 2 en cualquier reto ya suma una insignia.
+function getInsigniasGanadas(session) {
+  const todosLosRetos = [...ACHIEVEMENTS_CONFIG, ...ACHIEVEMENTS_EXTRA];
+  const insignias = [];
+  todosLosRetos.forEach((cfg) => {
+    const value = Number(session?.[cfg.field]) || 0;
+    cfg.tiers.forEach((tier) => {
+      if (value >= tier.threshold) {
+        insignias.push({ id: `${cfg.id}-nivel-${tier.level}`, name: `${cfg.name} · Nv.${tier.level}`, icon: cfg.icon, desc: tier.desc });
+      }
+    });
+  });
+  return insignias;
+}
+
+function getInsigniasVistasKey(uid) { return `egglish_insignias_vistas_${uid || 'anon'}`; }
+
+// Muestra un toast dorado cada vez que aparece una insignia que el usuario
+// no había visto todavía (comparando contra lo guardado en localStorage).
+function notificarInsigniasNuevas(uid, insignias) {
+  const key = getInsigniasVistasKey(uid);
+  const raw = localStorage.getItem(key);
+
+  if (raw === null) {
+    // Primera vez que corre esta función para este usuario: registra lo que
+    // ya tiene sin notificar, para no bombardearlo con insignias "viejas".
+    try { localStorage.setItem(key, JSON.stringify(insignias.map((i) => i.id))); } catch {}
+    return;
+  }
+
+  let vistas = [];
+  try { vistas = JSON.parse(raw) || []; } catch { vistas = []; }
+  const vistasSet = new Set(vistas);
+
+  const nuevas = insignias.filter((ins) => !vistasSet.has(ins.id));
+  if (nuevas.length === 0) return;
+
+  nuevas.forEach((ins) => { mostrarNotificacionInsignia(ins); vistasSet.add(ins.id); });
+  try { localStorage.setItem(key, JSON.stringify([...vistasSet])); } catch {}
+}
+
+function mostrarNotificacionInsignia(insignia) {
+  const container = document.getElementById('badge-toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'badge-toast';
+  toast.innerHTML = `<span class="badge-toast-icon">${insignia.icon}</span><span>¡Insignia obtenida!<br>${insignia.name}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
 function renderAchievements(session) {
   const container = document.getElementById('achievements-container');
+  if (container) {
+    const lista = mostrarRetosExtra ? [...ACHIEVEMENTS_CONFIG, ...ACHIEVEMENTS_EXTRA] : ACHIEVEMENTS_CONFIG;
+    container.innerHTML = lista.map((cfg) => renderAchievement(cfg, session?.[cfg.field])).join('');
+  }
+  renderBadges(session);
+}
+
+// Insignias mostradas actualmente (para poder abrir su detalle al hacer click)
+let insigniasActuales = [];
+
+function renderBadges(session) {
+  const insignias = getInsigniasGanadas(session);
+  insigniasActuales = insignias;
+
+  const container = document.getElementById('badges-container');
+  if (container) {
+    if (insignias.length === 0) {
+      container.innerHTML = '<p class="badges-empty">Aún no tienes insignias. ¡Completa retos para coleccionarlas! 🏅</p>';
+    } else {
+      container.innerHTML = insignias.map((ins, i) => `
+        <div class="badge-item" data-index="${i}" tabindex="0" role="button" aria-label="Ver detalle de ${ins.name}">
+          <div class="badge-icon">${ins.icon}</div>
+          <span class="badge-name">${ins.name}</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  notificarInsigniasNuevas(session?.uid, insignias);
+}
+
+// ── Detalle de insignia (se abre al hacer click, no queda estático) ─────────
+function abrirDetalleInsignia(insignia) {
+  const backdrop = document.getElementById('badge-detail-backdrop');
+  const modal = document.getElementById('badge-detail-modal');
+  if (!backdrop || !modal) return;
+  document.getElementById('badge-detail-icon').textContent = insignia.icon;
+  document.getElementById('badge-detail-name').textContent = insignia.name;
+  document.getElementById('badge-detail-desc').textContent = insignia.desc || '';
+  backdrop.classList.add('open');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function cerrarDetalleInsignia() {
+  const backdrop = document.getElementById('badge-detail-backdrop');
+  const modal = document.getElementById('badge-detail-modal');
+  if (!backdrop || !modal) return;
+  backdrop.classList.remove('open');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+function bindBadgeDetailModal() {
+  const container = document.getElementById('badges-container');
+  const backdrop = document.getElementById('badge-detail-backdrop');
+  const closeBtn = document.getElementById('badge-detail-close');
   if (!container) return;
-  container.innerHTML = ACHIEVEMENTS_CONFIG.map((cfg) => renderAchievement(cfg, session?.[cfg.field])).join('');
+
+  container.addEventListener('click', (e) => {
+    const item = e.target.closest('.badge-item');
+    if (!item) return;
+    const insignia = insigniasActuales[Number(item.dataset.index)];
+    if (insignia) abrirDetalleInsignia(insignia);
+  });
+  container.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const item = e.target.closest('.badge-item');
+    if (!item) return;
+    e.preventDefault();
+    const insignia = insigniasActuales[Number(item.dataset.index)];
+    if (insignia) abrirDetalleInsignia(insignia);
+  });
+
+  if (backdrop) backdrop.addEventListener('click', cerrarDetalleInsignia);
+  if (closeBtn) closeBtn.addEventListener('click', cerrarDetalleInsignia);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarDetalleInsignia(); });
+}
+
+function bindVerTodosRetos() {
+  const btn = document.getElementById('btn-ver-retos');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    mostrarRetosExtra = !mostrarRetosExtra;
+    btn.textContent = mostrarRetosExtra ? 'VER MENOS' : 'VER TODO';
+    renderAchievements(currentSession);
+  });
 }
 
 // ── Estadísticas simplificadas: Puntos y Racha ─────────────────────
@@ -274,6 +419,40 @@ function renderAvatar(session) {
   }
 }
 
+const MAX_AVATAR_DIMENSION = 320;
+const AVATAR_JPEG_QUALITY = 0.82;
+
+// Convierte el archivo elegido en una imagen comprimida (base64/data URL),
+// redimensionada para que quepa cómodamente en localStorage y en Firestore.
+function comprimirImagenAvatar(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('El archivo no es una imagen válida.'));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > MAX_AVATAR_DIMENSION) {
+          height = Math.round((height * MAX_AVATAR_DIMENSION) / width);
+          width = MAX_AVATAR_DIMENSION;
+        } else if (height >= width && height > MAX_AVATAR_DIMENSION) {
+          width = Math.round((width * MAX_AVATAR_DIMENSION) / height);
+          height = MAX_AVATAR_DIMENSION;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', AVATAR_JPEG_QUALITY));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function bindAvatarUpload() {
   const editBtn = document.getElementById('avatar-edit-btn');
   const fileInput = document.getElementById('avatar-file-input');
@@ -285,9 +464,8 @@ function bindAvatarUpload() {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (!currentSession || !currentSession.uid) { fileInput.value = ''; return; }
-
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor selecciona un archivo de imagen.');
+    if (!file.type || !file.type.startsWith('image/')) {
+      alert('Selecciona un archivo de imagen válido (JPG, PNG, etc).');
       fileInput.value = '';
       return;
     }
@@ -297,22 +475,23 @@ function bindAvatarUpload() {
     editBtn.disabled = true;
 
     try {
-      // 🩹 Firebase Storage no está disponible en este proyecto, así que
-      // la foto se comprime y se guarda directamente en localStorage,
-      // en este dispositivo. No requiere conexión ni Firebase.
-      const dataUrl = await readAndResizeImage(file);
-      const saved = saveLocalAvatar(currentSession.uid, dataUrl);
-      if (!saved) {
-        alert('No se pudo guardar la foto: el almacenamiento local está lleno. Intenta con una imagen más pequeña.');
-        return;
-      }
+      const dataUrl = await comprimirImagenAvatar(file);
 
+      // Se guarda YA en localStorage: la foto queda persistente en este
+      // navegador aunque falle la sincronización con Firestore.
       currentSession.fotoURL = dataUrl;
       saveCachedSession(currentSession);
       renderAvatar(currentSession);
+
+      // Sincroniza también con Firestore (no bloquea la UI si falla).
+      try {
+        await updateDoc(doc(db, 'users', currentSession.uid), { fotoURL: dataUrl });
+      } catch (err) {
+        console.warn('La foto se guardó en este navegador, pero no se pudo sincronizar con Firestore:', err);
+      }
     } catch (err) {
-      console.warn('Error guardando la foto de perfil:', err);
-      alert('No se pudo actualizar la foto de perfil. Inténtalo de nuevo.');
+      console.warn('Error procesando la foto de perfil:', err);
+      alert('No se pudo actualizar la foto de perfil. Inténtalo con otra imagen.');
     } finally {
       editBtn.textContent = originalLabel;
       editBtn.disabled = false;
@@ -327,16 +506,55 @@ function fillProfile(session) {
   renderAvatar(session);
   document.querySelector('.profile-name').textContent = name || 'Usuario';
   document.querySelector('.profile-username').textContent = generateUsername(name);
-  document.querySelector('.profile-joined').textContent = getJoinDate();
+  document.querySelector('.profile-joined').textContent = formatJoinDate(session.fechaRegistro);
   document.getElementById('profile-email').textContent = email || '';
   if (document.getElementById('profile-age')) document.getElementById('profile-age').textContent = age ? `${age} años` : '';
 }
 
+// ── Tip dorado aleatorio ─────────────────────
+// Se elige un consejo al azar cada vez que se carga el perfil (es decir,
+// cada vez que el usuario inicia sesión, o cierra sesión y vuelve a entrar).
+const TIPS = [
+  'La práctica diaria de 10 minutos rinde más que una sesión larga una vez por semana.',
+  'Escuchar inglés todos los días entrena tu oído, aunque no entiendas cada palabra.',
+  'Aprende frases completas, no solo palabras sueltas: se recuerdan mejor en contexto.',
+  'Equivocarte al hablar es parte del proceso, no un fracaso.',
+  'Repite en voz alta lo que escuchas: mejora tu pronunciación y tu memoria.',
+  'Ver series con subtítulos en inglés ayuda a asociar el sonido con la escritura.',
+  'Las 100 palabras más usadas del idioma cubren gran parte de las conversaciones diarias.',
+  'Anota 3 palabras nuevas cada día y úsalas en una frase propia.',
+  'La constancia vence a la intensidad: una racha diaria construye el hábito.',
+  'Piensa en inglés, aunque sea en frases simples, mientras haces tareas cotidianas.',
+  'Grábate hablando y escúchate: notarás progresos que no ves en el momento.',
+  'No traduzcas palabra por palabra: intenta pensar directamente en la nueva estructura.',
+  'Cada lección completada suma, aunque el avance de un día parezca pequeño.',
+  'Dormir bien ayuda a consolidar lo que aprendiste durante el día.',
+  'Cantar canciones en inglés es una forma divertida de memorizar vocabulario.',
+];
+
+function mostrarTipAleatorio() {
+  const tipEl = document.getElementById('tip-text');
+  if (!tipEl) return;
+  const indice = Math.floor(Math.random() * TIPS.length);
+  tipEl.textContent = TIPS[indice];
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   bindAvatarUpload();
-  // No pintar la caché aquí: podría pertenecer a la cuenta anterior.
-  // Auth confirma la identidad y los datos reales en el listener inferior.
-  adaptNavbar(null);
+  bindVerTodosRetos();
+  bindBadgeDetailModal();
+  mostrarTipAleatorio();
+
+  const cached = getCachedSession();
+  if (cached) {
+    currentSession = computeDerivedFields(cached);
+    adaptNavbar(currentSession);
+    fillProfile(currentSession);
+    fillStats(currentSession);
+    renderAchievements(currentSession);
+  } else {
+    adaptNavbar(null);
+  }
 });
 
 onAuthStateChanged(auth, async (user) => {
@@ -360,16 +578,19 @@ onAuthStateChanged(auth, async (user) => {
     }
   } catch (e) { console.warn(e); }
 
-  let session = { uid: user.uid, name: user.displayName || user.email?.split('@')[0] || 'Usuario', email: user.email, ...userData };
-
-  // 🩹 La foto de perfil vive SOLO en localStorage de este dispositivo
-  // (Firebase Storage no está disponible). Si existe una guardada aquí,
-  // tiene prioridad sobre cualquier valor viejo que pudiera venir de Firestore.
-  const localAvatar = getLocalAvatar(user.uid);
-  if (localAvatar) session.fotoURL = localAvatar;
+  let session = {
+    uid: user.uid,
+    name: user.displayName || user.email?.split('@')[0] || 'Usuario',
+    email: user.email,
+    ...userData,
+    // Fecha real de creación de la cuenta (Firebase Auth es la fuente de verdad;
+    // va después del spread para que nunca la pise un campo viejo de Firestore).
+    fechaRegistro: user.metadata?.creationTime ? new Date(user.metadata.creationTime).toISOString() : new Date().toISOString(),
+  };
 
   // Valida la racha contra la última actividad registrada en Firebase
   session = await validarRachaEnFirebase(session);
+  session = computeDerivedFields(session);
 
   currentSession = session;
   saveCachedSession(session);
