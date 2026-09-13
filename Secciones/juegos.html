@@ -186,6 +186,7 @@
       <button class="level-tab active" data-level="A1">🐣 A1 <span>Básico</span></button>
       <button class="level-tab" data-level="A2">🐥 A2 <span>Elemental</span></button>
       <button class="level-tab" data-level="B1">🦅 B1 <span>Intermedio</span></button>
+      <button class="level-tab" data-level="B2">🦉 B2 <span>Avanzado</span></button>
     </div>
 
     <div class="games-grid" id="games-grid">
@@ -201,9 +202,12 @@
       <button class="btn-back" onclick="goBack()">← Salir</button>
       <div class="game-title-row">
         <span class="game-tag" id="mc-level-tag">A1</span>
-        <span class="game-name">🎯 Opción Múltiple</span>
+        <span class="game-name" id="mc-game-name">🎯 Opción Múltiple</span>
       </div>
-      <div class="stars-row"><span class="star-icon">⭐</span><span id="mc-score">0</span></div>
+      <div class="stars-row">
+        <span id="mc-timer" class="timer-badge" style="display:none;">⏱ 8</span>
+        <span class="star-icon">⭐</span><span id="mc-score">0</span>
+      </div>
     </div>
 
     <div class="game-card">
@@ -215,7 +219,8 @@
 
       <div class="question-area">
         <div class="question-mascot">
-          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="mascot" class="q-mascot-img"/>
+          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="mascot" class="q-mascot-img" id="mc-mascot-img"/>
+          <span class="question-emoji" id="mc-emoji" style="display:none;"></span>
         </div>
         <p class="question-text" id="mc-question">¿Cómo se dice 'Huevo' en inglés?</p>
       </div>
@@ -240,13 +245,13 @@
       <button class="btn-back" onclick="goBack()">← Salir</button>
       <div class="game-title-row">
         <span class="game-tag" id="match-level-tag">A1</span>
-        <span class="game-name">🔗 Conecta Palabras</span>
+        <span class="game-name" id="match-game-name">🔗 Conecta Palabras</span>
       </div>
       <div class="stars-row"><span class="star-icon">⭐</span><span id="match-score">0</span></div>
     </div>
 
     <div class="game-card">
-      <p class="match-instruction">Toca una palabra en español y luego su traducción en inglés</p>
+      <p class="match-instruction" id="match-instruction-text">Toca una palabra en español y luego su traducción en inglés</p>
       <div class="match-container">
         <div class="match-col" id="match-es"><!-- injected --></div>
         <div class="match-col" id="match-en"><!-- injected --></div>
@@ -263,7 +268,7 @@
       <button class="btn-back" onclick="goBack()">← Salir</button>
       <div class="game-title-row">
         <span class="game-tag" id="fill-level-tag">A2</span>
-        <span class="game-name">✏️ Completa la Frase</span>
+        <span class="game-name" id="fill-game-name">✏️ Completa la Frase</span>
       </div>
       <div class="stars-row"><span class="star-icon">⭐</span><span id="fill-score">0</span></div>
     </div>
@@ -274,6 +279,7 @@
         <div class="progress-track"><div class="progress-fill" id="fill-progress"></div></div>
         <span id="fill-q-total">de 5</span>
       </div>
+      <p class="fill-context" id="fill-context" style="display:none;"></p>
       <p class="question-text" id="fill-sentence"></p>
       <div class="word-bank" id="fill-bank"></div>
       <div class="fill-answer-row" id="fill-answer-row"></div>
@@ -295,7 +301,7 @@
       <button class="btn-back" onclick="goBack()">← Salir</button>
       <div class="game-title-row">
         <span class="game-tag" id="listen-level-tag">B1</span>
-        <span class="game-name">🔊 Escucha y Elige</span>
+        <span class="game-name" id="listen-game-name">🔊 Escucha y Elige</span>
       </div>
       <div class="stars-row"><span class="star-icon">⭐</span><span id="listen-score">0</span></div>
     </div>
@@ -321,34 +327,36 @@
   </div>
 </div>
 
-<!-- ── SCREEN 5: TRANSLATE ── -->
-<div id="screen-translate" class="screen game-screen">
+<!-- ── SCREEN 5: ORDER (motor genérico: traducir / ordenar frases) ── -->
+<!-- Usado por: Traduce la Frase (B1), Ordena la Frase (A1),
+     Organiza la Oración (A2) y Traducción Inversa (A2) -->
+<div id="screen-order" class="screen game-screen">
   <div class="game-bg game-bg--teal">
     <div class="game-header">
       <button class="btn-back" onclick="goBack()">← Salir</button>
       <div class="game-title-row">
-        <span class="game-tag" id="translate-level-tag">B1</span>
-        <span class="game-name">🌐 Traduce la Frase</span>
+        <span class="game-tag" id="order-level-tag">B1</span>
+        <span class="game-name" id="order-game-name">🌐 Traduce la Frase</span>
       </div>
-      <div class="stars-row"><span class="star-icon">⭐</span><span id="translate-score">0</span></div>
+      <div class="stars-row"><span class="star-icon">⭐</span><span id="order-score">0</span></div>
     </div>
 
     <div class="game-card">
       <div class="progress-row">
-        <span id="translate-q-label">Pregunta 1</span>
-        <div class="progress-track"><div class="progress-fill" id="translate-progress"></div></div>
-        <span id="translate-q-total">de 5</span>
+        <span id="order-q-label">Pregunta 1</span>
+        <div class="progress-track"><div class="progress-fill" id="order-progress"></div></div>
+        <span id="order-q-total">de 5</span>
       </div>
-      <p class="translate-label">Traduce al inglés:</p>
-      <p class="question-text" id="translate-sentence"></p>
-      <div class="word-bank" id="translate-bank"></div>
-      <div class="fill-answer-row" id="translate-answer-row"></div>
-      <button class="btn-check" id="translate-check-btn" onclick="checkTranslate()">Verificar ✓</button>
+      <p class="translate-label" id="order-label">Traduce al inglés:</p>
+      <p class="question-text" id="order-sentence"></p>
+      <div class="word-bank" id="order-bank"></div>
+      <div class="fill-answer-row" id="order-answer-row"></div>
+      <button class="btn-check" id="order-check-btn" onclick="checkOrder()">Verificar ✓</button>
 
-      <div class="explain-box" id="translate-explain">
-        <p class="explain-result" id="translate-explain-result"></p>
-        <p class="explain-text" id="translate-explain-text"></p>
-        <button class="btn-next" id="translate-next-btn" onclick="nextTranslate()">Siguiente →</button>
+      <div class="explain-box" id="order-explain">
+        <p class="explain-result" id="order-explain-result"></p>
+        <p class="explain-text" id="order-explain-text"></p>
+        <button class="btn-next" id="order-next-btn" onclick="nextOrder()">Siguiente →</button>
       </div>
     </div>
   </div>

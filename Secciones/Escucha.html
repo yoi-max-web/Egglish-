@@ -862,6 +862,121 @@
         .completion-metric .num { font-size: 1.3rem; font-weight: 900; color: var(--blue); display: block; }
         .completion-metric .label { font-size: 0.75rem; font-weight: 700; color: var(--text-gray); text-transform: uppercase; }
 
+        /* ══════════ MODAL DE FINALIZACIÓN (ventana flotante / popup) ══════════ */
+        .completion-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 20, 30, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 5000;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+        .completion-overlay.show {
+            display: flex;
+            opacity: 1;
+        }
+        .completion-modal {
+            background: var(--bg-main);
+            border-radius: 24px;
+            padding: 36px 28px 28px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+            transform: translateY(24px) scale(0.94);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .completion-overlay.show .completion-modal {
+            transform: translateY(0) scale(1);
+        }
+        .completion-modal .completion-stars { margin-bottom: 6px; }
+        .completion-modal .completion-title { font-size: 1.35rem; }
+        .completion-message {
+            color: var(--text-gray);
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 22px;
+            line-height: 1.4;
+        }
+        .completion-score-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            margin-bottom: 26px;
+            flex-wrap: wrap;
+        }
+        .completion-ring {
+            width: 92px;
+            height: 92px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: white;
+            border: 6px solid var(--border-light);
+            background: var(--green);
+            box-shadow: 0 4px 0 var(--green-shadow);
+        }
+        .completion-ring.score-great { background: var(--green); box-shadow: 0 4px 0 var(--green-shadow); }
+        .completion-ring.score-good  { background: var(--blue);  box-shadow: 0 4px 0 var(--blue-shadow); }
+        .completion-ring.score-ok    { background: var(--yellow);box-shadow: 0 4px 0 var(--yellow-shadow); }
+        .completion-ring.score-low   { background: var(--red);   box-shadow: 0 4px 0 var(--red-shadow); }
+        .completion-score-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            text-align: left;
+        }
+        .completion-score-metric { text-align: left; }
+        .completion-score-metric .num { font-size: 1.15rem; font-weight: 900; color: var(--text-dark); display: block; }
+        .completion-score-metric .label { font-size: 0.72rem; font-weight: 700; color: var(--text-gray); text-transform: uppercase; }
+        .completion-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .completion-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .completion-btn-retry {
+            background: var(--blue);
+            color: white;
+            box-shadow: 0 4px 0 var(--blue-shadow);
+        }
+        .completion-btn-retry:active { box-shadow: 0 0 0 var(--blue-shadow); transform: translateY(4px); }
+        .completion-btn-library {
+            background: white;
+            color: var(--text-dark);
+            border: 2px solid var(--border-light);
+        }
+        .completion-btn-library:hover { background: #f7f7f7; }
+
+        html.dark .completion-modal { background: #0f172a; }
+        html.dark .completion-message { color: #94a3b8; }
+        html.dark .completion-score-metric .num { color: #f1f5f9; }
+        html.dark .completion-btn-library { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+        html.dark .completion-btn-library:hover { background: #273549; }
+
+        @media (max-width: 480px) {
+            .completion-modal { padding: 28px 20px 22px; }
+            .completion-score-row { gap: 16px; }
+        }
+
         /* Focus visible accesible, respeta colores existentes */
         .option:focus-visible,
         .tf-btn:focus-visible,
@@ -1008,6 +1123,7 @@
                     <button class="level-tab active" data-level="A1">🐣 A1 <span>Principiante</span></button>
                     <button class="level-tab" data-level="A2">🐥 A2 <span>Básico</span></button>
                     <button class="level-tab" data-level="B1">🦅 B1 <span>Intermedio</span></button>
+                    <button class="level-tab" data-level="B2">🎓 B2 <span>Avanzado</span></button>
                 </div>
 
                 <div class="listening-grid" id="listeningGrid">
@@ -1066,6 +1182,36 @@
                         <button class="btn-action" id="actionBtn" disabled>Comprobar</button>
                         <button class="btn-go-library" id="btnGoLibrary" type="button" style="display:none;">🏠 Ver biblioteca</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════ MODAL: FINALIZACIÓN DE LA PRUEBA DE ESCUCHA ══════════ -->
+        <div id="completionOverlay" class="completion-overlay" aria-hidden="true">
+            <div class="completion-modal" role="dialog" aria-modal="true" aria-labelledby="completionTitle">
+                <div class="completion-stars" id="completionStars">⭐⭐⭐</div>
+                <h3 class="completion-title" id="completionTitle">¡Excelente comprensión auditiva!</h3>
+                <p class="completion-message" id="completionMessage">Entendiste casi todo el audio a la perfección.</p>
+
+                <div class="completion-score-row">
+                    <div class="completion-ring score-great" id="completionRing">
+                        <span id="completionPercent">100%</span>
+                    </div>
+                    <div class="completion-score-metrics">
+                        <div class="completion-score-metric">
+                            <span class="num" id="completionCorrect">5/5</span>
+                            <span class="label">Correctas</span>
+                        </div>
+                        <div class="completion-score-metric">
+                            <span class="num" id="completionXp">+70 XP</span>
+                            <span class="label">Ganado</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="completion-actions">
+                    <button class="completion-btn completion-btn-retry" id="completionRetryBtn" type="button">🔄 Reintentar</button>
+                    <button class="completion-btn completion-btn-library" id="completionLibraryBtn" type="button">🏠 Volver a la biblioteca</button>
                 </div>
             </div>
         </div>
@@ -1137,137 +1283,249 @@
 
     // ── Banco de ejercicios ───────────────────────────────────
     const LESSON_DATA = {
+        // ── A1 (Principiante): 5 tarjetas, 1 audio temático + 5 preguntas cada una ──
         A1: [
-            { topic:"Presentaciones", type:"mc", audio:"Hello! My name is Anna. I am from Spain. Nice to meet you.", rate:0.8,
-              prompt:"¿Cómo se llama la persona?", options:["Anna","Laura","Sofía"], correct:0 },
-            { topic:"Saludos", type:"order", rate:0.8,
-              parts:["Hello, how are you?","I am fine, thank you.","See you later!"],
-              prompt:"Ordena la conversación como la escuchaste." },
-            { topic:"Números", type:"fill", audio:"I have three apples and two oranges.", rate:0.8,
-              sentence:"Ella tiene ___ manzanas.", options:["dos","tres","cuatro"], correct:1 },
-            { topic:"Colores", type:"img", audio:"My favorite color is blue. The sky is blue too.", rate:0.8,
-              prompt:"¿Cuál es el color favorito de la persona?",
-              options:[{emoji:"🔴",label:"Rojo"},{emoji:"🔵",label:"Azul"},{emoji:"🟢",label:"Verde"}], correct:1 },
-            { topic:"Familia", type:"img", audio:"This is my mother. This is my father. I love my family.", rate:0.8,
-              prompt:"¿De quién habla primero?",
-              options:[{emoji:"👩",label:"Madre"},{emoji:"👨",label:"Padre"},{emoji:"👶",label:"Bebé"}], correct:0 },
-            { topic:"Comida", type:"mc", audio:"I eat pizza on Fridays. I don't like vegetables very much.", rate:0.8,
-              prompt:"¿Qué come los viernes?", options:["Ensalada","Pizza","Sopa"], correct:1 },
-            { topic:"Escuela", type:"tf", audio:"I go to school every day except Sunday. My favorite subject is Math.", rate:0.8,
-              statement:"La persona va a la escuela todos los días excepto el domingo.", correct:true },
-            { topic:"Rutinas", type:"order", rate:0.8,
-              parts:["I wake up at seven.","I have breakfast.","I go to work."],
-              prompt:"Ordena la rutina diaria en el orden correcto." },
-            { topic:"Objetos", type:"mc", audio:"There is a book on the table and a pen next to it.", rate:0.8,
-              prompt:"¿Qué hay junto al libro?", options:["Un lápiz","Un cuaderno","Un bolígrafo"], correct:2 },
-            { topic:"Animales", type:"img", audio:"The dog is running in the park. The cat is sleeping on the sofa.", rate:0.8,
-              prompt:"¿Qué animal está corriendo?",
-              options:[{emoji:"🐶",label:"Perro"},{emoji:"🐱",label:"Gato"},{emoji:"🐦",label:"Pájaro"}], correct:0 },
-            { topic:"Países", type:"img", audio:"I am from Mexico. My friend is from France.", rate:0.8,
-              prompt:"¿De dónde es la persona que habla?",
-              options:[{emoji:"🇲🇽",label:"México"},{emoji:"🇫🇷",label:"Francia"},{emoji:"🇪🇸",label:"España"}], correct:0 },
-            { topic:"Profesiones", type:"mc", audio:"She is a doctor. She works at the hospital every morning.", rate:0.8,
-              prompt:"¿Cuál es su profesión?", options:["Profesora","Doctora","Enfermera"], correct:1 },
-            { topic:"Horarios", type:"fill", audio:"The store opens at nine in the morning and closes at six in the evening.", rate:0.8,
-              sentence:"La tienda abre a las ___ de la mañana.", options:["ocho","nueve","diez"], correct:1 },
-            { topic:"Transporte", type:"multi", audio:"I go to work by bus. Sometimes I ride my bike, but I never take the train.", rate:0.8,
-              prompt:"¿Qué medios de transporte usa? (Selecciona todos los correctos)",
-              options:["Autobús","Bicicleta","Tren","Carro"], correct:[0,1] }
+            {
+                topic: "Presentaciones personales", icon: "👋", color: "lc-blue", rate: 0.8,
+                audio: "Hi! My name is Laura. I am eleven years old and I am from Medellín, Colombia. I have one brother and one sister. My favorite color is purple and I love drawing animals.",
+                questions: [
+                    { type:"mc", prompt:"¿Cómo se llama la persona?", options:["Laura","Sara","Ana"], correct:0 },
+                    { type:"mc", prompt:"¿Cuántos años tiene?", options:["Diez","Once","Doce"], correct:1 },
+                    { type:"mc", prompt:"¿De dónde es?", options:["Medellín, Colombia","Bogotá, Colombia","Lima, Perú"], correct:0 },
+                    { type:"mc", prompt:"¿Cuál es su color favorito?", options:["Azul","Púrpura","Verde"], correct:1 },
+                    { type:"mc", prompt:"¿Qué le gusta hacer?", options:["Dibujar animales","Jugar fútbol","Cantar"], correct:0 }
+                ]
+            },
+            {
+                topic: "Mi familia", icon: "👨‍👩‍👧", color: "lc-purple", rate: 0.8,
+                audio: "This is my family. My father is a teacher and my mother is a doctor. I have one sister; her name is Emma and she is six years old. We have a small dog called Max.",
+                questions: [
+                    { type:"mc", prompt:"¿A qué se dedica el padre?", options:["Doctor","Maestro","Chef"], correct:1 },
+                    { type:"mc", prompt:"¿A qué se dedica la madre?", options:["Doctora","Maestra","Enfermera"], correct:0 },
+                    { type:"mc", prompt:"¿Cómo se llama la hermana?", options:["Emma","Anna","Lily"], correct:0 },
+                    { type:"mc", prompt:"¿Cuántos años tiene la hermana?", options:["Cinco","Seis","Siete"], correct:1 },
+                    { type:"mc", prompt:"¿Cómo se llama el perro?", options:["Rex","Max","Tom"], correct:1 }
+                ]
+            },
+            {
+                topic: "La hora y los horarios", icon: "🕘", color: "lc-green", rate: 0.8,
+                audio: "It is three o'clock in the afternoon. My English class starts at three thirty and finishes at four fifteen. After class, I go home and I have dinner at seven o'clock.",
+                questions: [
+                    { type:"mc", prompt:"¿Qué hora es al inicio del audio?", options:["Las tres","Las tres y media","Las cuatro"], correct:0 },
+                    { type:"mc", prompt:"¿A qué hora empieza la clase de inglés?", options:["A las tres","A las tres y media","A las cuatro"], correct:1 },
+                    { type:"mc", prompt:"¿A qué hora termina la clase?", options:["A las cuatro","A las cuatro y cuarto","A las cinco"], correct:1 },
+                    { type:"mc", prompt:"¿Qué hace después de la clase?", options:["Va al parque","Va a casa","Va a la tienda"], correct:1 },
+                    { type:"mc", prompt:"¿A qué hora cena?", options:["A las seis","A las siete","A las ocho"], correct:1 }
+                ]
+            },
+            {
+                topic: "Rutinas diarias", icon: "⏰", color: "lc-yellow", rate: 0.8,
+                audio: "Every day, I wake up at seven in the morning. I take a shower, and then I have breakfast with my family. After breakfast, I walk to school. In the afternoon, I do my homework and play with my dog.",
+                questions: [
+                    { type:"mc", prompt:"¿A qué hora se despierta?", options:["A las seis","A las siete","A las ocho"], correct:1 },
+                    { type:"mc", prompt:"¿Qué hace después de ducharse?", options:["Desayuna con su familia","Va a dormir","Sale a correr"], correct:0 },
+                    { type:"mc", prompt:"¿Cómo va a la escuela?", options:["En autobús","Caminando","En bicicleta"], correct:1 },
+                    { type:"mc", prompt:"¿Qué hace en la tarde, además de la tarea?", options:["Ve televisión","Juega con su perro","Cocina"], correct:1 },
+                    { type:"mc", prompt:"¿Con quién desayuna?", options:["Con sus amigos","Con su familia","Solo/a"], correct:1 }
+                ]
+            },
+            {
+                topic: "Los animales", icon: "🐶", color: "lc-red", rate: 0.8,
+                audio: "I have a small dog. His name is Rocky and he is brown and white. He likes to run in the park and he sleeps on my bed every night.",
+                questions: [
+                    { type:"mc", prompt:"¿Cómo se llama el perro?", options:["Rocky","Buddy","Charlie"], correct:0 },
+                    { type:"mc", prompt:"¿De qué color es?", options:["Negro","Café y blanco","Blanco y negro"], correct:1 },
+                    { type:"mc", prompt:"¿Qué le gusta hacer en el parque?", options:["Correr","Nadar","Dormir"], correct:0 },
+                    { type:"mc", prompt:"¿Dónde duerme el perro?", options:["En su propia cama","En la cama de la persona","En el jardín"], correct:1 },
+                    { type:"mc", prompt:"¿Con qué frecuencia duerme ahí?", options:["Una vez a la semana","Todas las noches","Nunca"], correct:1 }
+                ]
+            }
         ],
+        // ── A2 (Básico): 5 tarjetas, 1 audio temático + 5 preguntas cada una ──
         A2: [
-            { topic:"Restaurante", type:"order", rate:0.9,
-              parts:["Good evening, table for two please.","Here is the menu.","I would like the chicken, please."],
-              prompt:"Ordena la conversación en el restaurante." },
-            { topic:"Aeropuerto", type:"mc", audio:"Excuse me, where is gate twelve? Your flight is boarding now.", rate:0.9,
-              prompt:"¿Qué le dicen sobre el vuelo?", options:["Está retrasado","Está embarcando ahora","Fue cancelado"], correct:1 },
-            { topic:"Compras", type:"multi", audio:"I bought a shirt and some shoes, but I didn't buy a jacket.", rate:0.9,
-              prompt:"¿Qué compró? (Selecciona todo lo correcto)", options:["Camisa","Zapatos","Chaqueta","Pantalones"], correct:[0,1] },
-            { topic:"Hotel", type:"tf", audio:"The hotel has a swimming pool, but breakfast is not included in the price.", rate:0.9,
-              statement:"El desayuno está incluido en el precio.", correct:false },
-            { topic:"Médico", type:"fill", audio:"I have a headache and a sore throat. The doctor gave me some medicine.", rate:0.9,
-              sentence:"El médico le dio ___.", options:["una receta","medicina","una inyección"], correct:1 },
-            { topic:"Trabajo", type:"mc", audio:"I work as an engineer. I usually start work at eight and finish at five.", rate:0.9,
-              prompt:"¿A qué hora empieza a trabajar?", options:["A las siete","A las ocho","A las nueve"], correct:1 },
-            { topic:"Clima", type:"tf", audio:"It is raining today and it will probably rain tomorrow too. It is quite cold.", rate:0.9,
-              statement:"Se espera que también llueva mañana.", correct:true },
-            { topic:"Vacaciones", type:"img", audio:"We are going to the beach this summer. We will stay in a small hotel near the sea.", rate:0.9,
-              prompt:"¿A dónde van de vacaciones?",
-              options:[{emoji:"🏖️",label:"Playa"},{emoji:"⛰️",label:"Montaña"},{emoji:"🏙️",label:"Ciudad"}], correct:0 },
-            { topic:"Invitaciones", type:"mc", audio:"Would you like to come to my birthday party on Saturday? It starts at seven.", rate:0.9,
-              prompt:"¿Para qué es la invitación?", options:["Una boda","Un cumpleaños","Una graduación"], correct:1 },
-            { topic:"Indicaciones", type:"order", rate:0.9,
-              parts:["Go straight for two blocks.","Turn left at the traffic light.","The bank is on your right."],
-              prompt:"Ordena las indicaciones para llegar." },
-            { topic:"Teléfono", type:"fill", audio:"Hello, can I speak to Mr. Smith please? He is not available right now.", rate:0.9,
-              sentence:"El señor Smith ___ en este momento.", options:["está disponible","no está disponible","está de vacaciones"], correct:1 },
-            { topic:"Amigos", type:"multi", audio:"My friends like playing football and watching movies, but they don't like cooking.", rate:0.9,
-              prompt:"¿Qué les gusta hacer? (Selecciona todo lo correcto)", options:["Jugar fútbol","Ver películas","Cocinar","Leer"], correct:[0,1] }
+            {
+                topic: "Pedir comida en un restaurante", icon: "🍽️", color: "lc-yellow", rate: 0.9,
+                audio: "Good evening! Welcome to our restaurant. Would you like to see the menu? Yes, please. I would like a chicken salad and a glass of orange juice. And for dessert, I would like some chocolate cake.",
+                questions: [
+                    { type:"mc", prompt:"¿Qué pide de plato principal?", options:["Sopa","Ensalada de pollo","Pizza"], correct:1 },
+                    { type:"mc", prompt:"¿Qué bebida pide?", options:["Jugo de naranja","Agua","Café"], correct:0 },
+                    { type:"mc", prompt:"¿Qué pide de postre?", options:["Helado","Pastel de chocolate","Fruta"], correct:1 },
+                    { type:"mc", prompt:"¿Qué le pregunta el mesero primero?", options:["Si quiere ver el menú","Si quiere pagar","Si quiere una mesa"], correct:0 },
+                    { type:"mc", prompt:"¿En qué momento del día ocurre la escena?", options:["Por la mañana","Por la tarde","Por la noche"], correct:2 }
+                ]
+            },
+            {
+                topic: "En el aeropuerto", icon: "✈️", color: "lc-blue", rate: 0.9,
+                audio: "Excuse me, where is gate seven? Your flight to New York is boarding in fifteen minutes, so please hurry. You need to show your passport and boarding pass at the gate.",
+                questions: [
+                    { type:"mc", prompt:"¿Qué está buscando la persona?", options:["La puerta siete","La sala de espera","El baño"], correct:0 },
+                    { type:"mc", prompt:"¿A dónde va el vuelo?", options:["A Londres","A Nueva York","A México"], correct:1 },
+                    { type:"mc", prompt:"¿En cuánto tiempo embarca el vuelo?", options:["En cinco minutos","En diez minutos","En quince minutos"], correct:2 },
+                    { type:"mc", prompt:"¿Qué debe mostrar en la puerta?", options:["Su pasaporte y pase de abordar","Solo su pasaporte","Su boleto impreso"], correct:0 },
+                    { type:"mc", prompt:"¿Qué le recomiendan hacer?", options:["Esperar tranquilo/a","Darse prisa","Cambiar de vuelo"], correct:1 }
+                ]
+            },
+            {
+                topic: "De compras", icon: "🛍️", color: "lc-red", rate: 0.9,
+                audio: "I went shopping yesterday. I bought a blue jacket and a pair of black shoes, but I didn't buy a hat because it was too expensive. The shoes were on sale, so I paid less money.",
+                questions: [
+                    { type:"mc", prompt:"¿Cuándo fue de compras?", options:["Hoy","Ayer","La semana pasada"], correct:1 },
+                    { type:"mc", prompt:"¿Qué compró?", options:["Una chaqueta azul y zapatos negros","Un sombrero y una chaqueta","Zapatos y una bufanda"], correct:0 },
+                    { type:"mc", prompt:"¿Por qué no compró el sombrero?", options:["No le gustó","Era muy caro","No había de su talla"], correct:1 },
+                    { type:"mc", prompt:"¿Qué pasó con los zapatos?", options:["Estaban rotos","Estaban en oferta","Eran de otro color"], correct:1 },
+                    { type:"mc", prompt:"¿Cómo le fue con el precio de los zapatos?", options:["Pagó más de lo normal","Pagó menos dinero","No pagó nada"], correct:1 }
+                ]
+            },
+            {
+                topic: "Planeando unas vacaciones", icon: "🏔️", color: "lc-teal", rate: 0.9,
+                audio: "This winter, my family and I are going to the mountains. We are going to ski every day and drink hot chocolate at night. We will stay in a small cabin near a lake for one week.",
+                questions: [
+                    { type:"mc", prompt:"¿A dónde van de vacaciones?", options:["A la playa","A la montaña","A la ciudad"], correct:1 },
+                    { type:"mc", prompt:"¿En qué estación del año viajan?", options:["En verano","En invierno","En primavera"], correct:1 },
+                    { type:"mc", prompt:"¿Qué van a hacer todos los días?", options:["Nadar","Esquiar","Pescar"], correct:1 },
+                    { type:"mc", prompt:"¿Dónde se van a hospedar?", options:["En un hotel","En una cabaña cerca de un lago","En casa de un familiar"], correct:1 },
+                    { type:"mc", prompt:"¿Cuánto tiempo se van a quedar?", options:["Un fin de semana","Una semana","Un mes"], correct:1 }
+                ]
+            },
+            {
+                topic: "En el consultorio médico", icon: "🩺", color: "lc-purple", rate: 0.9,
+                audio: "I don't feel very well today. I have a headache and a little fever. The doctor says I should rest at home, drink a lot of water, and take some medicine twice a day.",
+                questions: [
+                    { type:"mc", prompt:"¿Cómo se siente la persona?", options:["Muy bien","No muy bien","Feliz"], correct:1 },
+                    { type:"mc", prompt:"¿Qué síntomas tiene?", options:["Dolor de cabeza y fiebre","Dolor de estómago","Tos y gripe"], correct:0 },
+                    { type:"mc", prompt:"¿Qué le recomienda el doctor primero?", options:["Ir al hospital","Descansar en casa","Hacer ejercicio"], correct:1 },
+                    { type:"mc", prompt:"¿Qué más le recomienda beber?", options:["Café","Mucha agua","Jugo"], correct:1 },
+                    { type:"mc", prompt:"¿Cuántas veces al día debe tomar la medicina?", options:["Una vez","Dos veces","Tres veces"], correct:1 }
+                ]
+            }
         ],
+        // ── B1 (Intermedio): 5 tarjetas, 1 audio temático + 5 preguntas cada una ──
         B1: [
-            { topic:"Entrevistas", type:"mc", rate:1.0,
-              audio:"Good morning. Thank you for joining us today. Can you tell us about your new project? Yes, of course. We have been working on this project for almost two years, and we are very excited to finally launch it next month.",
-              prompt:"¿Cuánto tiempo llevan trabajando en el proyecto?", options:["Un año","Casi dos años","Tres años"], correct:1 },
-            { topic:"Entrevistas", type:"tf", rate:1.0,
-              audio:"Good morning. Thank you for joining us today. Can you tell us about your new project? Yes, of course. We have been working on this project for almost two years, and we are very excited to finally launch it next month.",
-              statement:"El proyecto se lanzará el próximo mes.", correct:true },
-            { topic:"Podcasts", type:"mc", rate:1.0,
-              audio:"Welcome back to the show. Today we are talking about how technology is changing education. More and more students are learning online, and many schools now use tablets instead of textbooks.",
-              prompt:"¿De qué tema habla el podcast?", options:["Tecnología en la educación","Deportes","Cocina"], correct:0 },
-            { topic:"Podcasts", type:"mc", rate:1.0,
-              audio:"Welcome back to the show. Today we are talking about how technology is changing education. More and more students are learning online, and many schools now use tablets instead of textbooks.",
-              prompt:"¿Qué usan las escuelas en lugar de libros de texto?", options:["Computadoras","Tabletas","Pizarrones"], correct:1 },
-            { topic:"Noticias sencillas", type:"tf", rate:1.0,
-              audio:"In today's news, the city announced a new park will open next spring. The park will have a lake, walking paths, and an area for children to play.",
-              statement:"El parque abrirá la próxima primavera.", correct:true },
-            { topic:"Noticias sencillas", type:"mc", rate:1.0,
-              audio:"In today's news, the city announced a new park will open next spring. The park will have a lake, walking paths, and an area for children to play.",
-              prompt:"¿Qué tendrá el parque?", options:["Un lago y áreas de juego","Un museo","Un estadio"], correct:0 },
-            { topic:"Historias", type:"mc", rate:1.0,
-              audio:"Once upon a time, a young girl found a mysterious box in her grandmother's attic. Inside the box, there was an old letter and a golden key.",
-              prompt:"¿Dónde encontró la caja?", options:["En el sótano","En el ático","En el jardín"], correct:1 },
-            { topic:"Historias", type:"mc", rate:1.0,
-              audio:"Once upon a time, a young girl found a mysterious box in her grandmother's attic. Inside the box, there was an old letter and a golden key.",
-              prompt:"¿Qué había dentro de la caja?", options:["Una carta y una llave dorada","Dinero","Fotografías"], correct:0 },
-            { topic:"Experiencias de viaje", type:"mc", rate:1.0,
-              audio:"Last year, I traveled to Japan for the first time. The food was amazing, and the people were incredibly kind. I especially loved visiting the temples in Kyoto.",
-              prompt:"¿A qué país viajó?", options:["China","Japón","Corea"], correct:1 },
-            { topic:"Experiencias de viaje", type:"mc", rate:1.0,
-              audio:"Last year, I traveled to Japan for the first time. The food was amazing, and the people were incredibly kind. I especially loved visiting the temples in Kyoto.",
-              prompt:"¿Qué le gustó especialmente?", options:["Los templos de Kioto","Las playas","Las montañas"], correct:0 },
-            { topic:"Opiniones", type:"mc", rate:1.0,
-              audio:"In my opinion, remote work has many benefits, but it can also make people feel isolated. I think a mix of home and office work is the best solution.",
-              prompt:"¿Qué solución propone la persona?", options:["Trabajar siempre en casa","Una mezcla de casa y oficina","Trabajar siempre en la oficina"], correct:1 },
-            { topic:"Opiniones", type:"tf", rate:1.0,
-              audio:"In my opinion, remote work has many benefits, but it can also make people feel isolated. I think a mix of home and office work is the best solution.",
-              statement:"La persona piensa que el trabajo remoto no tiene desventajas.", correct:false },
-            { topic:"Debates simples", type:"mc", rate:1.0,
-              audio:"Some people believe that homework helps students learn better. Others argue that too much homework causes stress and takes away free time.",
-              prompt:"¿Cuál es un argumento en contra de la tarea?", options:["Ayuda a aprender mejor","Causa estrés y quita tiempo libre","Es divertida"], correct:1 },
-            { topic:"Debates simples", type:"mc", rate:1.0,
-              audio:"Some people believe that homework helps students learn better. Others argue that too much homework causes stress and takes away free time.",
-              prompt:"¿Cuál es un argumento a favor de la tarea?", options:["Ayuda a aprender mejor","No sirve para nada","Quita tiempo libre"], correct:0 },
-            { topic:"Narraciones", type:"mc", rate:1.0,
-              audio:"The old sailor looked at the ocean and remembered his first voyage many years ago. He had been young and afraid, but the sea had taught him to be brave.",
-              prompt:"¿Qué le enseñó el mar?", options:["A tener miedo","A ser valiente","A nadar"], correct:1 },
-            { topic:"Narraciones", type:"tf", rate:1.0,
-              audio:"The old sailor looked at the ocean and remembered his first voyage many years ago. He had been young and afraid, but the sea had taught him to be brave.",
-              statement:"El marinero recuerda su primer viaje.", correct:true },
-            { topic:"Conversaciones entre varias personas", type:"mc", rate:1.0,
-              audio:"Hey, are you coming to the meeting? Yes, but I might be a few minutes late. Don't worry, we can start without you and catch you up later.",
-              prompt:"¿Qué va a pasar si llega tarde?", options:["No podrá entrar","Empezarán sin ella y la pondrán al día","Cancelarán la reunión"], correct:1 },
-            { topic:"Conversaciones entre varias personas", type:"tf", rate:1.0,
-              audio:"Hey, are you coming to the meeting? Yes, but I might be a few minutes late. Don't worry, we can start without you and catch you up later.",
-              statement:"La persona llegará exactamente a tiempo.", correct:false }
+            {
+                topic: "Entrevista de trabajo", icon: "🎙️", color: "lc-blue", rate: 1.0,
+                audio: "Good morning. Please, have a seat. So, tell me a little about yourself and why you are interested in this position. Well, I have been working in marketing for three years. I enjoy creating campaigns and analyzing results. I applied for this job because your company has an excellent reputation and I would like to grow professionally here. That sounds great. Do you have experience working in a team? Yes, in my last job I worked with a team of five people and we achieved all our quarterly goals.",
+                questions: [
+                    { type:"mc", prompt:"¿Cuántos años de experiencia en marketing tiene el candidato?", options:["Dos años","Tres años","Cinco años"], correct:1 },
+                    { type:"mc", prompt:"¿Por qué le interesa trabajar en esa empresa?", options:["Por el salario","Porque tiene buena reputación y quiere crecer profesionalmente","Porque queda cerca de su casa"], correct:1 },
+                    { type:"mc", prompt:"¿Con cuántas personas trabajaba en su empleo anterior?", options:["Tres","Cuatro","Cinco"], correct:2 },
+                    { type:"mc", prompt:"¿Qué le pregunta el entrevistador sobre trabajo en equipo?", options:["Si le gusta trabajar solo","Si tiene experiencia trabajando en equipo","Si sabe liderar equipos grandes"], correct:1 },
+                    { type:"mc", prompt:"¿Qué lograron en el trabajo anterior?", options:["Ganar un premio","Abrir nuevas sucursales","Alcanzar todas las metas trimestrales"], correct:2 }
+                ]
+            },
+            {
+                topic: "Planes de viaje", icon: "🧳", color: "lc-green", rate: 1.0,
+                audio: "Hey, have you decided where you are going for your holidays yet? Yes! I am planning to visit Portugal. I have always wanted to go there. I am going to spend a week in Lisbon and then take a train to Porto. I have already booked the hotel and the flights. I am so excited! That sounds amazing. Are you going alone or with someone? I am going with my cousin. She speaks a little Portuguese, so that will be very helpful.",
+                questions: [
+                    { type:"mc", prompt:"¿A qué país va de vacaciones?", options:["España","Italia","Portugal"], correct:2 },
+                    { type:"mc", prompt:"¿Cuánto tiempo va a pasar en Lisboa?", options:["Tres días","Una semana","Dos semanas"], correct:1 },
+                    { type:"mc", prompt:"¿Qué va a hacer después de Lisboa?", options:["Volver a casa","Tomar un tren a Oporto","Ir a la playa"], correct:1 },
+                    { type:"mc", prompt:"¿Con quién va de viaje?", options:["Con un amigo","Con su primo/a","Sola"], correct:1 },
+                    { type:"mc", prompt:"¿Qué habilidad tiene su acompañante que será útil?", options:["Habla portugués","Conoce el país","Tiene un coche"], correct:0 }
+                ]
+            },
+            {
+                topic: "Anécdota del pasado", icon: "📖", color: "lc-red", rate: 1.0,
+                audio: "Something funny happened to me last weekend. I was walking to the supermarket when I saw my old school teacher. I hadn't seen her in almost ten years! She recognized me immediately and we stopped to chat. She told me that she retired last year and that she was really enjoying her free time. She was taking painting classes and learning how to cook Italian food. It was a really nice surprise.",
+                questions: [
+                    { type:"mc", prompt:"¿Cuándo ocurrió la anécdota?", options:["El fin de semana pasado","Hace un mes","El año pasado"], correct:0 },
+                    { type:"mc", prompt:"¿A quién encontró mientras caminaba?", options:["A un vecino","A su maestra de la escuela","A un amigo del trabajo"], correct:1 },
+                    { type:"mc", prompt:"¿Hace cuánto tiempo no la veía?", options:["Cinco años","Siete años","Casi diez años"], correct:2 },
+                    { type:"mc", prompt:"¿Qué le contó la maestra sobre su situación actual?", options:["Que seguía trabajando","Que se había jubilado el año anterior","Que se había mudado"], correct:1 },
+                    { type:"mc", prompt:"¿Qué actividades hace ahora la maestra en su tiempo libre?", options:["Leer y viajar","Tomar clases de pintura y aprender cocina italiana","Hacer ejercicio y estudiar idiomas"], correct:1 }
+                ]
+            },
+            {
+                topic: "Tecnología en la educación", icon: "🎧", color: "lc-yellow", rate: 1.0,
+                audio: "Today on our podcast we are discussing how technology is changing the way students learn. More and more schools are using tablets and interactive whiteboards instead of traditional textbooks. Online platforms also allow students to access lessons from anywhere in the world. However, some teachers are concerned because students can get easily distracted by social media during class. Experts suggest that the key is to find a balance between technology and traditional teaching methods.",
+                questions: [
+                    { type:"mc", prompt:"¿De qué trata el podcast?", options:["Cómo la tecnología cambia el aprendizaje","Los mejores videojuegos educativos","Cómo estudiar sin internet"], correct:0 },
+                    { type:"mc", prompt:"¿Qué están usando las escuelas en lugar de libros de texto tradicionales?", options:["Robots y drones","Tabletas y pizarras interactivas","Películas y documentales"], correct:1 },
+                    { type:"mc", prompt:"¿Qué ventaja mencionan de las plataformas en línea?", options:["Son gratuitas","Permiten acceder a clases desde cualquier lugar","Tienen mejores profesores"], correct:1 },
+                    { type:"mc", prompt:"¿Cuál es la preocupación de algunos maestros?", options:["Que los estudiantes no tienen dispositivos","Que los estudiantes se distraen con redes sociales","Que la tecnología es muy costosa"], correct:1 },
+                    { type:"mc", prompt:"¿Qué sugieren los expertos?", options:["Eliminar la tecnología del aula","Usar solo tecnología","Encontrar un equilibrio entre tecnología y métodos tradicionales"], correct:2 }
+                ]
+            },
+            {
+                topic: "Noticias locales", icon: "📰", color: "lc-purple", rate: 1.0,
+                audio: "In local news today, the city council announced a major project to improve public transportation. Starting next January, three new bus routes will be added to connect the suburbs with the city center. The new routes will run every fifteen minutes during peak hours. The mayor explained that the goal is to reduce traffic and encourage more people to leave their cars at home. The project will cost approximately two million dollars and is expected to be completed by the end of next year.",
+                questions: [
+                    { type:"mc", prompt:"¿Qué anunció el ayuntamiento?", options:["Un nuevo parque público","Mejoras en el transporte público","La construcción de una nueva carretera"], correct:1 },
+                    { type:"mc", prompt:"¿Cuántas rutas de autobús nuevas habrá?", options:["Dos","Tres","Cinco"], correct:1 },
+                    { type:"mc", prompt:"¿Cuándo comenzará el proyecto?", options:["En octubre","En enero del próximo año","En verano"], correct:1 },
+                    { type:"mc", prompt:"¿Con qué frecuencia circularán los autobuses en horas pico?", options:["Cada cinco minutos","Cada quince minutos","Cada media hora"], correct:1 },
+                    { type:"mc", prompt:"¿Cuánto costará aproximadamente el proyecto?", options:["Un millón de dólares","Dos millones de dólares","Cinco millones de dólares"], correct:1 }
+                ]
+            }
+        ],
+        // ── B2 (Avanzado): 5 tarjetas, 1 audio temático + 5 preguntas cada una ──
+        B2: [
+            {
+                topic: "Debate sobre tecnología", icon: "💻", color: "lc-blue", rate: 1.0,
+                audio: "Welcome to today's panel discussion on artificial intelligence and the future of work. Our first speaker argues that AI will inevitably replace millions of jobs in manufacturing, logistics, and even administrative roles, leading to widespread unemployment unless governments implement policies like universal basic income. However, the second speaker contends that throughout history, technological revolutions have always created more jobs than they destroyed. She points out that AI will likely generate entirely new industries we cannot yet imagine, much like the internet did in the 1990s. The debate remains unresolved, but both agree that retraining programs for displaced workers are urgently needed.",
+                questions: [
+                    { type:"mc", prompt:"¿Cuál es el argumento principal del primer ponente?", options:["La IA creará millones de empleos nuevos","La IA reemplazará millones de trabajos y causará desempleo masivo","La IA solo afectará a los trabajos creativos"], correct:1 },
+                    { type:"mc", prompt:"¿Qué política sugiere el primer ponente para hacer frente a este problema?", options:["Prohibir el uso de IA en empresas","Implementar una renta básica universal","Reducir la jornada laboral a cuatro días"], correct:1 },
+                    { type:"mc", prompt:"¿Qué argumento da la segunda ponente basándose en la historia?", options:["Las revoluciones tecnológicas siempre han destruido más empleos de los que crean","Las revoluciones tecnológicas siempre han creado más empleos de los que destruyen","La tecnología no tiene impacto real en el mercado laboral"], correct:1 },
+                    { type:"mc", prompt:"¿Con qué ejemplo histórico compara la segunda ponente el impacto de la IA?", options:["La Revolución Industrial del siglo XVIII","La expansión del ferrocarril en el siglo XIX","El impacto de internet en los años 90"], correct:2 },
+                    { type:"mc", prompt:"¿En qué punto concreto están de acuerdo ambos ponentes?", options:["En que la IA es una amenaza que debe regularse estrictamente","En que los programas de reentrenamiento para trabajadores desplazados son urgentes","En que los gobiernos deben financiar la investigación en IA"], correct:1 }
+                ]
+            },
+            {
+                topic: "Opiniones sobre medio ambiente", icon: "🌿", color: "lc-green", rate: 1.0,
+                audio: "Good evening. Tonight we look at the growing debate over plastic pollution in our oceans. Environmental groups are pushing for an immediate global ban on single-use plastics, arguing that marine ecosystems are collapsing at an alarming rate. Over eight million tonnes of plastic enter the ocean every year, devastating fish populations and entering the human food chain through seafood. Industry representatives, however, warn that an abrupt ban would severely disrupt supply chains and cost hundreds of thousands of jobs without adequate alternatives in place. Scientists propose a middle ground: a phased elimination of the most harmful plastics over ten years, combined with investment in biodegradable materials and improved waste management infrastructure in developing nations.",
+                questions: [
+                    { type:"mc", prompt:"¿Qué están exigiendo los grupos medioambientalistas?", options:["Una reducción gradual del plástico durante veinte años","Una prohibición global e inmediata de los plásticos de un solo uso","Mayor inversión en reciclaje de plástico"], correct:1 },
+                    { type:"mc", prompt:"¿Cuántas toneladas de plástico entran al océano cada año según el reportaje?", options:["Cuatro millones","Ocho millones","Doce millones"], correct:1 },
+                    { type:"mc", prompt:"¿Cómo afecta el plástico oceánico a los seres humanos de manera indirecta?", options:["A través de la contaminación del aire","Entrando a la cadena alimentaria humana a través del marisco","Contaminando el agua potable directamente"], correct:1 },
+                    { type:"mc", prompt:"¿Cuál es la advertencia de los representantes de la industria ante una prohibición abrupta?", options:["Que los consumidores no aceptarán los materiales alternativos","Que disrumpirá cadenas de suministro y costará cientos de miles de empleos","Que la tecnología para reemplazar el plástico aún no existe"], correct:1 },
+                    { type:"mc", prompt:"¿Qué proponen los científicos como término medio?", options:["Prohibir solo los plásticos en océanos pero no en tierra","Una eliminación gradual de los plásticos más dañinos en diez años con inversión en alternativas","Crear impuestos elevados al plástico para desincentivar su uso"], correct:1 }
+                ]
+            },
+            {
+                topic: "Noticias de actualidad", icon: "📡", color: "lc-yellow", rate: 1.0,
+                audio: "In international news, world leaders gathered this week in Geneva for an emergency summit on global food security. The United Nations warned that approximately 690 million people currently face hunger, a number that has risen sharply due to supply chain disruptions, climate-related droughts, and ongoing regional conflicts. The summit produced a landmark agreement in which forty-two countries pledged to redirect agricultural subsidies toward sustainable farming practices and to cut food waste in half by 2030. Critics, however, expressed skepticism, noting that similar pledges made at previous summits largely went unfulfilled. The UN Secretary-General called the agreement a historic step but acknowledged that implementation would require unprecedented international cooperation.",
+                questions: [
+                    { type:"mc", prompt:"¿Dónde tuvo lugar la cumbre de emergencia sobre seguridad alimentaria?", options:["Bruselas","Ginebra","Nueva York"], correct:1 },
+                    { type:"mc", prompt:"¿Cuántas personas enfrentan hambre según la ONU?", options:["Aproximadamente 490 millones","Aproximadamente 590 millones","Aproximadamente 690 millones"], correct:2 },
+                    { type:"mc", prompt:"¿Cuáles son las tres causas mencionadas del aumento del hambre?", options:["Guerras, inflación y pérdida de empleo","Disrupciones en la cadena de suministro, sequías climáticas y conflictos regionales","Deuda externa, corrupción y mala gobernanza"], correct:1 },
+                    { type:"mc", prompt:"¿Cuál es uno de los compromisos del acuerdo firmado por los 42 países?", options:["Duplicar la producción agrícola para 2025","Reducir el desperdicio de alimentos a la mitad para 2030","Prohibir la exportación de granos durante cinco años"], correct:1 },
+                    { type:"mc", prompt:"¿Cómo calificó el Secretario General de la ONU el acuerdo, y cuál fue su advertencia?", options:["Lo llamó insuficiente y pidió medidas más drásticas","Lo llamó un paso histórico pero reconoció que requeriría cooperación internacional sin precedentes","Lo rechazó por no incluir a suficientes países"], correct:1 }
+                ]
+            },
+            {
+                topic: "Psicología y comportamiento", icon: "🧠", color: "lc-red", rate: 1.0,
+                audio: "Welcome to Mind Matters, the podcast where we explore the science of human behavior. Today's topic is procrastination, the tendency to delay tasks despite knowing the negative consequences. Researchers have found that procrastination is not primarily a time management problem, as it was long believed, but rather an emotional regulation issue. People avoid tasks that generate anxiety, boredom, or self-doubt, seeking immediate relief through distracting activities. A study from the University of Sheffield found that chronic procrastinators reported higher levels of stress and lower well-being compared to non-procrastinators, even though they initially felt better by avoiding tasks. Practical strategies include breaking large tasks into small steps, setting implementation intentions such as 'I will do this task at nine o'clock tomorrow morning', and practising self-compassion rather than self-criticism after a delay.",
+                questions: [
+                    { type:"mc", prompt:"¿Cuál era la creencia tradicional sobre la procrastinación que los investigadores han refutado?", options:["Que era un problema de falta de motivación","Que era principalmente un problema de gestión del tiempo","Que estaba relacionada con baja inteligencia"], correct:1 },
+                    { type:"mc", prompt:"¿Qué tipo de problema identifican ahora los investigadores que es la procrastinación?", options:["Un problema de organización y planificación","Un problema de regulación emocional","Un trastorno de atención como el TDAH"], correct:1 },
+                    { type:"mc", prompt:"¿Qué hallazgo principal tuvo el estudio de la Universidad de Sheffield?", options:["Los procrastinadores crónicos son más creativos","Los procrastinadores crónicos reportaron más estrés y menor bienestar","Los procrastinadores crónicos tienen mejor memoria a corto plazo"], correct:1 },
+                    { type:"mc", prompt:"¿Qué es una 'implementation intention' según el podcast?", options:["Una lista de metas anuales","Un plan específico como 'Haré esta tarea a las nueve de mañana'","Una aplicación de gestión del tiempo"], correct:1 },
+                    { type:"mc", prompt:"¿Qué estrategia emocional recomienda el podcast después de haber pospuesto una tarea?", options:["La autoexigencia y la autocrítica","La compasión hacia uno mismo en lugar de la autocrítica","Hablar con un psicólogo profesional"], correct:1 }
+                ]
+            },
+            {
+                topic: "Historia y sociedad", icon: "🏛️", color: "lc-teal", rate: 1.0,
+                audio: "In this week's history feature, we examine the long-term consequences of the Industrial Revolution on urban society in nineteenth-century Britain. As factories expanded rapidly, millions of rural workers migrated to cities like Manchester and Birmingham in search of employment. This dramatic urbanization created severe overcrowding, poor sanitation, and widespread child labor. However, it also gave rise to a powerful labor movement that successfully campaigned for workers' rights, including the ten-hour workday and the abolition of child labor in factories. Historians argue that while the Industrial Revolution generated unprecedented economic growth, its social costs were immense and fell disproportionately on the working class. The reforms it ultimately triggered, however, laid the foundation for the modern welfare state.",
+                questions: [
+                    { type:"mc", prompt:"¿A qué ciudades migraron principalmente los trabajadores rurales durante la Revolución Industrial en Gran Bretaña?", options:["Londres y Edimburgo","Manchester y Birmingham","Liverpool y Leeds"], correct:1 },
+                    { type:"mc", prompt:"¿Cuáles fueron tres consecuencias negativas de la rápida urbanización mencionadas en el audio?", options:["Desempleo, criminalidad y contaminación del aire","Superpoblación, saneamiento deficiente y trabajo infantil generalizado","Pobreza rural, migración forzada y escasez de alimentos"], correct:1 },
+                    { type:"mc", prompt:"¿Qué logro específico obtuvo el movimiento obrero relacionado con las horas de trabajo?", options:["La jornada laboral de ocho horas","La jornada laboral de diez horas","El derecho a la huelga general"], correct:1 },
+                    { type:"mc", prompt:"Según los historiadores, ¿sobre qué clase social recayeron desproporcionadamente los costes sociales de la Revolución Industrial?", options:["La clase media comerciante","La aristocracia terrateniente","La clase trabajadora"], correct:2 },
+                    { type:"mc", prompt:"¿Qué institución moderna sentaron las bases las reformas impulsadas por la Revolución Industrial?", options:["El sistema educativo universal","El estado del bienestar moderno","El sistema bancario central"], correct:1 }
+                ]
+            }
         ]
     };
 
     // ── Estado global ─────────────────────────────────────────
     const STATE = {
         level: 'A1',
-        index: 0,
+        cardIndex: 0,            // índice de la tarjeta/tema activo dentro del nivel
+        index: 0,                // índice de la pregunta (0-4) dentro de la tarjeta activa
         checked: false,
         completed: false,
-        audioCompleted: false,
+        audioCompleted: false,   // audio escuchado completo (desbloquea la pregunta actual)
+        cardAudioCompleted: false, // audio escuchado al menos 1 vez en esta tarjeta
         audioPlaying: false,
         selected: null,          // mc / tf / img / fill
         orderSelected: [],       // order
@@ -1325,59 +1583,8 @@
     const btnBackLibrary     = document.getElementById('btnBackLibrary');
     const btnGoLibrary       = document.getElementById('btnGoLibrary');
 
-    // Metadatos visuales de cada listening para la biblioteca
-    const CARD_META = {
-        A1: [
-            { icon:'👋', color:'lc-blue' },
-            { icon:'💬', color:'lc-green' },
-            { icon:'🔢', color:'lc-yellow' },
-            { icon:'🎨', color:'lc-red' },
-            { icon:'👨‍👩‍👧', color:'lc-purple' },
-            { icon:'🍕', color:'lc-teal' },
-            { icon:'🏫', color:'lc-blue' },
-            { icon:'⏰', color:'lc-green' },
-            { icon:'📚', color:'lc-yellow' },
-            { icon:'🐶', color:'lc-red' },
-            { icon:'🌍', color:'lc-purple' },
-            { icon:'👩‍⚕️', color:'lc-teal' },
-            { icon:'🕘', color:'lc-blue' },
-            { icon:'🚌', color:'lc-green' }
-        ],
-        A2: [
-            { icon:'🍽️', color:'lc-yellow' },
-            { icon:'✈️', color:'lc-blue' },
-            { icon:'🛍️', color:'lc-red' },
-            { icon:'🏨', color:'lc-purple' },
-            { icon:'🩺', color:'lc-teal' },
-            { icon:'💼', color:'lc-green' },
-            { icon:'🌦️', color:'lc-blue' },
-            { icon:'🏖️', color:'lc-yellow' },
-            { icon:'🎂', color:'lc-red' },
-            { icon:'🧭', color:'lc-purple' },
-            { icon:'☎️', color:'lc-teal' },
-            { icon:'🤝', color:'lc-green' }
-        ],
-        B1: [
-            { icon:'🎙️', color:'lc-blue' },
-            { icon:'🎙️', color:'lc-blue' },
-            { icon:'🎧', color:'lc-green' },
-            { icon:'🎧', color:'lc-green' },
-            { icon:'📰', color:'lc-yellow' },
-            { icon:'📰', color:'lc-yellow' },
-            { icon:'📖', color:'lc-red' },
-            { icon:'📖', color:'lc-red' },
-            { icon:'🧳', color:'lc-purple' },
-            { icon:'🧳', color:'lc-purple' },
-            { icon:'💭', color:'lc-teal' },
-            { icon:'💭', color:'lc-teal' },
-            { icon:'⚖️', color:'lc-blue' },
-            { icon:'⚖️', color:'lc-blue' },
-            { icon:'⛵', color:'lc-green' },
-            { icon:'⛵', color:'lc-green' },
-            { icon:'👥', color:'lc-yellow' },
-            { icon:'👥', color:'lc-yellow' }
-        ]
-    };
+    // Nota: el ícono/color de cada tarjeta ahora vive directamente en
+    // LESSON_DATA[nivel][i].icon / .color (ver banco de ejercicios arriba).
 
     let libraryLevel = 'A1';
 
@@ -1470,19 +1677,29 @@
         }
         return arr;
     }
-    function currentExercises() { return LESSON_DATA[STATE.level]; }
-    function currentExercise()  { return currentExercises()[STATE.index]; }
+    // La tarjeta activa (tema + audio) dentro del nivel actual.
+    function currentCard() { return LESSON_DATA[STATE.level][STATE.cardIndex]; }
+    // Las 5 preguntas de la tarjeta activa.
+    function currentExercises() { return currentCard().questions; }
+    // Combina los datos de la tarjeta (tema, audio, rate, icon, color) con
+    // los de la pregunta activa (type, prompt, options, correct, etc.),
+    // para que el resto del código (que espera un solo objeto "ex") no
+    // necesite cambios adicionales.
+    function currentExercise() {
+        return Object.assign({}, currentCard(), currentExercises()[STATE.index]);
+    }
 
     // ─────────────────────────────────────────────────────────
     //  INICIAR / REINICIAR NIVEL
     // ─────────────────────────────────────────────────────────
     function initLesson() {
-        STATE.index          = 0;
-        STATE.checked        = false;
-        STATE.completed      = false;
-        STATE.correctInLevel = 0;
-        STATE.totalInLevel   = 0;
-        STATE.streak         = 0;
+        STATE.index             = 0;
+        STATE.checked           = false;
+        STATE.completed         = false;
+        STATE.cardAudioCompleted = false;
+        STATE.correctInLevel    = 0;
+        STATE.totalInLevel      = 0;
+        STATE.streak            = 0;
         updateStatsUI();
         updateProgress();
         loadExercise();
@@ -1490,8 +1707,24 @@
 
     // ─────────────────────────────────────────────────────────
     //  AUDIO — bloqueo real hasta el evento "end"
+    //  Como ahora las 5 preguntas de una tarjeta comparten el MISMO
+    //  audio, solo se exige escucharlo completo la PRIMERA vez dentro
+    //  de esa tarjeta (STATE.cardAudioCompleted). En las preguntas
+    //  siguientes de la misma tarjeta, el audio queda disponible para
+    //  repetir, pero ya no bloquea las respuestas.
     // ─────────────────────────────────────────────────────────
     function resetAudioState() {
+        if (STATE.cardAudioCompleted) {
+            STATE.audioCompleted = true;
+            STATE.audioPlaying   = false;
+            audioProgressBar.style.width = '100%';
+            audioBtn.classList.remove('playing');
+            audioWrapper.classList.remove('playing');
+            audioStatus.textContent = 'Ya escuchaste el audio ✅ (puedes repetirlo)';
+            audioStatus.className = 'audio-status is-ready';
+            unlockExerciseControls();
+            return;
+        }
         STATE.audioCompleted = false;
         STATE.audioPlaying   = false;
         audioProgressBar.style.width = '0%';
@@ -1555,6 +1788,7 @@
         utterance.onend = () => {
             STATE.audioPlaying   = false;
             STATE.audioCompleted = true;
+            STATE.cardAudioCompleted = true;
             audioBtn.classList.remove('playing');
             audioWrapper.classList.remove('playing');
             audioProgressBar.style.width = '100%';
@@ -1608,7 +1842,9 @@
             return;
         }
 
-        const ex = list[STATE.index];
+        // ex combina los datos de la tarjeta (topic, audio, rate) con los
+        // de la pregunta activa (type, prompt, options, correct...).
+        const ex = currentExercise();
         topicChip.textContent = ex.topic;
         questionText.innerText = ex.prompt ? ex.prompt : (ex.type === 'tf' ? '¿Verdadero o falso?' : (ex.type === 'order' ? 'Escucha y luego ordena' : 'Escucha con atención'));
 
@@ -1983,32 +2219,24 @@
     //  BIBLIOTECA DE LISTENINGS
     // ─────────────────────────────────────────────────────────
     function renderLibrary() {
-        const list = LESSON_DATA[libraryLevel];
-        const meta = CARD_META[libraryLevel];
+        const list = LESSON_DATA[libraryLevel]; // lista de tarjetas (temas) del nivel
         listeningGrid.innerHTML = '';
 
-        list.forEach((ex, i) => {
-            const m = meta[i % meta.length];
-            const card = document.createElement('button');
-            card.type = 'button';
-            card.className = 'listening-card';
-            card.innerHTML = `
-                <div class="listening-card-icon ${m.color}">
-                    ${iconImgHtml(m.icon, 'card-img', 'emoji-fallback')}
-                    <span class="listening-card-badge">${exerciseTypeLabel(ex.type)}</span>
+        list.forEach((card, i) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'listening-card';
+            btn.innerHTML = `
+                <div class="listening-card-icon ${card.color}">
+                    ${iconImgHtml(card.icon, 'card-img', 'emoji-fallback')}
+                    <span class="listening-card-badge">${iconImgHtml('🎧', 'badge-img', 'emoji-fallback')}</span>
                 </div>
-                <span class="listening-card-title">${ex.topic}</span>
-                <span class="listening-card-progress">${libraryLevel} · ${i + 1}</span>
+                <span class="listening-card-title">${card.topic}</span>
+                <span class="listening-card-progress">${libraryLevel} · ${card.questions.length} preguntas</span>
             `;
-            card.addEventListener('click', () => startLessonAt(libraryLevel, i));
-            listeningGrid.appendChild(card);
+            btn.addEventListener('click', () => startLessonAt(libraryLevel, i));
+            listeningGrid.appendChild(btn);
         });
-    }
-
-    function exerciseTypeLabel(type) {
-        const labels = { mc:'📝', tf:'⚖️', img:'🖼️', fill:'✏️', order:'🔀', multi:'☑️' };
-        const emoji = labels[type] || '🎧';
-        return iconImgHtml(emoji, 'badge-img', 'emoji-fallback');
     }
 
     function showScreen(name) {
@@ -2016,17 +2244,23 @@
         screenLesson.classList.toggle('active', name === 'lesson');
     }
 
-    function startLessonAt(level, index) {
-        STATE.level = level;
+    // level: 'A1' | 'A2' | 'B1' | 'B2'  ·  cardIndex: índice de la tarjeta/tema dentro del nivel
+    function startLessonAt(level, cardIndex) {
+        STATE.level    = level;
+        STATE.cardIndex = cardIndex;
         if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
         document.querySelector('.audio-panel').style.display = 'flex';
+        const bottomSection = document.querySelector('.bottom-section');
+        if (bottomSection) bottomSection.style.display = '';
+        closeCompletionModal();
         showScreen('lesson');
-        STATE.index          = index;
-        STATE.checked        = false;
-        STATE.completed      = false;
-        STATE.correctInLevel = 0;
-        STATE.totalInLevel   = 0;
-        STATE.streak         = 0;
+        STATE.index              = 0;
+        STATE.checked            = false;
+        STATE.completed          = false;
+        STATE.cardAudioCompleted = false;
+        STATE.correctInLevel     = 0;
+        STATE.totalInLevel       = 0;
+        STATE.streak             = 0;
         updateStatsUI();
         updateProgress();
         loadExercise();
@@ -2042,6 +2276,7 @@
 
     btnBackLibrary.addEventListener('click', () => {
         if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        closeCompletionModal();
         showScreen('library');
         renderLibrary();
     });
@@ -2049,50 +2284,140 @@
     if (btnGoLibrary) {
         btnGoLibrary.addEventListener('click', () => {
             if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            closeCompletionModal();
             showScreen('library');
             renderLibrary();
         });
     }
 
     // ─────────────────────────────────────────────────────────
-    //  PANTALLA DE COMPLETADO DE NIVEL
+    //  MODAL DE FINALIZACIÓN (al terminar las 5 preguntas de un audio)
+    // ─────────────────────────────────────────────────────────
+    const completionOverlay   = document.getElementById('completionOverlay');
+    const completionStars     = document.getElementById('completionStars');
+    const completionTitle     = document.getElementById('completionTitle');
+    const completionMessage   = document.getElementById('completionMessage');
+    const completionPercent   = document.getElementById('completionPercent');
+    const completionRing      = document.getElementById('completionRing');
+    const completionCorrect   = document.getElementById('completionCorrect');
+    const completionXp        = document.getElementById('completionXp');
+    const completionRetryBtn  = document.getElementById('completionRetryBtn');
+    const completionLibraryBtn = document.getElementById('completionLibraryBtn');
+
+    // Mensaje de felicitación personalizado según el puntaje obtenido y el nivel.
+    function completionFeedbackFor(acc) {
+        const level = STATE.level;
+        const isAdvanced = (level === 'B1' || level === 'B2');
+        if (acc >= 90) {
+            return {
+                badge: 'score-great',
+                title: isAdvanced ? '¡Comprensión auditiva sobresaliente!' : '¡Excelente comprensión auditiva!',
+                message: isAdvanced
+                    ? 'Captaste los detalles clave de un audio de nivel ' + level + ' con gran precisión. ¡Dominas el inglés hablado! 🏆'
+                    : 'Entendiste casi todo el audio a la perfección. ¡Sigue así! 🎧'
+            };
+        } else if (acc >= 70) {
+            return {
+                badge: 'score-good',
+                title: isAdvanced ? '¡Muy sólida comprensión!' : '¡Muy buen oído!',
+                message: isAdvanced
+                    ? 'Comprendiste la mayor parte del audio ' + level + '. Repasa los detalles que se te escaparon y estarás listo/a para el siguiente nivel. 💪'
+                    : 'Vas muy bien comprendiendo el inglés hablado. ¡Un esfuerzo más!'
+            };
+        } else if (acc >= 50) {
+            return {
+                badge: 'score-ok',
+                title: isAdvanced ? '¡Buen intento en nivel ' + level + '!' : '¡Vas por buen camino!',
+                message: isAdvanced
+                    ? 'Los audios de nivel ' + level + ' son desafiantes. Vuelve a escucharlo con atención y fíjate en las expresiones clave. 🎯'
+                    : 'Sigue practicando tu oído, cada vez entenderás más.'
+            };
+        }
+        return {
+            badge: 'score-low',
+            title: isAdvanced ? '¡El nivel ' + level + ' es un reto!' : '¡Sigue practicando tu oído!',
+            message: isAdvanced
+                ? 'No te desanimes: los audios de nivel ' + level + ' requieren práctica constante. Escúchalo otra vez, prestando atención al contexto y al vocabulario. 🔁'
+                : 'Escucha el audio otra vez con calma. La práctica mejora tu comprensión.'
+        };
+    }
+
+    function openCompletionModal(acc, expGanado) {
+        const total = STATE.totalInLevel || 1;
+        const stars = acc >= 90 ? '⭐⭐⭐' : acc >= 70 ? '⭐⭐' : acc >= 50 ? '⭐' : '☆';
+        const fb = completionFeedbackFor(acc);
+
+        completionStars.textContent = stars;
+        completionTitle.textContent = fb.title;
+        completionMessage.textContent = fb.message;
+        completionPercent.textContent = acc + '%';
+        completionRing.className = 'completion-ring ' + fb.badge;
+        completionCorrect.textContent = `${STATE.correctInLevel}/${total}`;
+        completionXp.textContent = `+${expGanado} XP`;
+
+        completionOverlay.classList.add('show');
+        completionOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeCompletionModal() {
+        if (!completionOverlay) return;
+        completionOverlay.classList.remove('show');
+        completionOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    if (completionRetryBtn) {
+        completionRetryBtn.addEventListener('click', () => {
+            startLessonAt(STATE.level, STATE.cardIndex);
+        });
+    }
+    if (completionLibraryBtn) {
+        completionLibraryBtn.addEventListener('click', () => {
+            closeCompletionModal();
+            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            showScreen('library');
+            renderLibrary();
+        });
+    }
+    if (completionOverlay) {
+        completionOverlay.addEventListener('click', (e) => {
+            if (e.target === completionOverlay) { /* clic en el fondo: no cierra, se debe elegir una acción */ }
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  PANTALLA DE COMPLETADO DE LA TARJETA (audio + 5 preguntas)
     // ─────────────────────────────────────────────────────────
     function showCompletion() {
         STATE.completed = true;
         progressBar.style.width = '100%';
-        topicChip.textContent = 'Nivel ' + STATE.level;
-        questionText.innerText = '¡Lección Completada! 🎉';
+        const card = currentCard();
+        topicChip.textContent = card.topic;
+        questionText.innerText = '¡Audio completado! 🎉';
         audioStatus.textContent = '';
         document.querySelector('.audio-panel').style.display = 'none';
+        exerciseArea.innerHTML = '';
+        feedbackBanner.classList.remove('show', 'correct', 'wrong');
+
+        const bottomSection = document.querySelector('.bottom-section');
+        if (bottomSection) bottomSection.style.display = 'none';
 
         const total = STATE.totalInLevel || 1;
         const acc = Math.round((STATE.correctInLevel / total) * 100);
-        const stars = acc >= 90 ? '⭐⭐⭐' : acc >= 70 ? '⭐⭐' : acc >= 50 ? '⭐' : '☆';
         const bonus = 20;
         STATE.xp += bonus;
         saveStat('egglish_xp', STATE.xp);
         updateStatsUI();
 
-        exerciseArea.innerHTML = `
-            <div class="completion-screen">
-                <div class="completion-stars">${stars}</div>
-                <p class="completion-title">¡Muy bien! Terminaste el nivel ${STATE.level}</p>
-                <p class="completion-sub">Bono de finalización: +${bonus} XP</p>
-                <div class="completion-metrics">
-                    <div class="completion-metric"><span class="num">${STATE.correctInLevel}/${STATE.totalInLevel}</span><span class="label">Correctas</span></div>
-                    <div class="completion-metric"><span class="num">${acc}%</span><span class="label">Precisión</span></div>
-                    <div class="completion-metric"><span class="num">${STATE.streak}</span><span class="label">Racha final</span></div>
-                </div>
-            </div>`;
-        feedbackBanner.classList.remove('show');
+        // Puntaje/porcentaje y mensaje de felicitación en la ventana modal.
+        const expGanado = STATE.correctInLevel * 10 + bonus;
+        openCompletionModal(acc, expGanado);
 
         celebrate(true);
         playSuccessSound();
 
         // Sincroniza el progreso REAL (puntos y ejercicios de escucha completados)
-        // con Firebase para que el Perfil lo muestre. Solo cuenta lo ganado en este nivel:
-        // 10 XP por cada respuesta correcta + el bono de finalización.
-        const expGanado = STATE.correctInLevel * 10 + bonus;
+        // con Firebase para que el Perfil lo muestre. Solo cuenta lo ganado en esta
+        // tarjeta: 10 XP por cada respuesta correcta + el bono de finalización.
         window._egglishProgresoPendiente = import('/Secciones/Js/egglish-progreso.js')
             .then(({ registrarProgreso }) => registrarProgreso({
                 exp: expGanado,
@@ -2100,11 +2425,6 @@
                 incremento: 1,
             }))
             .catch((e) => console.warn('No se pudo sincronizar el progreso con Firebase:', e));
-
-        actionBtn.disabled = false;
-        actionBtn.className = 'btn-action active continue';
-        actionBtn.innerText = 'Reiniciar nivel';
-        if (btnGoLibrary) btnGoLibrary.style.display = 'block';
     }
 
     // ─────────────────────────────────────────────────────────
@@ -2112,7 +2432,7 @@
     // ─────────────────────────────────────────────────────────
     audioBtn.addEventListener('click', playAudio);
     actionBtn.addEventListener('click', () => {
-        if (STATE.completed) { startLessonAt(STATE.level, 0); return; }
+        if (STATE.completed) { startLessonAt(STATE.level, STATE.cardIndex); return; }
         handleAction();
     });
 

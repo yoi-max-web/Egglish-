@@ -17,6 +17,8 @@
   --orange-d:#e07800;
   --teal:    #00c5a1;
   --teal-d:  #009e82;
+  --crimson: #e64980;
+  --crimson-d:#c22f68;
   --red:     #ff4b4b;
   --white:   #ffffff;
   --bg:      #f0f4f8;
@@ -140,6 +142,7 @@ a {
 .badge-A1 { background: var(--green); }
 .badge-A2 { background: var(--blue); }
 .badge-B1 { background: var(--purple); }
+.badge-B2 { background: var(--crimson); }
 .game-card-sel .btn-play {
   margin-top: 4px; padding: 10px 0; border-radius: 12px; border: none;
   font-family: var(--font); font-size: .9rem; font-weight: 800;
@@ -149,6 +152,7 @@ a {
 .btn-A1 { background: var(--green); box-shadow: 0 4px 0 var(--green-d); }
 .btn-A2 { background: var(--blue);  box-shadow: 0 4px 0 var(--blue-d); }
 .btn-B1 { background: var(--purple);box-shadow: 0 4px 0 var(--purple-d); }
+.btn-B2 { background: var(--crimson);box-shadow: 0 4px 0 var(--crimson-d); }
 
 /* ══════════ GAME SCREENS ══════════ */
 .game-screen { flex: 1; }
@@ -160,6 +164,7 @@ a {
 .game-bg--purple { background: var(--purple); }
 .game-bg--orange { background: var(--orange); }
 .game-bg--teal   { background: var(--teal); }
+.game-bg--crimson{ background: var(--crimson); }
 
 /* GAME HEADER */
 .game-header {
@@ -197,7 +202,22 @@ a {
 /* QUESTION AREA */
 .question-area { display: flex; align-items: center; gap: 16px; }
 .q-mascot-img  { width: 72px; height: 72px; object-fit: contain; flex-shrink: 0; }
+.question-emoji { font-size: 3.4rem; line-height: 1; flex-shrink: 0; }
 .question-text { font-size: 1.4rem; font-weight: 900; color: var(--text); line-height: 1.3; }
+
+/* TIMER (juegos con tiempo límite, p.ej. "Opuestos Rápidos") */
+.timer-badge {
+  font-size: .85rem; font-weight: 900; color: var(--white);
+  background: rgba(0,0,0,.2); padding: 3px 10px; border-radius: 99px;
+  margin-right: 4px;
+}
+.timer-badge.urgent { background: var(--red); animation: pulse-speak .5s ease-in-out infinite alternate; }
+
+/* CONTEXTO (diálogos, p.ej. "Rellenar Diálogos") */
+.fill-context {
+  font-size: .9rem; font-weight: 700; font-style: italic;
+  color: var(--light);
+}
 
 /* OPTIONS GRID */
 .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
