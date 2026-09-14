@@ -155,13 +155,16 @@
     <button class="level-tab" data-level="b1" aria-selected="false">
       🦜 B1 <span class="tab-badge">Intermedio</span>
     </button>
+    <button class="level-tab" data-level="b2" aria-selected="false">
+      🦉 B2 <span class="tab-badge">Avanzado</span>
+    </button>
   </div>
 
   <!-- BARRA DE RACHA / ESTADÍSTICAS -->
   <div class="path-stats-bar" id="path-stats-bar">
     <div class="path-stat"><span class="path-stat-icon">🔥</span><span id="stat-streak">0</span></div>
     <div class="path-stat"><span class="path-stat-icon">⭐</span><span id="stat-total-xp">0</span></div>
-    <div class="path-stat"><span class="path-stat-icon">🏆</span><span id="stat-lessons-done">0</span><span class="path-stat-sub">/12</span></div>
+    <div class="path-stat"><span class="path-stat-icon">🏆</span><span id="stat-lessons-done">0</span><span class="path-stat-sub">/14</span></div>
   </div>
 
   <!-- CONTENEDOR PRINCIPAL DEL CAMINO -->
@@ -194,7 +197,7 @@
     <div class="lesson-body" id="lesson-body">
       <div class="lesson-instruction" id="lesson-instruction">Escribe esto en español</div>
       <div class="lesson-character-row" id="lesson-character-row">
-        <div class="lesson-char-avatar" id="lesson-avatar">🐣</div>
+        <div class="lesson-char-avatar" id="lesson-avatar"><img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Egglish chick" style="width:3.2rem;height:3.2rem;object-fit:contain;"/></div>
         <div class="lesson-speech-bubble" id="lesson-audio-btn" title="Escuchar">
           <div class="audio-btn-inner">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
@@ -226,7 +229,7 @@
 
   <div class="completion-modal" id="completion-modal">
     <div class="completion-card">
-      <div class="completion-chick">🐣</div>
+      <div class="completion-chick"><img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Egglish chick" style="width:5rem;height:5rem;object-fit:contain;display:block;margin:0 auto;"/></div>
       <div class="completion-title">¡Lección Completada!</div>
       <div class="completion-sub" id="completion-sub">Has dominado esta lección. ¡Increíble trabajo!</div>
       <div class="completion-stats">
@@ -254,7 +257,7 @@
   <!-- LOSE MODAL (sin corazones) -->
   <div class="lose-modal" id="lose-modal">
     <div class="lose-card">
-      <div class="lose-chick">🥚</div>
+      <div class="lose-chick"><img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Egglish chick" style="width:4.5rem;height:4.5rem;object-fit:contain;display:block;margin:0 auto;filter:grayscale(0.4);"/></div>
       <div class="lose-title">¡Sin vidas!</div>
       <div class="lose-sub">Te quedaste sin corazones. No te preocupes, puedes reiniciar esta lección e intentarlo de nuevo.</div>
       <button class="lose-btn" id="lose-retry">🔄 INTENTAR DE NUEVO</button>
@@ -292,8 +295,8 @@
           </ul>
           <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Social</h4>
           <ul class="flex flex-col gap-2.5">
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li>
-            <li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li>
+            <li><a href="https://www.instagram.com/egglish.oficial/" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li>
+            <li><a href="https://www.tiktok.com/@egglish.oficial" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li>
           </ul>
         </div>
       </div>
@@ -378,6 +381,8 @@
     setupDarkMode();
     setupLogout();
   </script>
+  <!-- 🔊 Sistema de audio Egglish (debe cargarse ANTES del módulo de lecciones) -->
+  <script src="/Secciones/Js/Sound.js"></script>
   <!-- ⚠️ SCRIPT CLAVE: Carga la lógica de lecciones y dibuja el camino/modales -->
   <script type="module" src="/Secciones/Js/lecciones.js"></script>
 

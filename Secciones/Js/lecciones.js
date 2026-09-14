@@ -54,6 +54,9 @@ const LEVELS = {
   b1: { label: 'B1', units: [
     { title: 'En el mundo real', grad: ['#ef4444', '#dc2626'], themes: ['lugares', 'trabajos'] },
   ]},
+  b2: { label: 'B2', units: [
+    { title: 'Estructuras avanzadas', grad: ['#6366f1', '#4338ca'], themes: ['condicionales', 'vozpasiva'] },
+  ]},
 };
 
 const THEMES = {
@@ -334,6 +337,52 @@ const THEMES = {
     ],
   },
 
+  condicionales: {
+    label: 'Condicionales', icon: '🔀', xp: 70,
+    guide: {
+      summary: 'Aprende a formar el primer condicional para hablar de situaciones futuras posibles.',
+      rules: ['El primer condicional se forma con "If + presente simple, will + verbo base".', 'Se usa para hablar de situaciones reales o probables en el futuro.'],
+      examples: ['If it rains, I will stay home.', 'If you study, you will pass the exam.', 'She will call you if she has time.'],
+      mistakes: ['Usar "will" también en la cláusula con "if": "If it will rain..." (incorrecto).'],
+      tips: ['La cláusula con "if" puede ir al inicio o al final; si va al inicio, se separa con una coma.'],
+    },
+    questions: [
+      { type:'order', en:'If it rains, I will stay home.', es:['Si','llueve,','me','quedaré','en','casa.'], distractors:['saldré','iré','trabajaré'] },
+      { type:'choice', prompt:"Completa: 'If you study, you ___ pass the exam.'", options:['will','are','do','did'], answer:0 },
+      { type:'blank', sentence:'If she has time, she ___ call you. (llamará)', answer:'will', options:['will','would','is','was'] },
+      { type:'boolean', statement:"En el primer condicional se usa 'will' dentro de la cláusula con 'if'.", answer:false },
+      { type:'order', en:'She will call you if she has time.', es:['Ella','te','llamará','si','tiene','tiempo.'], distractors:['escribirá','visitará','ayudará'] },
+      { type:'choice', prompt:"Traduce: 'If I have money, I will travel.'", options:['Si tengo dinero, viajaré.','Si tuviera dinero, viajaría.','Si tenía dinero, viajaba.','Si tendré dinero, viajo.'], answer:0 },
+      { type:'blank', sentence:'If we hurry, we ___ catch the bus. (podremos)', answer:'will', options:['will','can','would','are'] },
+      { type:'boolean', statement:"El primer condicional habla de situaciones reales o probables en el futuro.", answer:true },
+      { type:'order', en:'If you are late, we will start without you.', es:['Si','llegas','tarde,','empezaremos','sin','ti.'], distractors:['esperaremos','saldremos','vendremos'] },
+      { type:'choice', prompt:"¿Cuál es la estructura correcta del primer condicional?", options:['If + presente, will + verbo','If + will, presente + verbo','If + pasado, would + verbo','If + presente, presente + verbo'], answer:0 },
+    ],
+  },
+
+  vozpasiva: {
+    label: 'Voz pasiva', icon: '🔄', xp: 70,
+    guide: {
+      summary: 'Aprende a construir oraciones en voz pasiva para enfocar la acción en vez del sujeto.',
+      rules: ['La voz pasiva se forma con "to be" + participio pasado.', 'Se usa cuando quien realiza la acción no es importante o se desconoce.'],
+      examples: ['The letter was written by John.', 'The house was built in 1990.', 'English is spoken all over the world.'],
+      mistakes: ['Olvidar el verbo "to be" y decir solo el participio: "The letter written by John" (incorrecto).'],
+      tips: ['Identifica primero el objeto de la oración activa: ese objeto se convierte en el sujeto de la pasiva.'],
+    },
+    questions: [
+      { type:'order', en:'The letter was written by John.', es:['La','carta','fue','escrita','por','John.'], distractors:['leída','enviada','abierta'] },
+      { type:'choice', prompt:"Forma pasiva de: 'They build houses.'", options:['Houses are built.','Houses were build.','Houses is built.','Houses building are.'], answer:0 },
+      { type:'blank', sentence:'English ___ spoken all over the world. (es)', answer:'is', options:['is','are','was','be'] },
+      { type:'boolean', statement:"La voz pasiva se forma con 'to be' + participio pasado.", answer:true },
+      { type:'order', en:'The house was built in 1990.', es:['La','casa','fue','construida','en','1990.'], distractors:['vendida','pintada','diseñada'] },
+      { type:'choice', prompt:"Traduce: 'The cake was eaten by the kids.'", options:['El pastel fue comido por los niños.','El pastel come a los niños.','Los niños comieron un pastel.','El pastel comerá a los niños.'], answer:0 },
+      { type:'blank', sentence:'The window ___ broken yesterday. (fue)', answer:'was', options:['was','is','were','be'] },
+      { type:'boolean', statement:"En voz pasiva siempre se debe omitir el verbo 'to be'.", answer:false },
+      { type:'order', en:'This song is loved by everyone.', es:['Esta','canción','es','amada','por','todos.'], distractors:['odiada','cantada','escuchada'] },
+      { type:'choice', prompt:"¿Cuándo se usa la voz pasiva?", options:['Cuando quien realiza la acción no es importante o se desconoce.','Solo en preguntas.','Solo con verbos irregulares.','Nunca en inglés hablado.'], answer:0 },
+    ],
+  },
+
 };
 
 /* ================================================================
@@ -344,6 +393,7 @@ const cachedUid = (() => {
   catch (e) { return 'anonimo'; }
 })();
 const STORAGE_KEY = `egglish_lecciones_v3_${cachedUid}`;
+const MID_LESSON_KEY = `egglish_mid_lesson_${cachedUid}`;
 
 function loadProgress() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { done: {}, xp: 0, streak: 0, lastDay: null }; }
@@ -353,6 +403,35 @@ function saveProgress() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (e) {}
 }
 const progress = loadProgress();
+
+/** Guarda exactamente dónde quedó el usuario dentro de una lección activa */
+function saveMidLesson() {
+  if (!lessonState.themeKey) return;
+  const snapshot = {
+    themeKey: lessonState.themeKey,
+    questions: lessonState.questions,
+    qIndex: lessonState.qIndex,
+    hearts: lessonState.hearts,
+    correctCount: lessonState.correctCount,
+    totalXp: lessonState.totalXp,
+    startTime: lessonState.startTime,
+  };
+  try { localStorage.setItem(MID_LESSON_KEY, JSON.stringify(snapshot)); } catch (e) {}
+}
+
+/** Elimina el guardado a mitad de lección (cuando se completa o se reinicia) */
+function clearMidLesson() {
+  try { localStorage.removeItem(MID_LESSON_KEY); } catch (e) {}
+}
+
+/** Carga el estado guardado a mitad de lección (si existe para la misma temática) */
+function loadMidLesson(themeKey) {
+  try {
+    const snap = JSON.parse(localStorage.getItem(MID_LESSON_KEY));
+    if (snap && snap.themeKey === themeKey && snap.qIndex > 0) return snap;
+  } catch (e) {}
+  return null;
+}
 
 function registerDayStreak() {
   const today = new Date().toDateString();
@@ -365,7 +444,7 @@ function registerDayStreak() {
 
 function flatThemeOrder() {
   const order = [];
-  ['a1', 'a2', 'b1'].forEach(lvl => {
+  ['a1', 'a2', 'b1', 'b2'].forEach(lvl => {
     LEVELS[lvl].units.forEach(unit => unit.themes.forEach(t => order.push(t)));
   });
   return order;
@@ -440,6 +519,7 @@ function updateStatsBar() {
 function setupLevelTabs() {
   document.querySelectorAll('.level-tab').forEach(tab => {
     tab.addEventListener('click', () => {
+      if (window.SoundManager) window.SoundManager.playClick();
       document.querySelectorAll('.level-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
@@ -501,19 +581,22 @@ function buildPath() {
 
         if (isDone) {
           btn.classList.add('state-done');
-          btn.innerHTML = `<span class="node-icon">${theme.icon}</span><span class="node-crown">👑</span>`;
+          btn.innerHTML = `
+            <span class="node-icon">${theme.icon}</span>
+            <span class="node-label-inner">${theme.label}</span>
+            <span class="node-crown">👑</span>`;
         } else if (prevDone) {
           btn.classList.add('state-current');
-          btn.innerHTML = `<span class="node-empezar">EMPEZAR</span><span class="node-icon">${theme.icon}</span>`;
+          btn.innerHTML = `
+            <span class="node-empezar">EMPEZAR</span>
+            <span class="node-icon">${theme.icon}</span>
+            <span class="node-label-inner">${theme.label}</span>`;
         } else {
           btn.classList.add('state-locked');
-          btn.innerHTML = `<span class="node-icon">🔒</span>`;
+          btn.innerHTML = `
+            <span class="node-icon">🔒</span>
+            <span class="node-label-inner">${theme.label}</span>`;
         }
-
-        const themeLabel = document.createElement('span');
-        themeLabel.className = 'node-theme-label';
-        themeLabel.textContent = theme.label;
-        btn.appendChild(themeLabel);
 
         slot.appendChild(btn);
         track.appendChild(slot);
@@ -530,7 +613,12 @@ function buildPath() {
 
   pathMain.querySelectorAll('.lesson-node').forEach(btn => {
     btn.addEventListener('click', () => {
-      if (btn.classList.contains('state-locked')) { showToast('🔒 Completa la lección anterior primero.'); return; }
+      if (btn.classList.contains('state-locked')) {
+        if (window.SoundManager) window.SoundManager.playWrong();
+        showToast('🔒 Completa la lección anterior primero.');
+        return;
+      }
+      if (window.SoundManager) window.SoundManager.playClick();
       openLesson(btn.dataset.themeKey);
     });
   });
@@ -606,14 +694,31 @@ function openLesson(themeKey) {
   const theme = THEMES[themeKey];
   if (!theme) { showToast('⚠️ Lección no disponible aún.'); return; }
 
-  lessonState.themeKey = themeKey;
-  lessonState.questions = shuffleArray(theme.questions).slice(0, 10); // máximo 10 preguntas
-  lessonState.qIndex = 0;
-  lessonState.hearts = MAX_HEARTS;
-  lessonState.phase = 'input';
-  lessonState.correctCount = 0;
-  lessonState.totalXp = 0;
-  lessonState.startTime = Date.now();
+  // Inicializar SoundManager en el primer gesto del usuario
+  if (window.SoundManager) window.SoundManager.unlock();
+
+  const mid = loadMidLesson(themeKey);
+  if (mid) {
+    // Reanudar desde donde se quedó
+    lessonState.themeKey = mid.themeKey;
+    lessonState.questions = mid.questions;
+    lessonState.qIndex = mid.qIndex;
+    lessonState.hearts = mid.hearts;
+    lessonState.phase = 'input';
+    lessonState.correctCount = mid.correctCount;
+    lessonState.totalXp = mid.totalXp;
+    lessonState.startTime = mid.startTime;
+    showToast(`📍 Retomando desde la pregunta ${mid.qIndex + 1}`, 'success', 2200);
+  } else {
+    lessonState.themeKey = themeKey;
+    lessonState.questions = shuffleArray(theme.questions).slice(0, 10);
+    lessonState.qIndex = 0;
+    lessonState.hearts = MAX_HEARTS;
+    lessonState.phase = 'input';
+    lessonState.correctCount = 0;
+    lessonState.totalXp = 0;
+    lessonState.startTime = Date.now();
+  }
 
   updateHeartsUI();
   lessonModal.classList.add('open');
@@ -834,6 +939,7 @@ function commitTileDrop(id, x, y) {
     }
     order.answerOrder.splice(insertIndex, 0, id);
     tileById(id).placed = true;
+    if (window.SoundManager) window.SoundManager.playSelect();
   } else {
     tileById(id).placed = false;
   }
@@ -849,9 +955,11 @@ function toggleTile(id, origin) {
     if (tile.placed) return;
     tile.placed = true;
     order.answerOrder.push(id);
+    if (window.SoundManager) window.SoundManager.playSelect();
   } else {
     tile.placed = false;
     order.answerOrder = order.answerOrder.filter(tid => tid !== id);
+    if (window.SoundManager) window.SoundManager.playClick();
   }
   renderOrderZones();
 }
@@ -872,6 +980,7 @@ function renderChoiceExercise(q) {
       list.querySelectorAll('.choice-option').forEach(o => o.classList.remove('selected'));
       btn.classList.add('selected');
       lessonState.selectedChoice = i;
+      if (window.SoundManager) window.SoundManager.playClick();
       updateCheckBtn();
     });
     list.appendChild(btn);
@@ -905,6 +1014,7 @@ function renderBlankExercise(q) {
       lessonState.filledBlank = opt;
       slot.textContent = opt;
       slot.classList.add('filled');
+      if (window.SoundManager) window.SoundManager.playClick();
       updateCheckBtn();
     });
     optionsWrap.appendChild(btn);
@@ -935,6 +1045,7 @@ function renderBooleanExercise(q) {
       falseBtn.classList.remove('selected');
       btn.classList.add('selected');
       lessonState.selectedBool = val;
+      if (window.SoundManager) window.SoundManager.playClick();
       updateCheckBtn();
     });
   });
@@ -1007,6 +1118,7 @@ function checkAnswer() {
     feedbackTitle.textContent = '¡Correcto!';
     feedbackAns.textContent = correctAnswerText(q);
     feedbackEl.className = 'lesson-feedback correct';
+    if (window.SoundManager) window.SoundManager.playCorrect();
   } else {
     lessonState.hearts = Math.max(0, lessonState.hearts - 1);
     lessonState.phase = 'wrong';
@@ -1016,7 +1128,10 @@ function checkAnswer() {
     feedbackTitle.textContent = '¡Incorrecto!';
     feedbackAns.textContent = 'Respuesta correcta: ' + correctAnswerText(q);
     feedbackEl.className = 'lesson-feedback wrong';
+    if (window.SoundManager) window.SoundManager.playWrong();
   }
+  // Guardar progreso a mitad de lección
+  saveMidLesson();
   updateCheckBtn();
 
   if (lessonState.hearts <= 0) {
@@ -1044,11 +1159,14 @@ function skipQuestion() {
   feedbackTitle.textContent = 'Omitido';
   feedbackAns.textContent = 'Respuesta: ' + correctAnswerText(q);
   feedbackEl.className = 'lesson-feedback wrong';
+  if (window.SoundManager) window.SoundManager.playWrong();
+  saveMidLesson();
   updateCheckBtn();
   if (lessonState.hearts <= 0) setTimeout(() => showLoseModal(), 1100);
 }
 
 function finishLesson() {
+  clearMidLesson(); // lección terminada, borrar guardado parcial
   closeLesson(false);
   const elapsedSec = Math.round((Date.now() - lessonState.startTime) / 1000);
   const mm = Math.floor(elapsedSec / 60), ss = elapsedSec % 60;
@@ -1058,6 +1176,7 @@ function finishLesson() {
   document.getElementById('stat-hearts').textContent = '❤️'.repeat(lessonState.hearts) + '🤍'.repeat(MAX_HEARTS - lessonState.hearts);
   const pct = Math.round((lessonState.correctCount / lessonState.questions.length) * 100);
   document.getElementById('completion-sub').textContent = `Dominaste el ${pct}% de esta lección. ¡Increíble trabajo!`;
+  if (window.SoundManager) window.SoundManager.playVictory();
   completionModal.classList.add('open');
 }
 
@@ -1078,6 +1197,7 @@ function showLoseModal() {
    EVENTOS DE LA LECCIÓN (un único listener por control, sin duplicados)
 ================================================================ */
 document.getElementById('lose-retry').addEventListener('click', () => {
+  clearMidLesson();
   loseModal.classList.remove('open');
   openLesson(lessonState.themeKey);
 });

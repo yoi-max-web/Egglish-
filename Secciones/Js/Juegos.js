@@ -477,6 +477,10 @@ function goLevels(){ showScreen('screen-levels'); }
 
 function buildGrid(level) {
   const grid = document.getElementById('games-grid');
+  if (!grid) {
+    console.warn('buildGrid: no se encontró #games-grid en el DOM todavía');
+    return;
+  }
   grid.innerHTML = '';
   const available = GAMES.filter(g => g.levels.includes(level));
   available.forEach(g => {
@@ -495,15 +499,33 @@ function buildGrid(level) {
   });
 }
 
-// Level tabs
-document.querySelectorAll('.level-tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.level-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentLevel = btn.dataset.level;
-    buildGrid(currentLevel);
+function initGameSelector() {
+  // Level tabs
+  document.querySelectorAll('.level-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.level-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentLevel = btn.dataset.level;
+      buildGrid(currentLevel);
+    });
   });
-});
+
+  // 🩹 Construye la grilla inicial SIEMPRE cuando el DOM esté listo.
+  // Antes esta llamada vivía suelta al final del archivo: si cualquier
+  // otra línea del script fallaba antes de llegar a ese punto (por
+  // ejemplo por una API que algunos navegadores móviles no soportan
+  // igual que el de escritorio), buildGrid('A1') nunca se ejecutaba y
+  // las tarjetas quedaban vacías solo en esos dispositivos.
+  buildGrid(currentLevel);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initGameSelector);
+} else {
+  // El DOM ya estaba listo cuando se ejecutó este script (caso normal,
+  // ya que el <script> va al final del <body>).
+  initGameSelector();
+}
 
 // ══════════════════════════════════════════
 //  START GAME  (despachador genérico)
@@ -1135,9 +1157,9 @@ function shuffle(arr) {
 
 // ══════════════════════════════════════════
 //  INIT
+// (la construcción inicial de la grilla ahora se hace en
+//  initGameSelector(), disparado por DOMContentLoaded más arriba)
 // ══════════════════════════════════════════
-
-buildGrid('A1');
 
 /*
   El listener del menú hamburguesa (#hamburger-btn / #nav-menu) fue

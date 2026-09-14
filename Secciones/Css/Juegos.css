@@ -49,6 +49,9 @@ html.dark {
   --shadow:  0 4px 24px rgba(0,0,0,0.45);
 }
 
+html, body {
+  overflow-x: hidden; /* evita que un desbordamiento invisible en móvil "esconda" contenido a un costado */
+}
 body {
   font-family: var(--font);
   background: var(--bg);
@@ -73,7 +76,7 @@ a {
 */
 
 /* ══════════ SCREENS ══════════ */
-.screen { display: none; flex: 1; flex-direction: column; }
+.screen { display: none; flex: 1; flex-direction: column; min-width: 0; }
 .screen.active { display: flex; }
 
 /* ══════════ HERO BANNER ══════════ */
@@ -103,7 +106,7 @@ a {
 .hero-sub   { font-size: 1.05rem; font-weight: 700; color: rgba(255,255,255,.85); }
 
 /* ══════════ LEVELS SECTION ══════════ */
-.levels-section { padding: 32px 40px 40px; flex: 1; }
+.levels-section { padding: 32px 40px 40px; flex: 1; width: 100%; min-width: 0; box-sizing: border-box; }
 .level-tabs { display: flex; gap: 12px; margin-bottom: 28px; flex-wrap: wrap; }
 .level-tab {
   display: flex; flex-direction: column; align-items: flex-start;
@@ -120,8 +123,16 @@ a {
 /* GAMES GRID */
 .games-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  /* auto-fit (no auto-fill) + minmax(min(240px,100%), 1fr):
+     con auto-fill, en pantallas angostas el navegador puede reservar
+     "columnas fantasma" de 260px de ancho aunque estén vacías, lo que
+     empuja/recorta las tarjetas reales fuera del área visible en
+     algunos móviles. auto-fit colapsa esas columnas vacías, y el
+     min(240px,100%) garantiza que SIEMPRE quepa al menos 1 columna
+     sin importar cuán angosta sea la pantalla (celulares pequeños). */
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 20px;
+  width: 100%;
 }
 .game-card-sel {
   background: var(--card); border-radius: var(--radius);
@@ -391,4 +402,13 @@ a {
   .match-container { flex-direction: column; }
   .game-card      { padding: 20px 16px; }
   .hero-title     { font-size: 1.6rem; }
+}
+
+/* Refuerzo explícito para celulares: 1 sola columna, ancho completo.
+   Esto asegura que las 10 tarjetas se vean apiladas verticalmente
+   sin depender del cálculo automático de auto-fit/minmax. */
+@media (max-width: 480px) {
+  .games-grid {
+    grid-template-columns: 1fr;
+  }
 }
