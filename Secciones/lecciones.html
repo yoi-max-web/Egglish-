@@ -419,12 +419,6 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    /* z-index más alto que el de #egg-chat-window (9999): así, incluso en el
-       modo pantalla completa de celular, la burbuja (que tiene el ícono de
-       cerrar ✕ cuando el chat está abierto) queda SIEMPRE encima de la
-       ventana del chat y se puede tocar para cerrarlo. Antes tenían el mismo
-       z-index y, al dibujarse la ventana después en el HTML, tapaba la
-       burbuja y era imposible cerrar el chat en celulares. */
     z-index: 10000;
     border: none;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -437,6 +431,39 @@
     width: 28px;
     height: 28px;
     stroke: #fff;
+  }
+  /* Botón rojo "Salir" centrado en la parte superior del chat */
+  #egg-chat-close-top {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10001;
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 24px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    transition: background 0.15s ease, transform 0.15s ease;
+    display: none;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+  }
+  #egg-chat-close-top:hover {
+    background: #dc2626;
+    transform: translateX(-50%) scale(1.04);
+  }
+  /* En móvil: ocultar el botón flotante cuando el chat está abierto,
+     para que no tape el ícono de grabar audio de Chatbase */
+  @media (max-width: 480px) {
+    #egg-chat-bubble.chat-open {
+      display: none !important;
+    }
   }
   #egg-chat-window {
     position: fixed;
@@ -552,6 +579,8 @@
 </button>
 
 <div id="egg-chat-window" role="dialog" aria-label="Chat de ayuda">
+  <!-- Botón rojo Salir en la parte superior del chat, junto al encabezado "Eggy" -->
+  <button id="egg-chat-close-top" type="button" aria-label="Cerrar chat de ayuda">Salir</button>
   <div id="egg-chat-body">
     <div id="egg-chat-loading">
       <div id="egg-chat-spinner"></div>
@@ -571,10 +600,12 @@
     const loading = document.getElementById('egg-chat-loading');
     const iconOpen = document.getElementById('egg-chat-icon-open');
     const iconClose = document.getElementById('egg-chat-icon-close');
+    const closeTopBtn = document.getElementById('egg-chat-close-top');
     if (!bubble || !win || !body || !loading) return;
 
     let isOpen = false;
     let iframeCreated = false;
+    let iframeLoaded = false;
 
     // Mantiene --vvh = altura real visible de la pantalla (excluye el
     // teclado del móvil cuando está abierto). Sin esto, en iOS/Android
@@ -605,6 +636,12 @@
         setTimeout(() => {
           iframe.classList.add('loaded');
           loading.classList.add('hidden-loading');
+          // El botón "Salir" aparece SOLO cuando el chat ya terminó de cargar
+          iframeLoaded = true;
+          if (isOpen) {
+            if (closeTopBtn) closeTopBtn.style.display = 'block';
+            bubble.classList.add('chat-open');
+          }
         }, 300);
       });
       body.appendChild(iframe);
@@ -619,6 +656,14 @@
       iconClose.classList.remove('hidden');
       bubble.setAttribute('aria-expanded', 'true');
       bubble.setAttribute('aria-label', 'Cerrar chat de ayuda');
+      // Ocultar la burbuja INMEDIATAMENTE en móvil para que la X no
+      // tape el botón de enviar mientras el iframe todavía está cargando.
+      bubble.classList.add('chat-open');
+      // El botón "Salir" solo aparece cuando el iframe termina de cargar.
+      // En reaperturas (iframeLoaded ya es true) aparece de inmediato.
+      if (iframeLoaded) {
+        if (closeTopBtn) closeTopBtn.style.display = 'block';
+      }
     }
 
     function closeChat() {
@@ -628,6 +673,9 @@
       iconClose.classList.add('hidden');
       bubble.setAttribute('aria-expanded', 'false');
       bubble.setAttribute('aria-label', 'Abrir chat de ayuda');
+      // Ocultar botón "Salir" y restaurar burbuja flotante
+      if (closeTopBtn) closeTopBtn.style.display = 'none';
+      bubble.classList.remove('chat-open');
       setTimeout(() => {
         if (!isOpen) win.classList.remove('open');
       }, 200);
@@ -636,6 +684,11 @@
     bubble.addEventListener('click', () => {
       isOpen ? closeChat() : openChat();
     });
+
+    // Botón rojo "Salir" en la cabecera del chat
+    if (closeTopBtn) {
+      closeTopBtn.addEventListener('click', closeChat);
+    }
   })();
 </script>
 
