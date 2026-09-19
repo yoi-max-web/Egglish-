@@ -458,8 +458,8 @@
                 <p id="email-error" class="field-error hidden">Ingresa un correo electrónico válido.</p>
             </div>
            <div>
-    <input type="number" id="reg-edad" class="input-field" placeholder="Edad" min="8" max="18" step="1" required>
-    <p id="edad-error" class="field-error hidden">La edad debe ser un número entero entre 8 y 18.</p>
+    <input type="number" id="reg-edad" class="input-field" placeholder="Edad" min="10" max="18" step="1" required>
+    <p id="edad-error" class="field-error hidden">La edad debe ser un número entero entre 10 y 18.</p>
 </div>
             <div class="password-field-wrapper">
                 <input id="reg-password" type="password" class="input-field" placeholder="Contraseña" required>
@@ -554,7 +554,7 @@
           const valor = edadInput.value.trim();
           const numero = Number(valor);
           const esEntero = /^\d+$/.test(valor);
-          const esValido = esEntero && numero >= 8 && numero <= 18;
+          const esValido = esEntero && numero >= 10 && numero <= 18;
           edadInput.classList.toggle('is-error', !esValido);
           edadError.classList.toggle('hidden', esValido);
           return esValido;
@@ -616,10 +616,24 @@
           return validCount === reqs.length;
         }
 
+        // ── SVG icons para el toggle de contraseña ──────────
+        const EYE_OPEN = `<svg viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>`;
+        const EYE_CLOSED = `<svg viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+          <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+          <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>`;
+
         // Toggle Password
         passwordToggle.addEventListener('click', function () {
-          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-          passwordInput.setAttribute('type', type);
+          const isPassword = passwordInput.getAttribute('type') === 'password';
+          passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+          passwordToggle.innerHTML = isPassword ? EYE_CLOSED : EYE_OPEN;
+          passwordToggle.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
         });
 
         // Eventos

@@ -359,12 +359,13 @@
 
         const FB_CDN = 'https://www.gstatic.com/firebasejs/10.12.2';
 
-        // Inicializar Firebase una sola vez
-        const { initializeApp, getApps } = await import(`${FB_CDN}/firebase-app.js`);
-        const { getAuth, sendPasswordResetEmail } = await import(`${FB_CDN}/firebase-auth.js`);
+        const { initializeApp, getApps }                              = await import(`${FB_CDN}/firebase-app.js`);
+        const { getAuth, sendPasswordResetEmail }                     = await import(`${FB_CDN}/firebase-auth.js`);
+        const { getFirestore, collection, query, where, getDocs }     = await import(`${FB_CDN}/firebase-firestore.js`);
 
         const app  = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
         const auth = getAuth(app);
+        const db   = getFirestore(app);
 
         // ── Referencias DOM ───────────────────────────────────
         const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
@@ -375,60 +376,92 @@
         const recoveryEmailIn   = document.getElementById('recoveryEmail');
         const sendBtn           = recoveryForm.querySelector('button[type="submit"]');
 
-        // ── Elemento de error (lo creamos dinámicamente) ──────
+        // ── Mensaje de error debajo del input ─────────────────
         const errorMsg = document.createElement('p');
         errorMsg.style.cssText = `
             color: #ef4444; font-weight: 800; font-size: 14px;
-            margin: 0; display: none; font-family: 'Nunito', sans-serif;
+            margin: 4px 0 0 0; display: none; font-family: 'Nunito', sans-serif;
         `;
-        sendBtn.parentNode.insertBefore(errorMsg, sendBtn);
+        recoveryEmailIn.parentNode.insertAdjacentElement('afterend', errorMsg);
 
-        // ── Abrir modal ───────────────────────────────────────
+        // ── Validación de formato en tiempo real ──────────────
+        const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
+        sendBtn.disabled = true;
+        sendBtn.style.opacity = '0.6';
+
+        recoveryEmailIn.addEventListener('input', () => {
+            errorMsg.style.display = 'none';
+            recoveryEmailIn.style.borderColor = '';
+            const val = recoveryEmailIn.value.trim();
+            const formatOk = EMAIL_RE.test(val);
+            sendBtn.disabled = !formatOk;
+            sendBtn.style.opacity = formatOk ? '1' : '0.6';
+        });
+
+        // ── Abrir / cerrar modal ──────────────────────────────
         forgotPasswordBtn.addEventListener('click', (e) => {
             e.preventDefault();
             recoveryModal.classList.remove('hidden');
         });
-
-        // ── Cerrar modal con "X" ──────────────────────────────
         closeModalBtn.addEventListener('click', closeModal);
-
-        // ── Cerrar modal al hacer clic fuera ──────────────────
         recoveryModal.addEventListener('click', (e) => {
             if (e.target === recoveryModal) closeModal();
         });
 
-        // ── Enviar correo de recuperación con Firebase ────────
+        // ── Buscar email en Firestore (colección "users") ─────
+        // Esta es la única forma confiable: Firebase Auth no expone
+        // si un email existe desde el cliente en versiones modernas.
+        // Firestore sí lo sabe porque auth.js guarda { name, email, age }
+        // al registrar. Los usuarios viejos sin campo email deben
+        // agregarlo manualmente en la consola de Firebase.
+        async function emailExisteEnFirestore(email) {
+            const q        = query(collection(db, 'users'), where('email', '==', email));
+            const snapshot = await getDocs(q);
+            return !snapshot.empty;
+        }
+
+        // ── Enviar correo de recuperación ─────────────────────
         recoveryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const email = recoveryEmailIn.value.trim();
-            if (!email) {
-                showError('Ingresa tu correo electrónico.');
-                return;
-            }
+            if (!email) { showError('Ingresa tu correo electrónico.'); return; }
 
-            // Estado de carga
             sendBtn.disabled    = true;
-            sendBtn.textContent = 'ENVIANDO...';
+            sendBtn.textContent = 'VERIFICANDO...';
             sendBtn.style.opacity = '0.7';
             errorMsg.style.display = 'none';
             successMessage.classList.add('hidden');
 
             try {
+                // ── 1. Comprobar en Firestore si el email existe ────────
+                const existe = await emailExisteEnFirestore(email);
+
+                if (!existe) {
+                    // ❌ No hay usuario con ese correo → no enviar nada
+                    sendBtn.disabled    = false;
+                    sendBtn.textContent = 'ENVIAR CORREO';
+                    sendBtn.style.opacity = '1';
+                    showError('Este correo no posee un usuario asociado.');
+                    recoveryEmailIn.style.borderColor = '#ef4444';
+                    return;
+                }
+
+                // ── 2. Sí existe en Firestore → enviar correo ──────────
+                sendBtn.textContent   = 'ENVIANDO...';
                 await sendPasswordResetEmail(auth, email);
 
-                // ✅ Éxito: mostrar mensaje verde
-                successMessage.textContent = '✅ Correo enviado. Revisa tu bandeja de entrada.';
+                // ✅ Éxito — el modal queda abierto, el usuario lo cierra
+                successMessage.textContent = '✅ Correo enviado. Revisa tu bandeja de entrada y también la carpeta de spam.';
                 successMessage.classList.remove('hidden');
-                sendBtn.textContent  = 'ENVIADO ✓';
+                sendBtn.textContent      = 'ENVIADO ✓';
                 sendBtn.style.background = '#58cc02';
                 sendBtn.style.boxShadow  = '0 4px 0 #46a302';
-
-                // Cerrar modal después de 3 segundos
-                setTimeout(closeModal, 3000);
+                sendBtn.style.opacity    = '1';
+                sendBtn.disabled         = true; // evitar doble envío
 
             } catch (err) {
-                // ❌ Error: mostrar mensaje rojo
                 sendBtn.disabled    = false;
                 sendBtn.textContent = 'ENVIAR CORREO';
                 sendBtn.style.opacity = '1';
@@ -446,21 +479,21 @@
             recoveryModal.classList.add('hidden');
             recoveryForm.reset();
             successMessage.classList.add('hidden');
-            errorMsg.style.display  = 'none';
-            sendBtn.disabled        = false;
-            sendBtn.textContent     = 'ENVIAR CORREO';
-            sendBtn.style.opacity   = '1';
+            errorMsg.style.display = 'none';
+            recoveryEmailIn.style.borderColor = '';
+            sendBtn.disabled    = true;
+            sendBtn.textContent = 'ENVIAR CORREO';
+            sendBtn.style.opacity    = '0.6';
             sendBtn.style.background = '';
             sendBtn.style.boxShadow  = '';
         }
 
         function getResetError(code) {
             const map = {
-                'auth/invalid-email':        'El correo no es válido.',
-                'auth/user-not-found':       'No existe una cuenta con ese correo.',
-                'auth/too-many-requests':    'Demasiados intentos. Espera unos minutos.',
+                'auth/invalid-email':          'El correo no es válido.',
+                'auth/too-many-requests':      'Demasiados intentos. Espera unos minutos.',
                 'auth/network-request-failed': 'Sin conexión. Revisa tu internet.',
-                'auth/missing-email':        'Ingresa tu correo electrónico.',
+                'auth/missing-email':          'Ingresa tu correo electrónico.',
             };
             return map[code] || 'Error al enviar el correo. Intenta de nuevo.';
         }

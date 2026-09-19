@@ -12,6 +12,20 @@ function getCachedSession() { try { const raw = localStorage.getItem(SESSION_KEY
 function saveCachedSession(data) { try { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {} }
 function clearCachedSession() { localStorage.removeItem(SESSION_KEY); localStorage.removeItem('egglish_join_date'); localStorage.removeItem('egglish_tip_index'); }
 
+// ── Pantalla de bloqueo de sesión ─────────────────────
+// Cuando no hay sesión válida (sea al cargar, al volver con "Atrás" desde
+// bfcache, o porque Firebase confirma que no hay usuario), bloqueamos
+// TODO el contenido del perfil y mostramos únicamente #session-locked-screen
+// con las opciones de ir a iniciar sesión o al inicio. No navegamos solos:
+// es el usuario quien decide qué botón pulsar.
+function lockSession() {
+  clearCachedSession();
+  document.documentElement.classList.add('egg-locked');
+}
+function unlockSession() {
+  document.documentElement.classList.remove('egg-locked');
+}
+
 function getAvatarColor(name) {
   const colors = ['#1cb0f6', '#58cc02', '#f5a623', '#ff4b4b', '#9b59b6', '#e67e22', '#2ecc71', '#e74c3c'];
   const index = (name?.charCodeAt(0) || 0) % colors.length;
@@ -554,11 +568,42 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAchievements(currentSession);
   } else {
     adaptNavbar(null);
+    // Sin sesión cacheada: nos aseguramos de que quede bloqueado (el guard
+    // del <head> ya debería haberlo hecho antes de pintar nada).
+    lockSession();
   }
 });
 
+
+// ── Bloqueo de caché de historial (bfcache) ─────────────────────────────
+// Cuando el usuario cierra sesión y pulsa "Atrás", el navegador puede
+// restaurar esta página desde caché sin ejecutar el JS de nuevo.
+// `pageshow` se dispara SIEMPRE, incluso en restauraciones de bfcache.
+window.addEventListener("pageshow", (e) => {
+  if (e.persisted) {
+    // La página se restauró desde bfcache: puede traer en el DOM el perfil
+    // ya lleno de ANTES de cerrar sesión. Revalidamos de inmediato.
+    const cached = getCachedSession();
+    if (!cached) { lockSession(); return; }
+    // Hay caché en localStorage, pero puede estar obsoleta: confirmamos
+    // contra el estado real de Firebase Auth antes de confiar en ella.
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js")
+      .then(({ getAuth }) => {
+        const currentUser = getAuth().currentUser;
+        if (!currentUser) { lockSession(); } else { unlockSession(); }
+      })
+      .catch(() => { lockSession(); });
+  }
+});
+
+// Reemplazamos la entrada en el historial para que al cerrar sesión
+// el botón "Atrás" no lleve de vuelta a esta página protegida.
+if (window.history.replaceState) {
+  window.history.replaceState(null, "", window.location.href);
+}
+
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { clearCachedSession(); window.location.replace('/entrar.html'); return; }
+  if (!user) { lockSession(); return; }
 
   let userData = {
     age: null,
@@ -594,13 +639,14 @@ onAuthStateChanged(auth, async (user) => {
 
   currentSession = session;
   saveCachedSession(session);
+  unlockSession();
   adaptNavbar(session);
   fillProfile(session);
   fillStats(session);
   renderAchievements(session);
 });
 
-async function cerrarSesion() { clearCachedSession(); try { await signOut(auth); } catch (_) {} window.location.href = '/index.html'; }
+async function cerrarSesion() { lockSession(); try { await signOut(auth); } catch (_) {} window.location.href = '/index.html'; }
 
 function adaptNavbar(session) {
   const authZoneDesktop = document.getElementById('navbar-auth-zone');
