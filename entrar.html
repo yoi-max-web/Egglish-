@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Egglish - Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS (solo para botones de tema y cerrar) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,19 +29,23 @@
             --text-color: #4b4b4b;
             --input-bg: #f7f9fa;
             --focus-border: #84d8ff;
+            --card-bg: rgba(255, 255, 255, 0.16);
+            --card-border: rgba(255, 255, 255, 0.35);
         }
 
         html.dark {
-            --bg-color: #0f172a;
+            --bg-color: #0b172a;
             --border-color: #334155;
             --text-color: #f1f5f9;
             --input-bg: #0f172a;
+            --card-bg: rgba(15, 23, 42, 0.22);
+            --card-border: rgba(148, 163, 184, 0.25);
         }
 
-        html.dark .login-card { background-color: #1e293b; }
+        html.dark .login-card { background-color: var(--card-bg); }
         html.dark .input-group input { background-color: #0f172a; color: #f1f5f9; }
         html.dark .input-group input::placeholder { color: #94a3b8; }
-        html.dark .modal-content { background-color: #1e293b; }
+        html.dark .modal-content { background-color: var(--card-bg); }
 
         * {
             box-sizing: border-box;
@@ -57,6 +61,47 @@
             align-items: center;
             min-height: 100vh;
             color: var(--text-color);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* =====================================================
+           FONDO — degradado LINEAL en movimiento (en vez de
+           blobs circulares). Usa solo tonos de azul y se anima
+           desplazando la posición del degradado para dar
+           sensación de fondo "vivo".
+           ===================================================== */
+        #page-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            background: linear-gradient(120deg,
+                #eaf6ff, #bfe8ff, #7ec8ff, #1cb0f6, #4c9cff, #bfe8ff, #eaf6ff);
+            background-size: 400% 400%;
+            animation: gradient-move 18s ease infinite;
+        }
+        html.dark #page-bg {
+            background: linear-gradient(120deg,
+                #0b172a, #172554, #0c4a8f, #0090d9, #1cb0f6, #172554, #0b172a);
+            background-size: 400% 400%;
+        }
+        @keyframes gradient-move {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #page-bg { animation: none; }
+        }
+
+        /* Tarjetas de vidrio: fondo semitransparente + blur real
+           (backdrop-filter), igual que .backdrop-blur-sm/md de
+           Tailwind usado en las secciones de index.html */
+        .login-card,
+        .modal-content {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
 
         /* Tarjeta Principal */
@@ -64,13 +109,45 @@
             width: 100%;
             max-width: 400px;
             padding: 20px;
+            position: relative;
+            z-index: 1;
         }
 
+        /* =====================================================
+           EFECTO BEAM PLATEADO — misma técnica que el borde
+           giratorio de las tarjetas "¿Por qué elegir Egglish?"
+           en index.html, pero con tonos plateados/metálicos en
+           vez de azul/índigo, aplicado a la caja del formulario.
+           ===================================================== */
+        @property --beam {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 0deg;
+        }
+        @keyframes beam-spin { to { --beam: 360deg; } }
+
         .login-card {
-            background-color: white;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
+            position: relative;
+            isolation: isolate;
+            background-color: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 20px;
             padding: 30px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05);
+        }
+        .login-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: conic-gradient(from var(--beam), transparent 0 70%, #f8fafc 85%, #94a3b8 100%);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: beam-spin 4s linear infinite;
+            pointer-events: none;
+            z-index: -1;
         }
 
         .card-header {
@@ -79,20 +156,42 @@
 
         .logo-container {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
 
+        /* Marco del logo: mismo tratamiento "icono con marco
+           blanco + blur" que los íconos de "Tu camino hacia la
+           fluidez" en index.html (bg-white/60 + backdrop-blur +
+           rounded + borde de color) */
+        .logo-frame {
+            width: 88px;
+            height: 88px;
+            border-radius: 24px;
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 3px solid #bfe8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        html.dark .logo-frame {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-color: #1e3a5f;
+        }
+
         .logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
         }
 
         h1 {
             font-size: 24px;
-            font-weight: 800;
+            font-weight: 900;
             color: var(--text-color);
         }
 
@@ -168,11 +267,14 @@
         }
 
         .forgot-password {
-            color: var(--blue);
+            color: #000000;
             text-decoration: none;
             font-weight: 800;
             font-size: 14px;
             text-align: left;
+        }
+        html.dark .forgot-password {
+            color: #ffffff;
         }
 
         .forgot-password:hover {
@@ -197,12 +299,73 @@
         .btn-primary {
             background-color: var(--blue);
             box-shadow: 0 4px 0 var(--blue-shadow);
-            margin-top: 5px;
+            margin-top: 8px;
+            padding: 18px;
+            font-size: 17px;
         }
 
         .btn-primary:active {
             transform: translateY(4px);
             box-shadow: 0 0 0 var(--blue-shadow);
+        }
+
+        /* =====================================================
+           EFECTOS DEL BOTÓN "Empezar a Jugar" DE index.html
+           1) hover-circle-btn: círculo que "nace" desde el punto
+              exacto donde entra el cursor.
+           2) click-effect: ripple blanco que se expande al hacer
+              click (efecto "effect_dylan").
+           ===================================================== */
+        .hover-circle-btn {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .hover-circle-btn .btn-label {
+            position: relative;
+            z-index: 2;
+            transition: color 0.3s ease-in-out;
+        }
+        .hover-circle-btn .hover-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            display: block;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .hover-circle-btn:hover .hover-circle {
+            width: 250%;
+            height: 250%;
+        }
+
+        .click-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .click-effect:before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            display: block;
+            border-radius: inherit;
+            background-color: rgba(255, 255, 255, 0.55);
+            transform: scale(0.001, 0.001);
+            pointer-events: none;
+            z-index: 3;
+        }
+        .click-effect.is-clicked:before {
+            animation: click-ripple 0.7s ease-out;
+        }
+        @keyframes click-ripple {
+            50%  { transform: scale(1.4, 1.4); opacity: 0; }
+            99%  { transform: scale(0.001, 0.001); opacity: 0; }
+            100% { transform: scale(0.001, 0.001); opacity: 0.55; }
         }
 
         .btn-secondary {
@@ -235,14 +398,15 @@
         }
 
         .modal-content {
-            background-color: white;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
+            background-color: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 20px;
             padding: 30px;
             width: 90%;
             max-width: 350px;
             position: relative;
             text-align: center;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05);
         }
 
         .close-btn {
@@ -293,13 +457,22 @@
     </style>
 </head>
 <body>
+    <!--
+      ============================================================
+      FONDO — mismas olas SVG que el hero de index.html, aplicadas
+      con blur permanente (filter: blur) para lograr el mismo
+      efecto de "fondo borroso" detrás de la tarjeta de login.
+      ============================================================
+    -->
+    <div id="page-bg" aria-hidden="true"></div>
+
     <a href="/index.html" aria-label="Cerrar y volver al inicio"
-       class="fixed top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-white text-xl font-bold hover:bg-gray-100 dark:hover:bg-slate-700 no-underline shadow-sm">
+       class="fixed top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border-2 border-white/60 dark:border-slate-700/60 text-gray-700 dark:text-white text-xl font-bold hover:bg-white dark:hover:bg-slate-700 no-underline shadow-sm">
       &times;
     </a>
 
     <button id="dark-mode-toggle" type="button" aria-label="Cambiar modo oscuro" aria-pressed="false"
-       class="fixed top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700 shadow-sm">
+       class="fixed top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border-2 border-white/60 dark:border-slate-700/60 hover:bg-white dark:hover:bg-slate-700 shadow-sm">
       <svg id="dark-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700 dark:text-white">
         <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
         <g id="icon-sun" class="hidden">
@@ -313,9 +486,10 @@
         <div class="login-card">
             <header class="card-header">
                 <div class="logo-container">
-                    <!-- Referencia al logo si tienes una imagen real, o un placeholder visual -->
-                    <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Egglish Logo" class="logo">
-                    <h1>Egglish</h1>
+                    <div class="logo-frame">
+                        <img src="/imgs/eggy.png" alt="Egglish" class="logo">
+                    </div>
+                    <h1>Inicia Sesión</h1>
                 </div>
             </header>
             <form id="loginForm" class="login-form">
@@ -332,7 +506,10 @@
                     </button>
                 </div>
                 <a href="#" id="forgotPasswordBtn" class="forgot-password">¿Olvidaste tu contraseña?</a>
-                <button type="submit" class="btn-primary">INGRESAR</button>
+                <button type="submit" class="btn-primary hover-circle-btn click-effect">
+                    <span class="hover-circle" style="background-color:#0090d9"></span>
+                    <span class="btn-label">INGRESAR</span>
+                </button>
             </form>
         </div>
     </main>
@@ -497,6 +674,32 @@
             };
             return map[code] || 'Error al enviar el correo. Intenta de nuevo.';
         }
+    </script>
+    <script>
+      (function () {
+        document.querySelectorAll('.hover-circle-btn').forEach(function (btn) {
+          var circle = btn.querySelector('.hover-circle');
+          if (!circle) return;
+          function moveCircle(e) {
+            var rect = btn.getBoundingClientRect();
+            circle.style.top = (e.clientX ? e.clientY - rect.top : rect.height / 2) + 'px';
+            circle.style.left = (e.clientX ? e.clientX - rect.left : rect.width / 2) + 'px';
+          }
+          btn.addEventListener('mouseenter', moveCircle);
+          btn.addEventListener('mouseout', moveCircle);
+        });
+
+        document.querySelectorAll('.click-effect').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            btn.classList.remove('is-clicked');
+            void btn.offsetWidth; // fuerza reflow para reiniciar la animación
+            btn.classList.add('is-clicked');
+          });
+          btn.addEventListener('animationend', function () {
+            btn.classList.remove('is-clicked');
+          });
+        });
+      })();
     </script>
     <script>
       (function () {

@@ -44,6 +44,10 @@
             --shadow-card: 0 24px 48px -16px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
             --shadow-input-focus: 0 0 0 4px var(--blue-soft);
             --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Vidrio (glassmorphism) — igual que entrar.html */
+            --card-bg: rgba(255, 255, 255, 0.16);
+            --card-border: rgba(255, 255, 255, 0.35);
         }
 
         html.dark {
@@ -53,6 +57,9 @@
             --bg-page: #0f172a;
             --bg-card: #1e293b;
             --bg-input: #0f172a;
+
+            --card-bg: rgba(15, 23, 42, 0.22);
+            --card-border: rgba(148, 163, 184, 0.25);
         }
 
         html.dark body {
@@ -67,8 +74,6 @@
 
         body {
             background-color: var(--bg-page);
-            background-image: radial-gradient(circle at 15% 8%, rgba(28, 176, 246, 0.06), transparent 45%),
-                               radial-gradient(circle at 85% 92%, rgba(28, 176, 246, 0.05), transparent 45%);
             font-family: 'Nunito', sans-serif;
             color: var(--text-main);
             display: flex;
@@ -78,46 +83,108 @@
             padding: 20px;
         }
 
-        /* Main Container */
+        /* Fondo — degradado lineal animado, solo tonos de azul */
+        #page-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            background: linear-gradient(120deg,
+                #eaf6ff, #bfe8ff, #7ec8ff, #1cb0f6, #4c9cff, #bfe8ff, #eaf6ff);
+            background-size: 400% 400%;
+            animation: gradient-move 18s ease infinite;
+        }
+        html.dark #page-bg {
+            background: linear-gradient(120deg,
+                #0b172a, #172554, #0c4a8f, #0090d9, #1cb0f6, #172554, #0b172a);
+            background-size: 400% 400%;
+        }
+        @keyframes gradient-move {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #page-bg { animation: none; }
+        }
+
+        /* Main Container — vidrio (glassmorphism) + beam plateado */
         .registration-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
+            position: relative;
+            isolation: isolate;
+            z-index: 1;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background-color: var(--card-bg);
+            border: 2px solid var(--card-border);
             border-radius: 22px;
             padding: 28px 28px 20px; /* reducido para caber mejor en pantallas pequeñas */
             width: min(100%, 560px);
             max-width: 560px;
-            box-shadow: var(--shadow-card);
+            box-shadow: 0 8px 0 rgba(0,0,0,0.05);
+        }
+
+        @property --beam {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 0deg;
+        }
+        @keyframes beam-spin { to { --beam: 360deg; } }
+
+        .registration-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: conic-gradient(from var(--beam), transparent 0 70%, #f8fafc 85%, #94a3b8 100%);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: beam-spin 4s linear infinite;
+            pointer-events: none;
+            z-index: -1;
         }
 
         /* Branding Header */
         .card-header {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
             padding: 0;
             margin-bottom: 36px;
             width: 100%;
         }
 
-        .logo-placeholder {
-            width: 48px;
-            height: 48px;
+        .logo-frame {
+            width: 88px;
+            height: 88px;
+            border-radius: 24px;
+            background-color: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 3px solid #bfe8ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        html.dark .logo-frame {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-color: #1e3a5f;
         }
 
-        .card-header img {
-            width: 46px;
-            height: auto;
-            display: block;
-            filter: drop-shadow(0 4px 10px rgba(28, 176, 246, 0.22));
+        .card-header .logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
         }
 
         .card-header h1 {
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: -0.6px;
+            font-size: 24px;
+            font-weight: 400;
             color: var(--text-main);
-            margin: 0;
         }
 
         /* Form Layout */
@@ -163,6 +230,17 @@
             border-color: var(--danger);
         }
 
+        /* Quitar flechas (spinners) del input number de Edad */
+        #reg-edad::-webkit-outer-spin-button,
+        #reg-edad::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        #reg-edad {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
         .field-error {
             margin-top: 6px;
             font-size: 12.5px;
@@ -206,6 +284,10 @@
             background-color: #f3f4f6;
         }
 
+        html.dark .password-toggle:hover {
+            background-color: rgba(148, 163, 184, 0.18);
+        }
+
         .password-toggle:active {
             transform: translateY(-50%) scale(0.92);
         }
@@ -219,13 +301,13 @@
         /* Fat 3D Button */
         .btn-primary {
             width: 100%;
-            padding: 17px;
-            margin-top: 6px;
+            padding: 18px;
+            margin-top: 8px;
             background-color: var(--blue);
             color: #ffffff;
             font-family: 'Nunito', sans-serif;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 17px;
             text-transform: uppercase;
             letter-spacing: 0.8px;
             border: none;
@@ -252,6 +334,59 @@
             opacity: 0.7;
         }
 
+        /* Efecto hover-circle (círculo que nace desde el cursor) */
+        .hover-circle-btn {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .hover-circle-btn .btn-label {
+            position: relative;
+            z-index: 2;
+            transition: color 0.3s ease-in-out;
+        }
+        .hover-circle-btn .hover-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .hover-circle-btn:hover .hover-circle {
+            width: 250%;
+            height: 250%;
+        }
+
+        /* Efecto click-effect (ripple blanco) */
+        .click-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .click-effect:before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            display: block;
+            border-radius: inherit;
+            background-color: rgba(255, 255, 255, 0.55);
+            transform: scale(0.001, 0.001);
+            pointer-events: none;
+            z-index: 3;
+        }
+        .click-effect.is-clicked:before {
+            animation: click-ripple 0.7s ease-out;
+        }
+        @keyframes click-ripple {
+            50%  { transform: scale(1.4, 1.4); opacity: 0; }
+            99%  { transform: scale(0.001, 0.001); opacity: 0; }
+            100% { transform: scale(0.001, 0.001); opacity: 0.55; }
+        }
+
         /* Footer Link */
         .card-footer {
             margin-top: 28px;
@@ -262,7 +397,7 @@
 
         .login-link {
             display: inline-block;
-            color: var(--blue);
+            color: #000000;
             font-size: 15px;
             font-weight: 800;
             text-decoration: none;
@@ -272,6 +407,10 @@
             padding-bottom: 2px;
             border-bottom: 2px solid transparent;
             transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+        }
+
+        html.dark .login-link {
+            color: #ffffff;
         }
 
         .login-link:hover {
@@ -428,6 +567,7 @@
     </style>
 </head>
 <body class="dark:bg-slate-900 transition-colors relative">
+    <div id="page-bg" aria-hidden="true"></div>
 
     <a href="/index.html" aria-label="Cerrar y volver al inicio"
        class="absolute top-4 left-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 text-gray-700 dark:text-white text-xl font-bold hover:bg-gray-100 dark:hover:bg-slate-700 no-underline shadow-sm">
@@ -447,8 +587,10 @@
 
     <main class="registration-card" style="margin-top: 56px;">
         <header class="card-header">
-            <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logito " width="46" height="46">
-            <h1>Egglish</h1>
+            <div class="logo-frame">
+                <img src="/imgs/eggy.png" alt="Egglish" class="logo">
+            </div>
+            <h1>Regístrate</h1>
         </header>
 
         <form class="signup-form" id="signup-form" novalidate>
@@ -491,7 +633,10 @@
             <!-- Agregamos un div para mostrar errores de Firebase -->
             <div id="form-error" class="field-error hidden" style="text-align: center; font-size: 14px;"></div>
 
-            <button type="submit" class="btn-primary" id="btn-submit">Crear cuenta</button>
+            <button type="submit" class="btn-primary hover-circle-btn click-effect" id="btn-submit">
+                <span class="hover-circle" style="background-color:#0090d9"></span>
+                <span class="btn-label">Crear cuenta</span>
+            </button>
         </form>
 
         <footer class="card-footer">
@@ -519,6 +664,34 @@
       })();
     </script>
 
+    <!-- Script de efectos del botón (hover-circle + click-effect) -->
+    <script>
+      (function () {
+        document.querySelectorAll('.hover-circle-btn').forEach(function (btn) {
+          var circle = btn.querySelector('.hover-circle');
+          if (!circle) return;
+          function moveCircle(e) {
+            var rect = btn.getBoundingClientRect();
+            circle.style.top = (e.clientX ? e.clientY - rect.top : rect.height / 2) + 'px';
+            circle.style.left = (e.clientX ? e.clientX - rect.left : rect.width / 2) + 'px';
+          }
+          btn.addEventListener('mouseenter', moveCircle);
+          btn.addEventListener('mouseout', moveCircle);
+        });
+
+        document.querySelectorAll('.click-effect').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            btn.classList.remove('is-clicked');
+            void btn.offsetWidth; // fuerza reflow para reiniciar la animación
+            btn.classList.add('is-clicked');
+          });
+          btn.addEventListener('animationend', function () {
+            btn.classList.remove('is-clicked');
+          });
+        });
+      })();
+    </script>
+
     <!-- SCRIPT DE LÓGICA CON FIREBASE UNIFICADO -->
     <script type="module">
         import { registerUser } from '/Secciones/Js/auth.js';
@@ -530,6 +703,7 @@
         const edadError = document.getElementById('edad-error');
         const formError = document.getElementById('form-error');
         const btnSubmit = document.getElementById('btn-submit');
+        const btnSubmitLabel = btnSubmit.querySelector('.btn-label');
         
         // Elementos de la contraseña
         const passwordInput = document.getElementById('reg-password');
@@ -666,8 +840,8 @@
           const password = passwordInput.value;
 
           // Estado de carga (Loading)
-          const originalText = btnSubmit.textContent;
-          btnSubmit.textContent = 'Creando cuenta...';
+          const originalText = btnSubmitLabel.textContent;
+          btnSubmitLabel.textContent = 'Creando cuenta...';
           btnSubmit.disabled = true;
 
           try {
@@ -683,14 +857,14 @@
               formError.classList.remove('hidden');
               
               // Restaurar botón
-              btnSubmit.textContent = originalText;
+              btnSubmitLabel.textContent = originalText;
               btnSubmit.disabled = false;
             }
           } catch (error) {
              console.error("Error inesperado en el registro", error);
              formError.textContent = "Error inesperado. Inténtalo de nuevo.";
              formError.classList.remove('hidden');
-             btnSubmit.textContent = originalText;
+             btnSubmitLabel.textContent = originalText;
              btnSubmit.disabled = false;
           }
         });

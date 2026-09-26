@@ -56,7 +56,8 @@ function setButtonLoading(loading) {
   const btn = document.querySelector('#loginForm button[type="submit"]');
   if (!btn) return;
   btn.disabled      = loading;
-  btn.textContent   = loading ? 'VERIFICANDO...' : 'INGRESAR';
+  const label = btn.querySelector(".btn-label") || btn;
+  label.textContent = loading ? "VERIFICANDO..." : "INGRESAR";
   btn.style.opacity = loading ? '0.7' : '1';
 }
 
@@ -111,7 +112,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (result.ok) {
       const btn = form.querySelector('button[type="submit"]');
       if (btn) {
-        btn.textContent      = '¡Entrando! 🐣';
+        const lbl = btn.querySelector('.btn-label') || btn;
+        lbl.textContent = '¡Entrando! 🐣';
         btn.style.background = '#58cc02';
         btn.style.boxShadow  = '0 4px 0 #46a302';
       }
