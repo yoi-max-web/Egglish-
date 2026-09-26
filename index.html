@@ -220,6 +220,7 @@
        HERO "FEATURE" FIJO — efecto tipo Nike (zoom-out + blur
        + fade al hacer scroll), aplicado a #hero-feature y,
        con el mismo cálculo, al menú fijo (#site-nav).
+       Se activa en TODOS los dispositivos, incluido celular.
        ===================================================== */
     #hero-feature {
       position: fixed;
@@ -229,19 +230,15 @@
       height: calc(100vh - 68px);
       z-index: 1;
       overflow: hidden;
-    }
-    #hero-visual {
-      transform-origin: center center;
-      will-change: transform;
-    }
-    /* El blur ahora se aplica a TODO #hero-feature (imagen + texto),
-       para que funcione como "fondo borroso" único, no solo la imagen. */
-    #hero-feature {
       will-change: opacity, filter, transform;
     }
     #hero-spacer {
       width: 100%;
       height: 100vh;                  /* reserva el alto que ocupaba el hero fijo */
+    }
+    #hero-visual {
+      transform-origin: center center;
+      will-change: transform;
     }
     #site-nav {
       will-change: opacity;
@@ -334,12 +331,13 @@
       - Columna izquierda: imagen del pollito, centrada, protagonista en desktop.
       - Columna derecha: texto + botones, centrados verticalmente.
     -->
-    <section id="hero-feature" class="w-full flex flex-col md:flex-row items-center bg-white dark:bg-gray-950">
+    <section id="hero-feature" class="w-full flex flex-col md:flex-row items-stretch bg-white dark:bg-gray-950">
 
       <!-- Columna Izquierda: Pollito (único protagonista, mascotas adicionales removidas a pedido) -->
       <!-- #hero-visual-clip recorta el zoom para que NUNCA invada la columna de texto -->
-      <div id="hero-visual-clip" class="w-full md:w-1/2 min-h-[45vh] md:min-h-full h-full order-1 relative overflow-hidden">
-        <div id="hero-visual" class="hero-banner-bg w-full h-full flex items-center justify-center px-4 md:px-12 py-12 md:py-0">
+      <!-- Altura fija (no crece): así siempre le deja espacio a la columna de texto/botones -->
+      <div id="hero-visual-clip" class="w-full md:w-1/2 h-[30vh] md:h-full shrink-0 order-1 relative overflow-hidden">
+        <div id="hero-visual" class="hero-banner-bg w-full h-full flex items-center justify-center px-4 md:px-12 py-4 md:py-0">
 
         <!-- ── Ondas SVG LIGHT MODE ── -->
         <svg class="hero-waves waves-light" viewBox="0 0 500 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
@@ -376,10 +374,10 @@
         <div class="hero-pill" style="width:20px;height:8px;background:#f5a623;bottom:22%;right:14%;transform:rotate(25deg);opacity:.75"></div>
 
         <!-- ── Contenido: pollito ── -->
-        <div class="hero-content relative w-72 h-72 sm:w-96 sm:h-96 md:w-[26rem] md:h-[26rem] lg:w-[30rem] lg:h-[30rem] flex items-center justify-center">
+        <div class="hero-content relative w-48 h-48 sm:w-80 sm:h-80 md:w-[26rem] md:h-[26rem] lg:w-[30rem] lg:h-[30rem] flex items-center justify-center">
           <!-- SVG sustituido: se usa el archivo SVG real del pollito Egglish -->
           <svg
-            class="relative z-10 animate-bounce-chick w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-[22rem] lg:h-[22rem]"
+            class="relative z-10 animate-bounce-chick w-32 h-32 sm:w-56 sm:h-56 md:w-80 md:h-80 lg:w-[22rem] lg:h-[22rem]"
             viewBox="0 0 320 340"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -412,19 +410,22 @@
       </div>
 
       <!-- Columna Derecha: Contenido -->
-      <div class="w-full md:w-1/2 flex flex-col justify-center px-4 md:px-12 py-12 md:py-0 order-2 max-w-screen-md mx-auto md:mx-0 text-center md:text-left bg-white dark:bg-gray-950">
-        <h1 class="animate__animated animate__pulse animate__infinite text-4xl md:text-6xl font-extrabold leading-tight mb-4 text-[#1a1a2e] dark:text-white">
+      <!-- flex-1 min-h-0 + overflow-y-auto: toma el resto del alto disponible y,
+           si en un celular muy bajo el contenido no cupiera igual, se puede
+           scrollear DENTRO de esta columna para llegar a los botones. -->
+      <div class="w-full md:w-1/2 flex-1 min-h-0 overflow-y-auto flex flex-col justify-center px-4 md:px-12 pt-8 pb-3 md:py-0 order-2 max-w-screen-md mx-auto md:mx-0 text-center md:text-left bg-white dark:bg-gray-950">
+        <h1 class="animate__animated animate__pulse animate__infinite text-3xl md:text-6xl font-extrabold leading-tight mb-2 md:mb-4 text-[#1a1a2e] dark:text-white">
           Domina el inglés jugando
         </h1>
-        <p class="text-lg md:text-xl font-semibold text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto md:mx-0">
+        <p class="text-base md:text-xl font-semibold text-gray-500 dark:text-gray-400 mb-4 md:mb-8 max-w-md mx-auto md:mx-0">
           La forma más rápida, divertida y efectiva de aprender.
         </p>
 
-        <div class="flex flex-col sm:flex-row items-center md:items-start gap-4">
+        <div class="flex flex-row flex-wrap justify-center md:justify-start items-center gap-2 md:gap-4">
           <a
             href="/entrar.html"
             id="btn-empezar"
-            class="hover-circle-btn click-effect w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-white bg-egg-green shadow-hard-soft"
+            class="hover-circle-btn click-effect text-center rounded-full px-5 py-2 md:px-8 md:py-3 text-sm md:text-base font-bold text-white bg-egg-green shadow-hard-soft"
           >
             <span class="hover-circle" style="background-color:#46a302"></span>
             <span class="btn-label">Empezar a Jugar</span>
@@ -432,7 +433,7 @@
           <a
             href="/Secciones/Registro.html"
             id="btn-crear-cuenta"
-            class="hover-circle-btn click-effect w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-egg-blue border-2 border-egg-blue"
+            class="hover-circle-btn click-effect text-center rounded-full px-5 py-2 md:px-8 md:py-3 text-sm md:text-base font-bold text-egg-blue border-2 border-egg-blue"
           >
             <span class="hover-circle" style="background-color:#1cb0f6"></span>
             <span class="btn-label">Crear cuenta gratis</span>
@@ -449,8 +450,8 @@
       FEATURES
       ============================================================
     -->
-    <section class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14">
-      <div class="max-w-screen-xl mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 text-center bg-white/45 dark:bg-gray-950/45 backdrop-blur-sm">
+    <section class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14 pointer-events-none">
+      <div class="max-w-screen-xl mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 text-center bg-white/45 dark:bg-gray-950/45 backdrop-blur-sm pointer-events-auto">
       <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white drop-shadow-sm">¿Por qué elegir Egglish?</h2>
       <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold mb-12">Diseñado para que aprendas sin darte cuenta.</p>
 
@@ -479,8 +480,8 @@
       CAMINO / PATH
       ============================================================
     -->
-    <section class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14">
-      <div class="max-w-screen-xl mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 bg-gray-50/45 dark:bg-gray-900/45 backdrop-blur-sm">
+    <section class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14 pointer-events-none">
+      <div class="max-w-screen-xl mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 bg-gray-50/45 dark:bg-gray-900/45 backdrop-blur-sm pointer-events-auto">
       <div class="max-w-screen-xl mx-auto text-center mb-14">
         <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white drop-shadow-sm">Tu camino hacia la fluidez</h2>
         <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold">Mira cómo tu pollito crece con cada paso.</p>
@@ -683,11 +684,16 @@
       var $nav = $('#site-nav');
 
       var HERO_MIN_OPACITY = 0.45; // el banner nunca desaparece del todo: queda como fondo borroso bien visible
+      var BLUR_START = 0.12; // el blur no empieza hasta pasar este % de scroll (deja los botones usables sin efecto encima)
 
       function updateHeroOnScroll() {
         var fromTop = $(window).scrollTop();
         var vh = $(window).height();
-        var progress = Math.min(fromTop / vh, 1); // 0 → 1 durante el primer alto de pantalla scrolleado
+        var rawProgress = Math.min(fromTop / vh, 1); // 0 → 1 durante el primer alto de pantalla scrolleado
+
+        // El efecto (blur/zoom/fade) no arranca hasta pasar BLUR_START,
+        // así un scroll pequeño no difumina el banner ni tapa los botones.
+        var progress = Math.max(0, (rawProgress - BLUR_START) / (1 - BLUR_START));
 
         var scale = 1.15 - (0.15 * progress);     // zoom-out de la imagen: 1.15 → 1
         var blurPx = progress * 24;                // 0px → 24px de blur de TODO el banner (fondo)
