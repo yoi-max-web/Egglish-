@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -59,6 +60,207 @@
     html, body, header, nav, section, footer, div, a, button {
       transition: background-color .25s ease, color .25s ease, border-color .25s ease;
     }
+
+    /* =====================================================
+       HERO BANNER — Fondo con ondas + detalles decorativos
+       ===================================================== */
+    #hero-visual-clip,
+    .hero-banner-bg {
+      position: relative;
+      overflow: hidden;
+      background-color: #1b75ff;
+    }
+    .dark #hero-visual-clip,
+    .dark .hero-banner-bg {
+      background-color: #0b172a;
+    }
+
+    /* SVG de ondas: se intercambia vía display en dark mode */
+    .hero-banner-bg .waves-light { display: block; }
+    .hero-banner-bg .waves-dark  { display: none;  }
+    .dark .hero-banner-bg .waves-light { display: none;  }
+    .dark .hero-banner-bg .waves-dark  { display: block; }
+
+    .hero-banner-bg svg.hero-waves {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Estrellas de 4 puntas flotantes (light) */
+    @keyframes star-float {
+      0%, 100% { transform: translateY(0) scale(1);   opacity: .9; }
+      50%       { transform: translateY(-6px) scale(1.15); opacity: 1; }
+    }
+    .hero-star {
+      position: absolute;
+      pointer-events: none;
+      animation: star-float 3s ease-in-out infinite;
+    }
+    .hero-star:nth-child(2) { animation-delay: .6s;  }
+    .hero-star:nth-child(3) { animation-delay: 1.2s; }
+    .hero-star:nth-child(4) { animation-delay: 1.8s; }
+    .hero-star:nth-child(5) { animation-delay: 2.4s; }
+
+    /* Círculos flotantes */
+    @keyframes circle-float {
+      0%, 100% { transform: translateY(0);   opacity: .85; }
+      50%       { transform: translateY(-8px); opacity: 1;  }
+    }
+    .hero-circle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: circle-float 4s ease-in-out infinite;
+    }
+    .hero-circle:nth-of-type(2) { animation-delay: 1s;  }
+    .hero-circle:nth-of-type(3) { animation-delay: 2s;  }
+
+    /* Pastillas amarillas */
+    @keyframes pill-float {
+      0%, 100% { transform: rotate(-30deg) translateY(0);   }
+      50%       { transform: rotate(-30deg) translateY(-5px);}
+    }
+    .hero-pill {
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      animation: pill-float 3.5s ease-in-out infinite;
+    }
+    .hero-pill:nth-of-type(2) { animation-delay: .8s; }
+    .hero-pill:nth-of-type(3) { animation-delay: 1.6s;}
+
+    /* El contenido del banner siempre por encima de los decorativos */
+    .hero-banner-bg > .hero-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* =====================================================
+       EFECTO DE CLICK (ripple) — se aplica a cualquier botón
+       que tenga la clase .click-effect. Adaptado del efecto
+       "effect_dylan" que pediste: un círculo se expande y se
+       desvanece desde el centro del botón al hacer click.
+       ===================================================== */
+    .click-effect {
+      position: relative;
+      overflow: hidden;
+    }
+    .click-effect:before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      display: block;
+      border-radius: inherit;
+      background-color: rgba(255, 255, 255, 0.55);
+      transform: scale(0.001, 0.001);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .click-effect.is-clicked:before {
+      animation: click-ripple 0.7s ease-out;
+    }
+    @keyframes click-ripple {
+      50% {
+        transform: scale(1.4, 1.4);
+        opacity: 0;
+      }
+      99% {
+        transform: scale(0.001, 0.001);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(0.001, 0.001);
+        opacity: 0.55;
+      }
+    }
+
+    /* =====================================================
+       EFECTO DE HOVER — círculo que "nace" desde el punto
+       exacto donde entra el cursor (estilo .btn-6 del SCSS
+       que compartiste). Reemplaza los hovers de color simples
+       que tenían "Empezar a Jugar" y "Crear cuenta gratis".
+       El JS (al final del body) mueve el círculo con jQuery
+       usando la posición del mouse, igual que tu snippet.
+       ===================================================== */
+    .hover-circle-btn {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .hover-circle-btn .btn-label {
+      position: relative;
+      z-index: 2;
+      transition: color 0.3s ease-in-out;
+    }
+    .hover-circle-btn .hover-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: block;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .hover-circle-btn:hover .hover-circle {
+      width: 250%;
+      height: 250%;
+    }
+    #btn-crear-cuenta:hover .btn-label {
+      color: #ffffff;
+    }
+
+    /* =====================================================
+       HERO "FEATURE" FIJO — efecto tipo Nike (zoom-out + blur
+       + fade al hacer scroll), aplicado a #hero-feature y,
+       con el mismo cálculo, al menú fijo (#site-nav).
+       ===================================================== */
+    #hero-feature {
+      position: fixed;
+      top: 68px;                      /* alto del navbar */
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 68px);
+      z-index: 1;
+      overflow: hidden;
+    }
+    #hero-visual {
+      transform-origin: center center;
+      will-change: transform;
+    }
+    /* El blur ahora se aplica a TODO #hero-feature (imagen + texto),
+       para que funcione como "fondo borroso" único, no solo la imagen. */
+    #hero-feature {
+      will-change: opacity, filter, transform;
+    }
+    #hero-spacer {
+      width: 100%;
+      height: 100vh;                  /* reserva el alto que ocupaba el hero fijo */
+    }
+    #site-nav {
+      will-change: opacity;
+    }
+
+    /* =====================================================
+       SCROLL REVEAL — cada sección (Features, Camino, CTA)
+       aparece cuando entra en pantalla y se desvanece cuando
+       sale, una por una, en vez de quedar siempre visible.
+       ===================================================== */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+    .scroll-reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
   <script>
     /* Aplica el modo oscuro ANTES de pintar la página para evitar parpadeo */
@@ -86,9 +288,9 @@
     rutas, dime y la reintegro apuntando al nuevo botón.
   -->
   <header>
-    <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
+    <nav id="site-nav" class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
       <a href="/index.html" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+        <img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
         <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
       </a>
 
@@ -98,7 +300,7 @@
           type="button"
           aria-label="Cambiar modo oscuro"
           aria-pressed="false"
-          class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
+          class="click-effect w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
         >
           <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
             <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
@@ -117,26 +319,96 @@
 
     <!--
       ============================================================
-      HERO SECTION — layout de 2 columnas pedido
+      HERO SECTION — banner "feature" fijo (efecto Nike LeBron)
       ============================================================
-      - min-h-screen: ocupa el viewport completo bajo el navbar.
+      - #hero-feature queda "pegado" (position:fixed) al fondo,
+        cubriendo la pantalla completa bajo el navbar.
+      - #hero-spacer reserva ese mismo alto en el documento para que
+        el resto del contenido (Features, Camino, CTA...) empiece
+        justo debajo y, al hacer scroll, se deslice por ENCIMA del
+        hero fijo, tapándolo poco a poco.
+      - Mientras tanto, el JS (al final del body) hace zoom-out,
+        blur y fade del hero según el scroll, y aplica el mismo
+        fade al menú fijo (#site-nav).
       - flex-col en móvil (apilado) -> md:flex-row (2 columnas) en tablet+.
       - Columna izquierda: imagen del pollito, centrada, protagonista en desktop.
       - Columna derecha: texto + botones, centrados verticalmente.
     -->
-    <section class="min-h-screen w-full flex flex-col md:flex-row items-center bg-white dark:bg-gray-950">
+    <section id="hero-feature" class="w-full flex flex-col md:flex-row items-center bg-white dark:bg-gray-950">
 
       <!-- Columna Izquierda: Pollito (único protagonista, mascotas adicionales removidas a pedido) -->
-      <div class="w-full md:w-1/2 min-h-[45vh] md:min-h-screen flex items-center justify-center bg-egg-blue dark:bg-blue-950 px-4 md:px-12 py-12 md:py-0 order-1">
-        <div class="relative w-72 h-72 sm:w-96 sm:h-96 md:w-[26rem] md:h-[26rem] lg:w-[30rem] lg:h-[30rem] flex items-center justify-center">
+      <!-- #hero-visual-clip recorta el zoom para que NUNCA invada la columna de texto -->
+      <div id="hero-visual-clip" class="w-full md:w-1/2 min-h-[45vh] md:min-h-full h-full order-1 relative overflow-hidden">
+        <div id="hero-visual" class="hero-banner-bg w-full h-full flex items-center justify-center px-4 md:px-12 py-12 md:py-0">
 
-          <!-- Pollito: único protagonista de la columna, se quitaron las mascotas adicionales -->
-          <img
-            src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png"
-            alt="Pollito de Egglish"
-            class="relative z-10 animate-bounce-chick w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
-          />
+        <!-- ── Ondas SVG LIGHT MODE ── -->
+        <svg class="hero-waves waves-light" viewBox="0 0 500 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <path d="M-60 120 Q80 60 200 140 Q320 220 460 130 Q540 80 600 110 L600 0 L-60 0 Z" fill="#4c9cff" opacity=".55"/>
+          <path d="M-60 260 Q60 190 180 270 Q310 360 460 255 Q530 210 600 240 L600 120 Q540 90 460 140 Q310 230 180 150 Q60 70 -60 130 Z" fill="#4c9cff" opacity=".35"/>
+          <path d="M-60 580 Q100 490 240 560 Q370 630 500 530 Q560 490 600 510 L600 700 L-60 700 Z" fill="#4c9cff" opacity=".45"/>
+          <path d="M-60 650 Q120 580 270 640 Q390 690 520 620 Q570 595 600 610 L600 700 L-60 700 Z" fill="#4c9cff" opacity=".25"/>
+        </svg>
+
+        <!-- ── Ondas SVG DARK MODE ── -->
+        <svg class="hero-waves waves-dark" viewBox="0 0 500 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <path d="M-60 120 Q80 60 200 140 Q320 220 460 130 Q540 80 600 110 L600 0 L-60 0 Z" fill="#172554" opacity=".7"/>
+          <path d="M-60 260 Q60 190 180 270 Q310 360 460 255 Q530 210 600 240 L600 120 Q540 90 460 140 Q310 230 180 150 Q60 70 -60 130 Z" fill="#1e293b" opacity=".6"/>
+          <path d="M-60 580 Q100 490 240 560 Q370 630 500 530 Q560 490 600 510 L600 700 L-60 700 Z" fill="#172554" opacity=".65"/>
+          <path d="M-60 650 Q120 580 270 640 Q390 690 520 620 Q570 595 600 610 L600 700 L-60 700 Z" fill="#1e293b" opacity=".4"/>
+        </svg>
+
+        <!-- ── Estrellas de 4 puntas (blancas, visibles en light y dark) ── -->
+        <svg class="hero-star" style="top:8%;left:12%;width:18px;height:18px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+        <svg class="hero-star" style="top:15%;right:14%;width:14px;height:14px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+        <svg class="hero-star" style="top:68%;left:8%;width:22px;height:22px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+        <svg class="hero-star" style="bottom:12%;right:10%;width:16px;height:16px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+        <svg class="hero-star" style="top:42%;left:4%;width:12px;height:12px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+
+        <!-- ── Círculos cyan (light) / azul-grisáceo (dark) ── -->
+        <div class="hero-circle" style="width:14px;height:14px;background:#22d3ee;top:22%;left:6%;opacity:.9;box-shadow:0 0 8px #22d3ee88"></div>
+        <div class="hero-circle" style="width:10px;height:10px;background:#22d3ee;bottom:20%;left:18%;opacity:.8;box-shadow:0 0 6px #22d3ee66"></div>
+        <div class="hero-circle" style="width:12px;height:12px;background:#22d3ee;top:55%;right:8%;opacity:.85;box-shadow:0 0 7px #22d3ee77"></div>
+
+        <!-- ── Pastillas amarillas ── -->
+        <div class="hero-pill" style="width:28px;height:10px;background:#f5a623;top:30%;left:5%;transform:rotate(-30deg);opacity:.9"></div>
+        <div class="hero-pill" style="width:22px;height:8px;background:#f5a623;top:35%;right:6%;transform:rotate(30deg);opacity:.85"></div>
+        <div class="hero-pill" style="width:24px;height:9px;background:#f5a623;bottom:28%;left:12%;transform:rotate(-20deg);opacity:.8"></div>
+        <div class="hero-pill" style="width:20px;height:8px;background:#f5a623;bottom:22%;right:14%;transform:rotate(25deg);opacity:.75"></div>
+
+        <!-- ── Contenido: pollito ── -->
+        <div class="hero-content relative w-72 h-72 sm:w-96 sm:h-96 md:w-[26rem] md:h-[26rem] lg:w-[30rem] lg:h-[30rem] flex items-center justify-center">
+          <!-- SVG sustituido: se usa el archivo SVG real del pollito Egglish -->
+          <svg
+            class="relative z-10 animate-bounce-chick w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-[22rem] lg:h-[22rem]"
+            viewBox="0 0 320 340"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-label="Pollito de Egglish"
+            role="img"
+          >
+            <defs>
+              <!-- Halo de luz blanca difusa alrededor del pollito real -->
+              <radialGradient id="haloGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="white" stop-opacity="0.6"/>
+                <stop offset="50%"  stop-color="white" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="white" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="8" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- Halo blanco brillante detrás del pollito -->
+            <ellipse cx="160" cy="165" rx="128" ry="125" fill="url(#haloGlow)"/>
+
+            <!-- Pollito SVG real centrado en el viewBox 320×340 -->
+            <image href="/imgs/eggy.png" x="10" y="10" width="300" height="300"/>
+
+            <!-- Destellos de luz alrededor (rayos blancos con glow) -->
+          </svg>
         </div>
+      </div>
       </div>
 
       <!-- Columna Derecha: Contenido -->
@@ -151,27 +423,35 @@
         <div class="flex flex-col sm:flex-row items-center md:items-start gap-4">
           <a
             href="/entrar.html"
-            class="w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-white bg-egg-green hover:bg-egg-green-d transition-colors shadow-hard-soft"
+            id="btn-empezar"
+            class="hover-circle-btn click-effect w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-white bg-egg-green shadow-hard-soft"
           >
-            Empezar a Jugar 
+            <span class="hover-circle" style="background-color:#46a302"></span>
+            <span class="btn-label">Empezar a Jugar</span>
           </a>
           <a
             href="/Secciones/Registro.html"
-            class="w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-egg-blue border-2 border-egg-blue hover:bg-blue-50 transition-colors"
+            id="btn-crear-cuenta"
+            class="hover-circle-btn click-effect w-full sm:w-auto text-center rounded-full px-8 py-3 font-bold text-egg-blue border-2 border-egg-blue"
           >
-            Crear cuenta gratis
+            <span class="hover-circle" style="background-color:#1cb0f6"></span>
+            <span class="btn-label">Crear cuenta gratis</span>
           </a>
         </div>
       </div>
     </section>
+
+    <!-- Reserva el alto del hero fijo para que el resto del contenido empiece debajo -->
+    <div id="hero-spacer"></div>
 
     <!--
       ============================================================
       FEATURES
       ============================================================
     -->
-    <section class="px-4 md:px-12 py-20 max-w-screen-xl mx-auto text-center bg-white dark:bg-gray-950">
-      <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">¿Por qué elegir Egglish?</h2>
+    <section class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14">
+      <div class="max-w-screen-xl mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 text-center bg-white/45 dark:bg-gray-950/45 backdrop-blur-sm">
+      <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white drop-shadow-sm">¿Por qué elegir Egglish?</h2>
       <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold mb-12">Diseñado para que aprendas sin darte cuenta.</p>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -191,6 +471,7 @@
           <p class="text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Gana plumas doradas, sube de nivel y desbloquea accesorios.</p>
         </div>
       </div>
+      </div>
     </section>
 
     <!--
@@ -198,19 +479,18 @@
       CAMINO / PATH
       ============================================================
     -->
-    <section class="bg-gray-50 dark:bg-gray-900 px-4 md:px-12 py-20 border-t border-gray-200 dark:border-gray-800">
+    <section class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14">
+      <div class="max-w-screen-xl mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 bg-gray-50/45 dark:bg-gray-900/45 backdrop-blur-sm">
       <div class="max-w-screen-xl mx-auto text-center mb-14">
-        <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">Tu camino hacia la fluidez</h2>
+        <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white drop-shadow-sm">Tu camino hacia la fluidez</h2>
         <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold">Mira cómo tu pollito crece con cada paso.</p>
       </div>
 
       <div class="relative max-w-screen-md mx-auto flex flex-col items-center gap-16">
 
-        <div class="absolute left-1/2 md:left-[60px] top-[60px] bottom-[60px] w-1 -translate-x-1/2 md:translate-x-0 bg-gradient-to-b from-orange-200 via-orange-300 to-blue-300 dark:from-orange-800 dark:via-orange-700 dark:to-blue-800 rounded-full -z-10"></div>
-
         <div class="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-10 text-center md:text-left">
           <div class="relative z-10 w-[120px] h-[120px] bg-white dark:bg-gray-950 rounded-[30px] flex items-center justify-center shadow-hard-node border-4 border-orange-200 dark:border-orange-800 shrink-0">
-            <img src="https://em-content.zobj.net/source/twitter/376/egg_1f95a.png" alt="Huevo" class="w-[70px] h-[70px] object-contain">
+            <img src="/imgs/egg.png" alt="Huevo" class="w-[70px] h-[70px] object-contain">
           </div>
           <div class="flex-1 max-w-sm">
             <h3 class="text-2xl font-black mb-2 text-[#1a1a2e] dark:text-white">1. El Cascarón</h3>
@@ -220,7 +500,7 @@
 
         <div class="flex flex-col md:flex-row items-center justify-center w-full gap-6 md:gap-10 text-center md:text-left">
           <div class="relative z-10 w-[120px] h-[120px] bg-white dark:bg-gray-950 rounded-[30px] flex items-center justify-center shadow-hard-node border-4 border-orange-300 dark:border-orange-700 shrink-0">
-            <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Pollito saliendo" class="w-[70px] h-[70px] object-contain">
+            <img src="/imgs/eggy.png" alt="Pollito saliendo" class="w-[70px] h-[70px] object-contain">
           </div>
           <div class="flex-1 max-w-sm">
             <h3 class="text-2xl font-black mb-2 text-[#1a1a2e] dark:text-white">2. Primeros Pasos</h3>
@@ -239,6 +519,7 @@
         </div>
 
       </div>
+      </div>
     </section>
 
     <!--
@@ -246,7 +527,7 @@
       CTA FINAL
       ============================================================
     -->
-    <section class="px-4 md:px-12 py-16 flex justify-center">
+    <section class="scroll-reveal relative z-10 px-4 md:px-12 py-16 flex justify-center">
       <div class="bg-cta-dots relative bg-egg-blue rounded-[32px] px-6 md:px-10 py-16 text-center w-full max-w-screen-md shadow-hard-blue overflow-hidden">
         <img src="/imgs/Bigger-removebg-preview.png" alt="Pollito" class="w-[110px] h-auto mx-auto mb-4 drop-shadow-lg">
         <h2 class="text-3xl md:text-5xl font-black text-white mb-4">¿Qué esperas?</h2>
@@ -261,7 +542,7 @@
     FOOTER
     ============================================================
   -->
-  <footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
+  <footer class="relative z-10 bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
     <div class="max-w-screen-xl mx-auto">
 
       <!-- Grid de columnas simplificado (3 columnas), paleta azul/amarillo de Egglish -->
@@ -301,7 +582,7 @@
       <!-- Fila inferior: logo + copyright, separada por línea -->
       <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
         <div class="flex items-center gap-2.5">
-          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/>
+          <img src="/imgs/eggy.png" class="w-9 h-9 object-contain" alt="logo"/>
           <span class="font-black text-lg text-white">Egglish</span>
         </div>
         <p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p>
@@ -338,6 +619,168 @@
     });
 
     syncDarkModeUI();
+  </script>
+
+  <!--
+    ============================================================
+    EFECTOS DE BOTONES
+    ============================================================
+    1) Hover con círculo que sigue el punto exacto donde entra/sale
+       el cursor (igual a tu snippet de jQuery para .btn-6), aplicado
+       a "Empezar a Jugar" y "Crear cuenta gratis".
+    2) Efecto de click tipo "ripple" (adaptado de tu efecto
+       effect_dylan), aplicado a cualquier botón con .click-effect.
+  -->
+  <script>
+    $(function () {
+      $('.hover-circle-btn')
+        .on('mouseenter', function (e) {
+          var parentOffset = $(this).offset(),
+              relX = e.pageX - parentOffset.left,
+              relY = e.pageY - parentOffset.top;
+          $(this).find('.hover-circle').css({ top: relY, left: relX });
+        })
+        .on('mouseout', function (e) {
+          var parentOffset = $(this).offset(),
+              relX = e.pageX - parentOffset.left,
+              relY = e.pageY - parentOffset.top;
+          $(this).find('.hover-circle').css({ top: relY, left: relX });
+        });
+
+      $('.click-effect').on('click', function () {
+        var $btn = $(this);
+        $btn.removeClass('is-clicked');
+        // Forzar reflow para poder reiniciar la animación si se hace click varias veces seguidas
+        void $btn[0].offsetWidth;
+        $btn.addClass('is-clicked');
+      });
+
+      $('.click-effect').on('animationend', function () {
+        $(this).removeClass('is-clicked');
+      });
+    });
+  </script>
+
+  <!--
+    ============================================================
+    EFECTO DE SCROLL DEL HERO (banner fijo tipo Nike)
+    ============================================================
+    Adaptado de tu snippet original: en vez de animar
+    "background-size" (el hero no usa una sola imagen de fondo,
+    sino SVGs), se hace zoom-out con transform: scale() sobre
+    #hero-visual, blur() y fade de opacidad sobre #hero-feature,
+    y EXACTAMENTE el mismo fade se aplica al menú fijo #site-nav,
+    tal como pediste.
+    No se incluyó la detección de Chrome/Safari + capa .opaque de
+    respaldo del snippet original porque hoy "filter: blur()" ya
+    funciona igual en todos los navegadores modernos; si necesitas
+    dar soporte a navegadores muy viejos, avísame y la reintegro.
+  -->
+  <script>
+    $(function () {
+      var $heroFeature = $('#hero-feature');
+      var $heroVisual = $('#hero-visual');
+      var $nav = $('#site-nav');
+
+      var HERO_MIN_OPACITY = 0.45; // el banner nunca desaparece del todo: queda como fondo borroso bien visible
+
+      function updateHeroOnScroll() {
+        var fromTop = $(window).scrollTop();
+        var vh = $(window).height();
+        var progress = Math.min(fromTop / vh, 1); // 0 → 1 durante el primer alto de pantalla scrolleado
+
+        var scale = 1.15 - (0.15 * progress);     // zoom-out de la imagen: 1.15 → 1
+        var blurPx = progress * 24;                // 0px → 24px de blur de TODO el banner (fondo)
+
+        // Opacidad del banner: baja de 1 a HERO_MIN_OPACITY (nunca llega a 0),
+        // así queda funcionando como fondo desenfocado permanente detrás
+        // de las secciones translúcidas que se deslizan encima.
+        var heroOpacity = 1 - progress * (1 - HERO_MIN_OPACITY);
+
+        // La opacidad del menú fijo sí llega a 0 (se oculta del todo al bajar).
+        var navOpacity = 1 - progress;
+
+        // El zoom-out va solo en la imagen (columna izquierda)...
+        $heroVisual.css({
+          '-webkit-transform': 'scale(' + scale + ')',
+          'transform': 'scale(' + scale + ')'
+        });
+
+        // ...pero el blur y el fundido van en TODO el banner (imagen + texto),
+        // para que funcione como una sola pieza de "fondo borroso".
+        $heroFeature.css({
+          '-webkit-filter': 'blur(' + blurPx + 'px)',
+          'filter': 'blur(' + blurPx + 'px)',
+          'opacity': heroOpacity
+        });
+
+        $nav.css('opacity', Math.max(navOpacity, 0));
+        $nav.css('pointer-events', progress >= 0.98 ? 'none' : 'auto');
+      }
+
+      $(window).on('scroll', updateHeroOnScroll);
+      $(window).on('resize', updateHeroOnScroll);
+      updateHeroOnScroll();
+
+      /*
+        SNAP DE LA PRIMERA PANTALLA
+        Si el usuario suelta el scroll a medio camino entre el banner y la
+        siguiente sección, la página termina el movimiento sola: si ya pasó
+        del 40% la empuja hacia la siguiente sección, si no, la regresa
+        al banner completo. Solo aplica dentro de esa primera pantalla;
+        el resto de la página sigue con scroll libre normal.
+      */
+      var snapTimer = null;
+      var isSnapping = false;
+
+      function snapIfNeeded() {
+        if (isSnapping) return;
+        var vh = $(window).height();
+        var fromTop = $(window).scrollTop();
+
+        if (fromTop > 0 && fromTop < vh) {
+          var target = fromTop < vh * 0.4 ? 0 : vh;
+          isSnapping = true;
+          $('html, body').stop().animate({ scrollTop: target }, 380, function () {
+            isSnapping = false;
+          });
+        }
+      }
+
+      $(window).on('scroll', function () {
+        if (isSnapping) return;
+        clearTimeout(snapTimer);
+        snapTimer = setTimeout(snapIfNeeded, 130);
+      });
+    });
+  </script>
+
+  <!--
+    ============================================================
+    SCROLL REVEAL DE SECCIONES
+    ============================================================
+    Cada sección con .scroll-reveal (Features, Camino, CTA final)
+    aparece cuando entra en pantalla y se desvanece cuando sale,
+    una por una, tal como pediste.
+  -->
+  <script>
+    if ('IntersectionObserver' in window) {
+      var revealSections = document.querySelectorAll('.scroll-reveal');
+      var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          entry.target.classList.toggle('is-visible', entry.isIntersecting);
+        });
+      }, { threshold: 0.2 });
+
+      revealSections.forEach(function (section) {
+        revealObserver.observe(section);
+      });
+    } else {
+      // Respaldo para navegadores sin soporte: mostrar todo directo
+      document.querySelectorAll('.scroll-reveal').forEach(function (section) {
+        section.classList.add('is-visible');
+      });
+    }
   </script>
 </body>
 </html>
