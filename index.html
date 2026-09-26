@@ -830,37 +830,6 @@
       $(window).on('scroll', updateHeroOnScroll);
       $(window).on('resize', updateHeroOnScroll);
       updateHeroOnScroll();
-
-      /*
-        SNAP DE LA PRIMERA PANTALLA
-        Si el usuario suelta el scroll a medio camino entre el banner y la
-        siguiente sección, la página termina el movimiento sola: si ya pasó
-        del 40% la empuja hacia la siguiente sección, si no, la regresa
-        al banner completo. Solo aplica dentro de esa primera pantalla;
-        el resto de la página sigue con scroll libre normal.
-      */
-      var snapTimer = null;
-      var isSnapping = false;
-
-      function snapIfNeeded() {
-        if (isSnapping) return;
-        var vh = $(window).height() * 1.35; // coincide con la nueva altura del banner (135vh)
-        var fromTop = $(window).scrollTop();
-
-        if (fromTop > 0 && fromTop < vh) {
-          var target = fromTop < vh * 0.4 ? 0 : vh;
-          isSnapping = true;
-          $('html, body').stop().animate({ scrollTop: target }, 380, function () {
-            isSnapping = false;
-          });
-        }
-      }
-
-      $(window).on('scroll', function () {
-        if (isSnapping) return;
-        clearTimeout(snapTimer);
-        snapTimer = setTimeout(snapIfNeeded, 130);
-      });
     });
   </script>
 
