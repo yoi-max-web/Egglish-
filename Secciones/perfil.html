@@ -21,7 +21,10 @@
   </script>
   <style>
     #session-locked-screen { display: none; }
-    html.egg-locked body > *:not(#session-locked-screen) { display: none !important; }
+    /* Cuando hay egg-locked: ocultamos todo EXCEPTO la pantalla de bloqueo
+       y el fondo animado (#page-bg). El fondo (z-index 400) queda detrás
+       de la tarjeta de bloqueo (z-index 450) y ambos se ven. */
+    html.egg-locked body > *:not(#session-locked-screen):not(#page-bg) { display: none !important; }
     html.egg-locked #session-locked-screen { display: flex; }
   </style>
   <!-- Evitar que el navegador cachee esta página protegida -->
@@ -54,6 +57,59 @@
     };
   </script>
   <style>.shadow-hard-soft { box-shadow: 0 6px 0 rgba(0,0,0,0.1); }</style>
+  <style>
+    /* ============================================================
+       MODAL "EDITAR PERFIL" — estilos propios y autocontenidos,
+       no dependen de Perfil.css (así funcionan aunque ese archivo
+       cambie o no defina estas clases).
+       ============================================================ */
+    .eggmodal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10030;
+      opacity: 0; pointer-events: none; transition: opacity .25s ease;
+    }
+    .eggmodal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .eggmodal {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -48%); z-index: 10031;
+      width: 92%; max-width: 420px;
+      /* Fondo SÓLIDO (no la variable translúcida --card-bg): en claro y
+         oscuro debe verse una tarjeta opaca, sin transparencias. */
+      background: #ffffff; color: #1a1a2e;
+      border: 2px solid #e5e7eb;
+      border-radius: 24px; padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    html.dark .eggmodal {
+      background: #0f172a; color: #f1f5f9; border-color: #1e293b;
+    }
+    .eggmodal.open { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%); }
+    .eggmodal label {
+      display: block; font-size: 0.75rem; font-weight: 800; margin: 14px 0 6px;
+      color: #6b7280; text-transform: uppercase; letter-spacing: .02em;
+    }
+    html.dark .eggmodal label { color: #94a3b8; }
+    .eggmodal input, .eggmodal textarea {
+      width: 100%; padding: 10px 14px; border-radius: 14px; box-sizing: border-box;
+      border: 2px solid #e5e7eb; background: transparent;
+      color: inherit; font-weight: 700; font-family: inherit; font-size: 0.95rem;
+    }
+    html.dark .eggmodal input, html.dark .eggmodal textarea { border-color: #1e293b; }
+    .eggmodal textarea { resize: vertical; min-height: 70px; }
+    .eggmodal input:focus, .eggmodal textarea:focus { outline: none; border-color: #1cb0f6; }
+    /* Quita las flechitas de subir/bajar del input de edad (type=number) */
+    .eggmodal input[type="number"]::-webkit-inner-spin-button,
+    .eggmodal input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none; margin: 0;
+    }
+    .eggmodal input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+    .eggmodal-close-btn { background: rgba(0,0,0,0.06); }
+    html.dark .eggmodal-close-btn { background: rgba(255,255,255,0.1); }
+    .eggmodal-cancel-btn { border: 2px solid #e5e7eb; }
+    html.dark .eggmodal-cancel-btn { border-color: #1e293b; }
+  </style>
   <script>
     if (localStorage.getItem('egglish-theme') === 'dark' ||
         (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -61,68 +117,122 @@
     }
   </script>
 </head>
-<body>
+<body class="bg-[#f0f4f8] dark:bg-gray-950 text-black dark:text-white">
+
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  RESUMEN DE LA PÁGINA (para orientarte rápido en el archivo)
+  ══════════════════════════════════════════════════════════════════════
+  1. #page-bg               → fondo animado (definido en Perfil.css).
+  2. #session-locked-screen → pantalla que se ve si NO hay sesión.
+  3. <header><nav>           → menú de escritorio, fijo arriba (fixed).
+  4. #egg-offcanvas-wrap    → menú móvil (el que sale desde el ☰).
+  5. <main class="main-content">
+       - .left-panel  → tarjeta de perfil, consejo del día, insignias.
+       - .right-panel → estadísticas y logros.
+  6. Los <script> del final manejan: abrir/cerrar el menú móvil y el
+     efecto de "click" (ripple). La lógica real de datos (Firebase,
+     avatar, racha, logros, cerrar sesión) vive en /Secciones/Js/Perfil.js,
+     cargado al final del archivo. (Sin footer: esta página es de uso
+     interno logueado, no landing pública.)
+  ══════════════════════════════════════════════════════════════════════
+-->
+
+<!-- Fondo — degradado animado en movimiento, mismo estilo que Registro.html -->
+<div id="page-bg" aria-hidden="true"></div>
 
 <!-- ── Pantalla de bloqueo de sesión ─────────────────────────────────────
      Se muestra (vía la clase html.egg-locked) cuando no hay sesión válida:
      al recargar sin login, al volver con el botón "Atrás" tras cerrar
      sesión (bfcache), o si Firebase confirma que no hay usuario. Nunca
      deja ver el contenido real del perfil. -->
-<div id="session-locked-screen" class="fixed inset-0 z-[500] flex-col items-center justify-center gap-5 bg-white dark:bg-gray-900 px-6 text-center">
-  <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Egglish" class="w-16 h-16 object-contain"/>
-  <div class="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-950 flex items-center justify-center text-3xl">🔒</div>
-  <h1 class="text-xl sm:text-2xl font-black text-[#1a1a2e] dark:text-white">Tu sesión ha finalizado</h1>
-  <p class="text-sm sm:text-base font-semibold text-gray-500 dark:text-gray-400 max-w-sm">
-    Debes iniciar sesión de nuevo para ver tu perfil.
-  </p>
-  <div class="flex flex-col sm:flex-row gap-3 mt-2 w-full max-w-xs sm:max-w-none justify-center">
-    <a href="/entrar.html" class="text-sm font-black text-white bg-egg-blue hover:bg-egg-blue-d px-6 py-3 rounded-full shadow-hard-soft no-underline">Iniciar sesión</a>
-    <a href="/index.html" class="text-sm font-black text-[#1a1a2e] dark:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-6 py-3 rounded-full no-underline">Ir al inicio</a>
+<div id="session-locked-screen" class="fixed inset-0 flex-col items-center justify-center px-6 text-center" style="z-index: 450; background: transparent;">
+  <!-- Tarjeta glassmorphism: se lee bien sobre el degradado claro Y el oscuro -->
+  <div class="flex flex-col items-center gap-5 rounded-3xl px-8 py-10 max-w-sm w-full"
+       style="background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 2px solid var(--card-border); box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
+    <img src="/imgs/eggy.png" alt="Egglish" class="w-16 h-16 object-contain drop-shadow-md"/>
+    <div class="w-14 h-14 rounded-full flex items-center justify-center"
+         style="background: rgba(28,176,246,0.15); color: #1cb0f6;">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+    </div>
+    <div>
+      <h1 class="text-xl sm:text-2xl font-black" style="color: var(--text);">Tu sesión ha finalizado</h1>
+      <p class="text-sm sm:text-base font-semibold mt-2" style="color: var(--mid);">
+        Debes iniciar sesión de nuevo para ver tu perfil.
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3 w-full justify-center">
+      <a href="/index.html" class="text-sm font-black px-6 py-3 rounded-full no-underline transition-colors"
+         style="background: var(--card-bg-soft); color: var(--text); border: 2px solid var(--card-border);">Ir al inicio</a>
+    </div>
   </div>
 </div>
 
+<!-- MENÚ DE ESCRITORIO (barra superior).
+     Se fuerza con "style" en línea (con !important) además de las clases
+     de Tailwind, porque Perfil.css estaba pisando la posición/z-index
+     del ".site-navbar" y el menú se quedaba tapado al hacer scroll.
+     El estilo en línea con !important gana sobre cualquier regla de
+     Perfil.css, sea cual sea su orden de carga o especificidad.
+     z-[500] / z-index:9999 lo ponen POR ENCIMA de #page-bg (z-index:400)
+     y de todo el contenido de la página.
+     La clase "site-navbar" (definida en Perfil.css) le da el fondo
+     translúcido con blur. -->
 <header>
- <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
+<nav class="site-navbar fixed top-0 left-0 w-full z-[500] flex items-center justify-between px-4 md:px-8 h-[68px]"
+     style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; z-index: 9999 !important;">
     <div class="flex items-center gap-1 sm:gap-2 min-w-0">
-      <button id="egg-menu-btn" type="button" aria-label="Abrir menú de navegación" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
+      <button id="egg-menu-btn" type="button" aria-label="Abrir menú de navegación" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
       <a href="/index.html" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
-        <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
+        <img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+        <span class="text-base sm:text-xl font-black text-black dark:text-white whitespace-nowrap truncate">Egglish</span>
       </a>
     </div>
 
     <ul class="hidden md:flex items-center gap-1 list-none m-0 p-0">
-      <li><a href="/Secciones/lecciones.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">📖 Lecciones</a></li>
-      <li><a href="/Secciones/Escucha.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎯 Escucha</a></li>
-      <li><a href="/Secciones/juegos.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎮 Juegos</a></li>
-      <li><a href="/Secciones/perfil.html" class="px-3 py-2 rounded-full text-sm font-bold text-egg-blue dark:text-egg-blue no-underline">👤 Perfil</a></li>
+      <li><a href="/Secciones/lecciones.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/book-removebg-preview.png" alt="" class="nav-icon"/>Lecciones</a></li>
+      <li><a href="/Secciones/Escucha.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/audifonos-removebg-preview.png" alt="" class="nav-icon"/>Escucha</a></li>
+      <li><a href="/Secciones/juegos.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/ChatGPT_Image_27_sept_2026__02_43_52_p.m.-removebg-preview.png" alt="" class="nav-icon"/>Juegos</a></li>
+      <!-- "Perfil" es la página activa: se marca con un color distinto al resto.
+           text-egg-blue-d (azul oscuro) en modo claro, dark:text-sky-300 (azul claro) en modo oscuro. -->
+      <li><a href="/Secciones/perfil.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-egg-blue-d dark:text-sky-300 no-underline"><img src="/imgs/sssss-removebg-preview.png" alt="" class="nav-icon"/>Perfil</a></li>
     </ul>
 
     <div class="flex items-center gap-2 sm:gap-3 shrink-0">
       <div id="navbar-auth-zone" class="hidden md:flex items-center gap-2 sm:gap-3"></div>
-      <button id="dark-mode-toggle" type="button" aria-label="Cambiar modo oscuro" class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
-        <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white"><path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path><g id="icon-sun" class="hidden"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></g></svg>
-      </button>
     </div>
   </nav>
 </header>
-<div class="h-[68px]"></div>
+<!-- Este div vacío de 68px empuja el contenido hacia abajo esa misma
+     altura, para que la barra "fixed" de arriba no tape el inicio del
+     contenido (si cambias h-[68px] del nav, cambia también este valor).
+     Antes solo existía este comentario, sin el div real. -->
+<div style="height: 68px;" aria-hidden="true"></div>
+
 
 <div id="egg-offcanvas-wrap" class="md:hidden">
-  <div id="egg-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[220] opacity-0 pointer-events-none transition-opacity duration-300 ease-out" aria-hidden="true"></div>
-  <aside id="egg-offcanvas" class="fixed top-0 left-0 h-full w-[78%] max-w-[320px] bg-white dark:bg-gray-900 z-[230] -translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col" role="dialog" aria-modal="true" aria-label="Menú de navegación" aria-hidden="true">
+  <div id="egg-backdrop" class="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[520] opacity-0 pointer-events-none transition-opacity duration-300 ease-out" style="z-index: 10020 !important;" aria-hidden="true"></div>
+  <aside id="egg-offcanvas" class="site-offcanvas fixed top-0 left-0 h-full w-[78%] max-w-[320px] z-[530] -translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col" style="z-index: 10021 !important;" role="dialog" aria-modal="true" aria-label="Menú de navegación" aria-hidden="true">
     <div class="flex items-center justify-between px-5 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 shrink-0">
-      <div class="flex items-center gap-2.5"><img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 object-contain"/><span class="text-lg font-black text-[#1a1a2e] dark:text-white">Egglish</span></div>
-      <button id="egg-menu-close" type="button" class="w-9 h-9 flex items-center justify-center rounded-full text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+      <div class="flex items-center gap-2.5"><img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 object-contain"/><span class="text-lg font-black text-black dark:text-white">Egglish</span></div>
+      <button id="egg-menu-close" type="button" class="w-9 h-9 flex items-center justify-center rounded-full text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
     </div>
+    <!-- Este es el MENÚ MÓVIL (el que se abre desde el botón ☰).
+         Es una segunda copia del menú, normal en diseño responsive:
+         en pantallas grandes se ve la barra de arriba (<ul class="hidden md:flex">),
+         en pantallas chicas esa barra se oculta y se usa este panel lateral
+         en su lugar. Nunca se muestran los dos al mismo tiempo.
+         OJO: las imágenes de aquí deben ser las MISMAS que las de la barra
+         de arriba (antes apuntaban a rutas distintas y por eso no se veían). -->
     <nav class="flex-1 overflow-y-auto px-3 py-4">
       <ul class="flex flex-col gap-1 list-none m-0 p-0">
-        <li><a href="/Secciones/lecciones.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">📖 Lecciones</a></li>
-        <li><a href="/Secciones/Escucha.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎯 Escucha</a></li>
-        <li><a href="/Secciones/juegos.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎮 Juegos</a></li>
-        <li><a href="/Secciones/perfil.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-egg-blue bg-blue-50 dark:bg-blue-950 no-underline">👤 Perfil</a></li>
+        <li><a href="/Secciones/lecciones.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/book-removebg-preview.png" alt="" class="nav-icon"/><span>Lecciones</span></a></li>
+        <li><a href="/Secciones/Escucha.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/audifonos-removebg-preview.png" alt="" class="nav-icon"/><span>Escucha</span></a></li>
+        <li><a href="/Secciones/juegos.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/ChatGPT_Image_27_sept_2026__02_43_52_p.m.-removebg-preview.png" alt="" class="nav-icon"/><span>Juegos</span></a></li>
+        <!-- "Perfil" activo: mismo criterio de color que en el menú de escritorio -->
+        <li><a href="/Secciones/perfil.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-egg-blue-d dark:text-sky-300 bg-blue-50 dark:bg-blue-950 no-underline"><img src="/imgs/sssss-removebg-preview.png" alt="" class="nav-icon"/><span>Perfil</span></a></li>
       </ul>
     </nav>
     <div class="px-4 py-5 border-t-2 border-gray-200 dark:border-gray-800 flex flex-col gap-3 shrink-0" id="navbar-auth-zone-mobile"></div>
@@ -131,48 +241,86 @@
 
 <main class="main-content">
     <aside class="left-panel">
+      <!-- TARJETA DE PERFIL
+           El <img id="avatar-display"> muestra la foto de perfil real del
+           usuario (Perfil.js la reemplaza apenas carga, subiendo a Firebase
+           Storage si el usuario elige una foto). Mientras tanto se ve el
+           logo /imgs/eggy.png como imagen "de relleno". El botón con el
+           ícono de cámara (SVG, no es una imagen) abre el selector de
+           archivo oculto (<input type="file" ... hidden />). -->
       <div class="profile-card">
         <div class="avatar-wrapper">
-          <img id="avatar-display" src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Avatar" class="avatar-img"/>
-          <button class="avatar-edit-btn" id="avatar-edit-btn" type="button" aria-label="Cambiar foto de perfil">📷</button>
+          <img id="avatar-display" src="/imgs/eggy.png" alt="Avatar" class="avatar-img"/>
+          <button class="avatar-edit-btn click-effect" id="avatar-edit-btn" type="button" aria-label="Cambiar foto de perfil">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+          </button>
           <input type="file" id="avatar-file-input" accept="image/*" hidden />
         </div>
+        <!-- "Cargando..." y "@usuario" son placeholders: Perfil.js los
+             reemplaza en cuanto sabe quién inició sesión. -->
         <h2 class="profile-name">Cargando...</h2>
         <p class="profile-username">@usuario</p>
-        <p class="profile-joined">📅 —</p>
-        <p id="profile-email" style="font-size:0.85rem;color:#9ca3af;font-weight:600;margin-top:4px;"></p>
-        <p id="profile-age" style="font-size:0.85rem;color:#9ca3af;font-weight:600;margin-top:2px;"></p>
+        <p class="profile-joined"><img src="/imgs/cal-removebg-preview.png" alt="" class="icon-img icon-img--sm"/><span id="profile-joined-text">—</span></p>
+        <p id="profile-email" style="font-size:0.85rem;color:var(--mid);font-weight:700;margin-top:4px;"></p>
+        <p id="profile-age" style="font-size:0.85rem;color:var(--mid);font-weight:700;margin-top:2px;"></p>
+        <!-- Bio: campo nuevo en Firestore (bio), oculto si está vacío -->
+        <p id="profile-bio" class="hidden" style="font-size:0.85rem;color:var(--text);font-weight:700;margin-top:10px;line-height:1.4;"></p>
+        <!-- Abre el modal de edición (nombre, bio, edad); ver #edit-profile-modal más abajo -->
+        <button type="button" id="btn-editar-perfil" class="click-effect"
+          style="margin-top:16px;font-size:0.8rem;font-weight:800;color:var(--text);background:none;border:2px solid #1cb0f6;border-radius:999px;padding:8px 18px;cursor:pointer;">
+          Editar perfil
+        </button>
       </div>
 
       <!-- CONSEJO ALEATORIO: cambia cada vez que el usuario inicia sesión -->
       <div class="tip-card" id="tip-card">
-        <span class="tip-icon">💡</span>
+        <span class="tip-icon"><img src="/imgs/idea-removebg-preview.png" alt=""/></span>
         <p class="tip-text" id="tip-text">Cargando consejo...</p>
       </div>
 
       <!-- INSIGNIAS: se llenan solas cuando el usuario completa un reto -->
       <div class="info-card">
         <div class="card-header-row">
-          <div class="card-title-icon"><span>🏅</span><h3 class="info-card-title">Insignias</h3></div>
+          <div class="card-title-icon"><img src="/imgs/insigna-removebg-preview.png" alt=""/><h3 class="info-card-title">Insignias</h3></div>
         </div>
         <div id="badges-container" class="badges-grid"></div>
+      </div>
+
+      <!-- COMPARTIR: resumen de racha/puntos/insignias, sin escribir nada
+           en Firestore (solo lee lo que ya está en la sesión cargada). -->
+      <div class="info-card">
+        <div class="card-header-row">
+          <div class="card-title-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"></line><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line></svg>
+            <h3 class="info-card-title">Compartir</h3>
+          </div>
+        </div>
+        <p style="font-size:0.85rem;font-weight:700;color:var(--mid);margin:4px 0 14px;">Comparte tu racha, tus puntos y tus insignias con tus amigos.</p>
+        <button type="button" id="btn-compartir-perfil" class="click-effect"
+          style="width:100%;background:#58cc02;color:#fff;font-weight:800;border:none;border-radius:999px;padding:12px;cursor:pointer;">
+          Compartir mi perfil
+        </button>
+        <p id="compartir-feedback" style="display:none;font-size:0.8rem;font-weight:700;color:#46a302;margin-top:8px;text-align:center;">¡Copiado al portapapeles!</p>
       </div>
 
     </aside>
 
     <section class="right-panel">
+      <!-- ESTADÍSTICAS: los íconos de fuego (racha) y estrella (puntos)
+           son imágenes fijas; los NÚMEROS (0) los llena Perfil.js con
+           los datos reales de Firestore apenas carga la página. -->
       <div class="stats-section">
         <h2 class="section-title">Estadísticas</h2>
         <div class="stats-grid">
-          <div class="stat-card"><span class="stat-icon fire">🔥</span><div><p class="stat-value" id="stat-racha">0</p><p class="stat-label">Racha actual</p></div></div>
-          <div class="stat-card"><span class="stat-icon star">⭐</span><div><p class="stat-value" id="stat-puntos">0</p><p class="stat-label">Puntos acumulados</p></div></div>
+          <div class="stat-card"><span class="stat-icon fire"><img src="/imgs/streak-removebg-preview.png" alt=""/></span><div><p class="stat-value" id="stat-racha">0</p><p class="stat-label">Racha actual</p></div></div>
+          <div class="stat-card"><span class="stat-icon star"><img src="/imgs/star-removebg-preview.png" alt=""/></span><div><p class="stat-value" id="stat-puntos">0</p><p class="stat-label">Puntos acumulados</p></div></div>
         </div>
       </div>
 
       <div class="achievements-section">
         <div class="achievements-header">
-          <div class="achievements-title-row"><span>🏆</span><h2 class="section-title">Medallas y Logros</h2></div>
-          <button type="button" id="btn-ver-retos" class="link-blue" style="background:none;border:none;cursor:pointer;">VER TODO</button>
+          <div class="achievements-title-row"><img src="/imgs/tiro_al_blanco-removebg-preview.png" alt=""/><h2 class="section-title">Mis Logros</h2></div>
+          <button type="button" id="btn-ver-retos" class="link-blue click-effect" style="background:none;border:none;cursor:pointer;">VER TODO</button>
         </div>
         <!-- DINÁMICO: se llena desde Perfil.js con datos reales de Firestore (racha, exp, lecciones, escucha, juegos) -->
         <div id="achievements-container" class="flex flex-col gap-3"></div>
@@ -180,16 +328,13 @@
     </section>
 </main>
 
-<footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
-  <div class="max-w-screen-xl mx-auto">
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10 mb-14 text-left">
-      <div><h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Sobre nosotros</h4><ul class="flex flex-col gap-2.5"><li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Misión</a></li><li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Método de enseñanza</a></li><li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Creadores</a></li></ul></div>
-      <div><h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Ayuda y soporte</h4><ul class="flex flex-col gap-2.5"><li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Centro de ayuda</a></li><li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Contáctanos</a></li></ul></div>
-      <div><h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Términos y privacidad</h4><ul class="flex flex-col gap-2.5 mb-6"><li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Términos</a></li><li><a href="#" class="text-sm font-bold text-white/90 hover:text-white no-underline">Privacidad</a></li></ul><h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Social</h4><ul class="flex flex-col gap-2.5"><li><li><a href="https://www.instagram.com/egglish.oficial/" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li><li><a href="https://www.tiktok.com/@egglish.oficial" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li></ul></div>
-    </div>
-    <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left"><div class="flex items-center gap-2.5"><img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/><span class="font-black text-lg text-white">Egglish</span></div><p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p></div>
-  </div>
+<!-- MINI FOOTER: solo marca dónde termina la página, sin el footer
+     institucional completo (esta es una página interna, logueada). -->
+<footer style="border-top: 2px solid var(--card-border, rgba(0,0,0,0.08)); margin-top: 40px; padding: 20px 16px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+  <img src="/imgs/eggy.png" alt="" class="w-6 h-6 object-contain" aria-hidden="true"/>
+  <span style="font-size: 0.85rem; font-weight: 800; color: var(--mid, #6b7280);">@egglish 2026</span>
 </footer>
+
 
 <!-- Notificaciones de insignias obtenidas -->
 <div id="badge-toast-container" class="badge-toast-container" aria-live="polite"></div>
@@ -197,32 +342,60 @@
 <!-- Detalle de insignia: se abre al hacer click sobre una insignia -->
 <div id="badge-detail-backdrop" class="badge-detail-backdrop"></div>
 <div id="badge-detail-modal" class="badge-detail-modal" role="dialog" aria-modal="true" aria-hidden="true">
-  <button type="button" id="badge-detail-close" class="badge-detail-close" aria-label="Cerrar">✕</button>
+  <button type="button" id="badge-detail-close" class="badge-detail-close click-effect" aria-label="Cerrar">
+    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+  </button>
   <div class="badge-detail-icon" id="badge-detail-icon"></div>
   <h3 class="badge-detail-name" id="badge-detail-name"></h3>
   <p class="badge-detail-desc" id="badge-detail-desc"></p>
 </div>
 
+<!-- Modal: editar datos del perfil (nombre, bio, edad).
+     Nombre → Firebase Auth (displayName). Bio y edad → Firestore
+     (colección "users", documento del uid actual). -->
+<div class="eggmodal-backdrop" id="edit-profile-backdrop"></div>
+<div class="eggmodal" id="edit-profile-modal" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title" aria-hidden="true">
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <h3 id="edit-profile-title" style="font-size:1.2rem;font-weight:900;margin:0;">Editar perfil</h3>
+    <button type="button" id="edit-profile-close" class="click-effect eggmodal-close-btn" aria-label="Cerrar"
+      style="width:32px;height:32px;border-radius:999px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:inherit;">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+
+  <label for="edit-profile-name">Nombre</label>
+  <input type="text" id="edit-profile-name" maxlength="40" placeholder="Tu nombre"/>
+
+  <label for="edit-profile-bio">Bio</label>
+  <textarea id="edit-profile-bio" maxlength="140" placeholder="Cuéntanos algo sobre ti (opcional)"></textarea>
+  <!-- Contador de palabras de la bio: lo actualiza el script de más abajo
+       (bloque "LÍMITE DE PALABRAS EN LA BIO") cada vez que el usuario
+       escribe o cuando el modal se abre con una bio ya cargada. -->
+  <p id="edit-profile-bio-count" style="font-size:0.72rem;font-weight:700;color:#9ca3af;margin-top:4px;text-align:right;">0/30 palabras</p>
+
+  <label for="edit-profile-age">Edad</label>
+  <input type="number" id="edit-profile-age" min="8" max="18" step="1" placeholder="Entre 8 y 18"/>
+
+  <p id="edit-profile-error" style="display:none;color:#ef4444;font-size:0.8rem;font-weight:700;margin-top:10px;"></p>
+
+  <div style="display:flex;gap:10px;margin-top:20px;">
+    <button type="button" id="edit-profile-save" class="click-effect"
+      style="flex:1;background:#1cb0f6;color:#fff;font-weight:800;border:none;border-radius:999px;padding:12px;cursor:pointer;">
+      Guardar
+    </button>
+    <button type="button" id="edit-profile-cancel" class="click-effect eggmodal-cancel-btn"
+      style="flex:1;background:transparent;color:inherit;font-weight:800;border-radius:999px;padding:10px;cursor:pointer;">
+      Cancelar
+    </button>
+  </div>
+</div>
+
 <script>
   (function () {
-    const root = document.documentElement;
-    const darkToggle = document.getElementById('dark-mode-toggle');
-    const darkIcon = document.getElementById('dark-mode-icon');
-    function syncDarkModeUI() {
-      if (!darkToggle || !darkIcon) return;
-      const isDark = root.classList.contains('dark');
-      document.getElementById('icon-moon').classList.toggle('hidden', isDark);
-      document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
-      darkToggle.setAttribute('aria-pressed', String(isDark));
-    }
-    if (darkToggle) {
-      darkToggle.addEventListener('click', () => {
-        root.classList.toggle('dark');
-        localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
-        syncDarkModeUI();
-      });
-      syncDarkModeUI();
-    }
+    // Modo oscuro: ya no hay botón propio en esta página. El tema se
+    // hereda automáticamente del interruptor de index.html, porque el
+    // script en el <head> lee la misma clave 'egglish-theme' de
+    // localStorage y aplica la clase 'dark' al <html> antes de pintar.
     const menuBtn = document.getElementById('egg-menu-btn');
     const closeBtn = document.getElementById('egg-menu-close');
     const panel = document.getElementById('egg-offcanvas');
@@ -242,6 +415,81 @@
     menuBtn.addEventListener('click', openMenu);
     closeBtn.addEventListener('click', closeMenu);
     backdrop.addEventListener('click', closeMenu);
+  })();
+
+  // ── Efecto "ripple" de click, igual que en index.html (sin jQuery) ────
+  (function () {
+    function bindRipple(btn) {
+      btn.addEventListener('click', () => {
+        btn.classList.remove('is-clicked');
+        void btn.offsetWidth; // fuerza reflow para poder repetir la animación
+        btn.classList.add('is-clicked');
+      });
+      btn.addEventListener('animationend', () => btn.classList.remove('is-clicked'));
+    }
+    document.querySelectorAll('.click-effect').forEach(bindRipple);
+  })();
+
+  // ── LÍMITE DE PALABRAS EN LA BIO ────────────────────────────────────
+  // Autocontenido: no depende de Perfil.js. Muestra un contador en vivo
+  // y, si el usuario supera el límite, un mensaje de aviso (reutilizando
+  // el mismo <p id="edit-profile-error"> que ya usa el modal) y deshabilita
+  // el botón "Guardar" mientras la bio siga excedida, así nunca se guarda
+  // una bio demasiado larga sin importar qué haga Perfil.js.
+  (function () {
+    const BIO_MAX_WORDS = 30; // <-- cambia este número si quieres otro límite
+
+    const bioInput = document.getElementById('edit-profile-bio');
+    const bioCount = document.getElementById('edit-profile-bio-count');
+    const errorMsg = document.getElementById('edit-profile-error');
+    const saveBtn = document.getElementById('edit-profile-save');
+    const modal = document.getElementById('edit-profile-modal');
+    if (!bioInput || !bioCount || !errorMsg || !saveBtn) return;
+
+    function countWords(text) {
+      const trimmed = text.trim();
+      if (!trimmed) return 0;
+      return trimmed.split(/\s+/).length;
+    }
+
+    function updateBioCount() {
+      const words = countWords(bioInput.value);
+      const exceeded = words > BIO_MAX_WORDS;
+
+      bioCount.textContent = words + '/' + BIO_MAX_WORDS + ' palabras';
+      bioCount.style.color = exceeded ? '#ef4444' : '#9ca3af';
+
+      if (exceeded) {
+        errorMsg.textContent = 'Tu bio no puede superar ' + BIO_MAX_WORDS + ' palabras.';
+        errorMsg.style.display = 'block';
+        saveBtn.disabled = true;
+        saveBtn.style.opacity = '0.6';
+        saveBtn.style.cursor = 'default';
+      } else {
+        // Solo limpiamos el mensaje si es el de la bio (para no borrar
+        // algún otro error que Perfil.js pueda haber puesto ahí, por ej.
+        // sobre el nombre o la edad).
+        if (errorMsg.textContent.indexOf('bio no puede superar') !== -1) {
+          errorMsg.textContent = '';
+          errorMsg.style.display = 'none';
+        }
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = '';
+        saveBtn.style.cursor = 'pointer';
+      }
+    }
+
+    bioInput.addEventListener('input', updateBioCount);
+
+    // Si el modal se abre con una bio ya cargada (Perfil.js la rellena
+    // al abrir el formulario de edición), recalculamos el contador en
+    // cuanto el modal pasa a estar visible.
+    if (modal) {
+      const modalObserver = new MutationObserver(updateBioCount);
+      modalObserver.observe(modal, { attributes: true, attributeFilter: ['class', 'aria-hidden'] });
+    }
+
+    updateBioCount();
   })();
 </script>
 <script type="module" src="/Secciones/Js/Perfil.js"></script>

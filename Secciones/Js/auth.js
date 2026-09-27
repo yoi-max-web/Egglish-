@@ -100,7 +100,13 @@ export async function registerUser({ name, email, age, password }) {
       // esto termine ANTES de resolver, para que cuando perfil.html
       // consulte Firestore los datos ya existan.
       try {
-        await setDoc(doc(_sharedDb, 'users', user.uid), { name, email, age });
+        await setDoc(doc(_sharedDb, 'users', user.uid), {
+          name,
+          email,
+          age,
+          isNewUser: true,   // ← se usa para redirigir al placement test
+          level: null,       // se llenará al terminar el test
+        });
       } catch (e) {
         console.warn('[Egglish Auth] No se pudo guardar el perfil en Firestore:', e);
       }
@@ -204,6 +210,52 @@ export async function logoutUser() {
   }
 
   window.location.href = '/index.html';
+}
+
+// ─────────────────────────────────────────────────────────────
+//  FINALIZACIÓN DEL PLACEMENT TEST
+// ─────────────────────────────────────────────────────────────
+// Llama a esta función desde el script del placement-test.html
+// cuando el usuario termina el test. Hace dos cosas:
+//   1. Guarda el nivel resultante en Firestore (campo `level`).
+//   2. Marca isNewUser = false → a partir de aquí, el login
+//      redirigirá a /Secciones/perfil.html en vez del placement test.
+//
+// Uso:
+//   import { markTestCompleted } from '/Secciones/Js/auth.js';
+//   await markTestCompleted('B1');   // pasa el nivel que calculó el test
+export async function markTestCompleted(level = null) {
+  if (!USE_FIREBASE) {
+    // Modo simulado: no hay Firestore, solo actualizamos la caché local
+    const session = getSession();
+    if (session) saveLocalSession({ ...session, level, isNewUser: false });
+    return { ok: true };
+  }
+
+  try {
+    const { doc, updateDoc } = await import(`${FB_CDN}/firebase-firestore.js`);
+    const auth = await getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.warn('[Egglish Auth] markTestCompleted: no hay usuario autenticado.');
+      return { ok: false, error: 'Sin sesión activa.' };
+    }
+
+    await updateDoc(doc(_sharedDb, 'users', user.uid), {
+      isNewUser: false,   // ← desbloquea la redirección a perfil en futuros logins
+      level,              // ← nivel calculado por el placement test (ej. 'A1', 'B2')
+    });
+
+    // Actualizar caché local también
+    const session = getSession();
+    if (session) saveLocalSession({ ...session, level, isNewUser: false });
+
+    return { ok: true };
+  } catch (e) {
+    console.error('[Egglish Auth] Error en markTestCompleted:', e);
+    return { ok: false, error: e.message };
+  }
 }
 
 // ─────────────────────────────────────────────────────────────

@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Egglish – Test de Nivel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <script>
+    /* Aplica tema ANTES de pintar para evitar parpadeo */
+    if (localStorage.getItem('egglish-theme') === 'dark' ||
+        (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+  <style>
+    /* ═══════════════════════════════════════════
+       VARIABLES DE TEMA
+    ═══════════════════════════════════════════ */
+    :root {
+      --blue:        #1cb0f6;
+      --blue-d:      #0090d9;
+      --green:       #58cc02;
+      --green-d:     #46a302;
+
+      /* Fondo claro */
+      --bg-from:     #eaf6ff;
+      --bg-via1:     #bfe8ff;
+      --bg-via2:     #7ec8ff;
+      --bg-via3:     #1cb0f6;
+      --bg-via4:     #4c9cff;
+
+      /* Tarjeta — modo claro */
+      --card-bg:     rgba(255,255,255,0.55);
+      --card-border: rgba(255,255,255,0.75);
+      --card-shadow: 0 8px 40px rgba(0,144,217,0.15);
+
+      /* Textos — modo claro */
+      --text-main:   #1a1a2e;
+      --text-sub:    #5a6a85;
+      --text-muted:  #8a9ab5;
+
+      /* Opciones — modo claro */
+      --opt-bg:      rgba(255,255,255,0.65);
+      --opt-border:  rgba(180,210,240,0.7);
+      --opt-color:   #1a1a2e;
+      --opt-letter-bg:    rgba(28,176,246,0.1);
+      --opt-letter-color: #1cb0f6;
+
+      /* Barra de progreso — modo claro */
+      --prog-track:  rgba(0,0,0,0.08);
+      --prog-meta:   #5a6a85;
+
+      /* Divider — modo claro */
+      --divider-line: rgba(0,0,0,0.1);
+      --divider-text: #8a9ab5;
+
+      /* Instrucción de sección */
+      --sect-color:  #8a9ab5;
+    }
+
+    html.dark {
+      --bg-from:     #0b172a;
+      --bg-via1:     #172554;
+      --bg-via2:     #0c4a8f;
+      --bg-via3:     #0090d9;
+      --bg-via4:     #1cb0f6;
+
+      --card-bg:     rgba(15,23,42,0.55);
+      --card-border: rgba(148,163,184,0.2);
+      --card-shadow: 0 8px 40px rgba(0,0,0,0.4);
+
+      --text-main:   #f1f5f9;
+      --text-sub:    rgba(255,255,255,0.65);
+      --text-muted:  rgba(255,255,255,0.4);
+
+      --opt-bg:      rgba(255,255,255,0.06);
+      --opt-border:  rgba(255,255,255,0.15);
+      --opt-color:   #f1f5f9;
+      --opt-letter-bg:    rgba(28,176,246,0.15);
+      --opt-letter-color: #1cb0f6;
+
+      --prog-track:  rgba(255,255,255,0.1);
+      --prog-meta:   rgba(255,255,255,0.5);
+
+      --divider-line: rgba(255,255,255,0.12);
+      --divider-text: rgba(255,255,255,0.3);
+
+      --sect-color:  rgba(255,255,255,0.45);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════
+       FONDO DEGRADADO ANIMADO — mismo que entrar.html
+    ═══════════════════════════════════════════ */
+    #page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(120deg,
+        var(--bg-from), var(--bg-via1), var(--bg-via2),
+        var(--bg-via3), var(--bg-via4), var(--bg-via1), var(--bg-from));
+      background-size: 400% 400%;
+      animation: grad 18s ease infinite;
+    }
+    @keyframes grad {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @media (prefers-reduced-motion: reduce) { #page-bg { animation: none; } }
+
+    /* ═══════════════════════════════════════════
+       BEAM — borde plateado giratorio mejorado
+       (mismo @property que login-card en entrar.html)
+    ═══════════════════════════════════════════ */
+    @property --beam {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+    @keyframes beam-spin { to { --beam: 360deg; } }
+
+    /* ═══════════════════════════════════════════
+       WRAPPER
+    ═══════════════════════════════════════════ */
+    #app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 48px;
+    }
+
+    /* ═══════════════════════════════════════════
+       BARRA DE PROGRESO
+    ═══════════════════════════════════════════ */
+    #progress-wrap {
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 22px;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--prog-meta);
+      margin-bottom: 7px;
+    }
+    .progress-track {
+      height: 7px;
+      background: var(--prog-track);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ═══════════════════════════════════════════
+       TARJETA — glassmorphism con blur real + beam
+    ═══════════════════════════════════════════ */
+    .card {
+      width: 100%;
+      max-width: 680px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 28px;
+      padding: 36px 32px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: var(--card-shadow);
+
+      /* Beam plateado — isolation para el ::before */
+      position: relative;
+      isolation: isolate;
+    }
+    /* Borde beam giratorio plateado — mejorado vs versión anterior */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: conic-gradient(
+        from var(--beam),
+        transparent 0 65%,
+        rgba(248,250,252,0.7) 78%,
+        rgba(148,163,184,0.9) 88%,
+        rgba(248,250,252,0.7) 95%,
+        transparent 100%
+      );
+      filter: blur(1px);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: beam-spin 5s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 26px 18px; border-radius: 22px; }
+    }
+
+    /* ═══════════════════════════════════════════
+       TIPOGRAFÍA DE TARJETA
+    ═══════════════════════════════════════════ */
+    .welcome-chick {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .chick-bounce {
+      display: inline-block;
+      animation: bounce-chick 2s ease-in-out infinite;
+    }
+    @keyframes bounce-chick {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+    .chick-bounce img { width: 96px; height: 96px; object-fit: contain; }
+
+    .welcome-title {
+      font-size: clamp(24px, 5vw, 34px);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+    .welcome-sub {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-align: center;
+      margin-bottom: 30px;
+      line-height: 1.55;
+    }
+
+    .section-instruction {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sect-color);
+      text-align: center;
+      margin-bottom: 18px;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .question-num {
+      display: inline-block;
+      background: rgba(28,176,246,0.15);
+      border: 1.5px solid rgba(28,176,246,0.4);
+      border-radius: 8px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: clamp(16px, 3.2vw, 20px);
+      font-weight: 900;
+      line-height: 1.45;
+      margin-bottom: 22px;
+      color: var(--text-main);
+    }
+
+    /* ═══════════════════════════════════════════
+       OPCIONES — hover ripple igual a "Empezar a Jugar"
+    ═══════════════════════════════════════════ */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    /* Wrapper para el ripple (igual a .hover-circle-btn del index) */
+    .opt-btn {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--opt-bg);
+      border: 2px solid var(--opt-border);
+      border-radius: 14px;
+      color: var(--opt-color);
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      line-height: 1.3;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.1s;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    /* Círculo hover que nace desde el cursor */
+    .opt-btn .opt-ripple {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      background: rgba(28,176,246,0.18);
+      transform: translate(-50%,-50%);
+      transition: width 0.45s ease-in-out, height 0.45s ease-in-out;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .opt-btn:hover .opt-ripple {
+      width: 280%;
+      height: 280%;
+    }
+    .opt-btn:hover {
+      border-color: rgba(28,176,246,0.55);
+    }
+
+    /* Efecto click ripple (igual a .click-effect del index) */
+    .opt-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgba(255,255,255,0.45);
+      transform: scale(0.001);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .opt-btn.is-clicked::after {
+      animation: click-ripple 0.6s ease-out forwards;
+    }
+    @keyframes click-ripple {
+      50%  { transform: scale(1.4); opacity: 0; }
+      100% { transform: scale(0.001); opacity: 0; }
+    }
+
+    /* Letra y texto por encima del ripple */
+    .opt-letter, .opt-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    .opt-letter {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--opt-letter-bg);
+      border: 1.5px solid rgba(28,176,246,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 900;
+      color: var(--opt-letter-color);
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    /* Estado seleccionado */
+    .opt-btn.selected {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(28,176,246,0.2);
+      background: rgba(28,176,246,0.12);
+    }
+    .opt-btn.selected .opt-letter {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .opt-btn:active { transform: scale(0.985); }
+
+    /* ═══════════════════════════════════════════
+       BOTÓN SIGUIENTE — cambia a verde al seleccionar
+    ═══════════════════════════════════════════ */
+    .btn-next {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      margin-top: 22px;
+      letter-spacing: 0.4px;
+      transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s, opacity 0.2s;
+
+      /* Estado inicial: azul deshabilitado */
+      background: var(--blue);
+      box-shadow: 0 5px 0 var(--blue-d);
+      opacity: 0.42;
+      pointer-events: none;
+    }
+    .btn-next.ready {
+      opacity: 1;
+      pointer-events: auto;
+      background: var(--green);
+      box-shadow: 0 5px 0 var(--green-d);
+    }
+    /* Ripple en hover del botón siguiente */
+    .btn-next .btn-ripple {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transform: translate(-50%,-50%);
+      transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .btn-next:hover .btn-ripple { width: 300%; height: 300%; }
+    .btn-next .btn-label { position: relative; z-index: 1; }
+    .btn-next:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--green-d); }
+
+    /* ═══════════════════════════════════════════
+       BOTONES PRIMARIO / GREEN / GHOST (welcome + result)
+    ═══════════════════════════════════════════ */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      width: 100%;
+      padding: 16px;
+      background: var(--blue);
+      box-shadow: 0 5px 0 var(--blue-d);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      margin-top: 22px;
+      letter-spacing: 0.4px;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .btn-primary .btn-ripple {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+      transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .btn-primary:hover .btn-ripple { width: 300%; height: 300%; }
+    .btn-primary .btn-label { position: relative; z-index: 1; }
+    .btn-primary:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--blue-d); }
+
+    .btn-green {
+      background: var(--green);
+      box-shadow: 0 5px 0 var(--green-d);
+    }
+    .btn-green .btn-ripple { background: rgba(70,163,2,0.35); }
+    .btn-green:active { box-shadow: 0 1px 0 var(--green-d); }
+
+    .btn-ghost {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      color: var(--text-sub);
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+    }
+    html:not(.dark) .btn-ghost {
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.12);
+    }
+    .btn-ghost:hover {
+      background: rgba(28,176,246,0.1);
+      border-color: rgba(28,176,246,0.4);
+      color: var(--blue);
+    }
+
+    /* ═══════════════════════════════════════════
+       DIVIDER
+    ═══════════════════════════════════════════ */
+    .or-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 18px 0 0;
+      color: var(--divider-text);
+      font-size: 13px; font-weight: 800;
+    }
+    .or-divider::before, .or-divider::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: var(--divider-line);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESULTADO
+    ═══════════════════════════════════════════ */
+    .result-label {
+      font-size: 13px; font-weight: 800;
+      text-align: center;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .result-level {
+      font-size: clamp(56px, 14vw, 92px);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1;
+      margin: 10px 0 6px;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .result-name {
+      font-size: clamp(17px, 4vw, 22px);
+      font-weight: 900;
+      text-align: center;
+      color: var(--text-main);
+      margin-bottom: 14px;
+    }
+    .level-strip {
+      display: flex; justify-content: center; gap: 6px;
+      margin-bottom: 22px; flex-wrap: wrap;
+    }
+    .level-pip {
+      padding: 5px 14px; border-radius: 99px;
+      font-size: 12px; font-weight: 900;
+      background: rgba(128,128,128,0.1);
+      border: 2px solid rgba(128,128,128,0.15);
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+    .level-pip.active {
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 0 18px rgba(28,176,246,0.55);
+    }
+    .result-score-pill { display: flex; justify-content: center; margin-bottom: 18px; }
+    .score-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(28,176,246,0.1);
+      border: 2px solid rgba(28,176,246,0.25);
+      border-radius: 99px;
+      padding: 7px 18px;
+      font-size: 14px; font-weight: 900;
+      color: var(--text-sub);
+    }
+    .score-pill strong { color: var(--blue); }
+    .result-desc {
+      font-size: 14px; font-weight: 700;
+      text-align: center;
+      color: var(--text-sub);
+      line-height: 1.6;
+      max-width: 420px;
+      margin: 0 auto 26px;
+    }
+
+    /* ═══════════════════════════════════════════
+       ANIMACIÓN DE ENTRADA
+    ═══════════════════════════════════════════ */
+    .screen { animation: fadeUp 0.32s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 420px) {
+      .opt-btn  { font-size: 14px; padding: 11px 13px; }
+      .question-text { font-size: 15px; }
+      .btn-next, .btn-primary { font-size: 15px; }
+    }
+  </style>
+</head>
+
+<style>
+    /* ═══════════════════════════════════════════
+       BOTÓN DE CAMBIO DE TEMA
+    ═══════════════════════════════════════════ */
+    .theme-toggle-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 50;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      color: var(--text-main);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: transform 0.1s, background 0.2s;
+    }
+    .theme-toggle-btn:hover { background: var(--opt-bg); }
+    .theme-toggle-btn:active { transform: scale(0.94); }
+    .theme-toggle-btn svg { width: 20px; height: 20px; }
+    .theme-toggle-btn .hidden { display: none; }
+</style>
+<body>
+<div id="page-bg" aria-hidden="true"></div>
+
+<button id="dark-mode-toggle" type="button" aria-label="Cambiar modo oscuro" aria-pressed="false" class="theme-toggle-btn">
+  <svg id="dark-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+    <g id="icon-sun" class="hidden">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+    </g>
+  </svg>
+</button>
+
+<div id="app">
+
+  <!-- Barra de progreso -->
+  <div id="progress-wrap" style="display:none">
+    <div class="progress-meta">
+      <span id="prog-label">Pregunta 1 de 25</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Host de pantallas -->
+  <div id="screen-host"></div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════
+   TOGGLE DE TEMA (modo oscuro)
+════════════════════════════════════════════════ */
+(function () {
+  const root = document.documentElement;
+  const darkToggle = document.getElementById('dark-mode-toggle');
+  function syncDarkModeUI() {
+    const isDark = root.classList.contains('dark');
+    document.getElementById('icon-moon').classList.toggle('hidden', isDark);
+    document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
+    darkToggle.setAttribute('aria-pressed', String(isDark));
+  }
+  darkToggle.addEventListener('click', () => {
+    root.classList.toggle('dark');
+    localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
+    syncDarkModeUI();
+  });
+  syncDarkModeUI();
+})();
+</script>
+
+<script>
+/* ════════════════════════════════════════════════
+   PREGUNTAS
+════════════════════════════════════════════════ */
+const QUESTIONS = [
+  /* Sección A — Conversación */
+  { section: 'Para las siguientes preguntas, elige la mejor opción para completar la conversación.',
+    q: '1) Can I park here?',
+    opts: ['Sorry, I did that.', "It's the same place.", 'Only for half an hour.'],
+    correct: 2, score: 1 },
+  { q: "2) What colour will you paint the children's bedroom?",
+    opts: ['I hope it was right.', "We can't decide.", "It wasn't very difficult."],
+    correct: 1, score: 1 },
+  { q: "3) I can't understand this email.",
+    opts: ['Would you like some help?', "Don't you know?", 'I suppose you can.'],
+    correct: 0, score: 1 },
+  { q: "4) I'd like two tickets for tomorrow night.",
+    opts: ['How much did you pay?', 'Afternoon and evening.', "I'll just check for you."],
+    correct: 2, score: 1 },
+  { q: '5) Shall we go to the gym now?',
+    opts: ["I'm too tired.", "It's very good.", 'Not at all.'],
+    correct: 0, score: 1 },
+
+  /* Sección B — Vocabulario/Gramática */
+  { section: 'Para las siguientes preguntas, elige la mejor opción para completar la oración.',
+    q: "6) His eyes were ...... bad that he couldn't read the number plate of the car in front.",
+    opts: ['such', 'too', 'so', 'very'],
+    correct: 2, score: 2 },
+  { q: '7) The company needs to decide ...... and for all what its position is on this point.',
+    opts: ['here', 'once', 'first', 'finally'],
+    correct: 1, score: 2 },
+  { q: '8) Don\'t put your cup on the ...... of the table – someone will knock it off.',
+    opts: ['outside', 'edge', 'boundary', 'border'],
+    correct: 1, score: 2 },
+  { q: "9) I'm sorry - I didn't ...... to disturb you.",
+    opts: ['hope', 'think', 'mean', 'suppose'],
+    correct: 2, score: 2 },
+  { q: '10) The singer ended the concert ...... her most popular song.',
+    opts: ['by', 'with', 'in', 'as'],
+    correct: 1, score: 2 },
+
+  /* Sección C — Gramática avanzada */
+  { section: 'Elige la mejor opción gramatical para cada oración.',
+    q: '11) Would you mind ...... these plates a wipe before putting them in the cupboard?',
+    opts: ['making', 'doing', 'getting', 'giving'],
+    correct: 3, score: 3 },
+  { q: '12) I was looking forward ...... at the new restaurant, but it was closed.',
+    opts: ['to eat', 'to have eaten', 'to eating', 'eating'],
+    correct: 2, score: 3 },
+  { q: '13) ...... tired Melissa is when she gets home from work, she always makes time to say goodnight to the children.',
+    opts: ['Whatever', 'No matter how', 'However much', 'Although'],
+    correct: 1, score: 3 },
+  { q: '14) It was only ten days ago ...... she started her new job.',
+    opts: ['then', 'since', 'after', 'that'],
+    correct: 3, score: 3 },
+  { q: "15) The shop didn't have the shoes I wanted, but they've ...... a pair specially for me.",
+    opts: ['booked', 'ordered', 'commanded', 'asked'],
+    correct: 1, score: 3 },
+
+  /* Sección D — Nivel avanzado */
+  { section: 'Preguntas de nivel avanzado. Elige la opción más correcta.',
+    q: '16) He finally ...... up to the fact that he would never be a professional footballer.',
+    opts: ['brought', 'came', 'faced', 'woke'],
+    correct: 1, score: 4 },
+  { q: "17) I wasn't expecting that to happen. I was completely taken ......",
+    opts: ['back', 'away', 'off', 'out'],
+    correct: 0, score: 4 },
+  { q: '18) The new law will ...... small businesses from having to pay the tax.',
+    opts: ['excuse', 'forgive', 'relieve', 'exempt'],
+    correct: 3, score: 4 },
+  { q: '19) I could hear the neighbors ...... last night.',
+    opts: ['argue', 'to argue', 'arguing', 'to have argued'],
+    correct: 2, score: 4 },
+  { q: '20) It\'s about time we ...... this problem seriously.',
+    opts: ['took', 'would take', 'take', 'have taken'],
+    correct: 0, score: 4 },
+  { q: '21) Despite ...... hard all year, she failed the final exam.',
+    opts: ['studied', 'she studied', 'having studied', 'to have studied'],
+    correct: 2, score: 4 },
+  { q: '22) The report was ...... in that it contained several contradictions.',
+    opts: ['incoherent', 'flawed', 'misleading', 'inconsistent'],
+    correct: 3, score: 4 },
+  { q: '23) Had I known about the delay, I ...... a different route.',
+    opts: ['would take', 'would have taken', 'had taken', 'have taken'],
+    correct: 1, score: 4 },
+  { q: '24) The new policy is designed to ...... corruption at all levels of government.',
+    opts: ['reduce', 'curb', 'limit', 'lessen'],
+    correct: 1, score: 4 },
+  { q: '25) The more you practise, ...... you become at speaking English.',
+    opts: ['the more fluent', 'you become more fluent', 'more fluently', 'the fluently'],
+    correct: 0, score: 4 }
+];
+
+const LEVELS = [
+  { min: 0,  max: 14,  code: 'A1', name: 'Principiante',        desc: 'Conoces palabras básicas y frases muy simples. Estás dando tus primeros pasos en inglés. ¡Es el mejor momento para empezar!' },
+  { min: 15, max: 28,  code: 'A2', name: 'Básico',              desc: 'Puedes comunicarte en situaciones simples del día a día. Tienes una base sólida para crecer rápido.' },
+  { min: 29, max: 44,  code: 'B1', name: 'Intermedio',          desc: 'Manejas temas cotidianos y puedes expresar opiniones básicas. ¡Vas muy bien encaminado!' },
+  { min: 45, max: 58,  code: 'B2', name: 'Intermedio-Avanzado', desc: 'Comprendes ideas complejas y te expresas con fluidez en la mayoría de situaciones. ¡Excelente nivel!' }
+];
+
+const LETTERS = ['A','B','C','D'];
+
+let current = 0;
+let score   = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+
+const host        = document.getElementById('screen-host');
+const progressWrap= document.getElementById('progress-wrap');
+const progFill    = document.getElementById('prog-fill');
+const progLabel   = document.getElementById('prog-label');
+const progPct     = document.getElementById('prog-pct');
+
+/* ── Utilidades ── */
+function setProgress(idx) {
+  const pct = Math.round((idx / QUESTIONS.length) * 100);
+  progFill.style.width = pct + '%';
+  progLabel.textContent = 'Pregunta ' + (idx + 1) + ' de ' + QUESTIONS.length;
+  progPct.textContent = pct + '%';
+}
+
+/* Mueve el círculo de ripple desde la posición del cursor */
+function attachRipple(btn, circleClass) {
+  btn.addEventListener('mouseenter', function(e) {
+    const r = btn.getBoundingClientRect();
+    const c = btn.querySelector('.' + circleClass);
+    if (c) { c.style.top = (e.clientY - r.top) + 'px'; c.style.left = (e.clientX - r.left) + 'px'; }
+  });
+  btn.addEventListener('mouseout', function(e) {
+    const r = btn.getBoundingClientRect();
+    const c = btn.querySelector('.' + circleClass);
+    if (c) { c.style.top = (e.clientY - r.top) + 'px'; c.style.left = (e.clientX - r.left) + 'px'; }
+  });
+}
+
+/* ════════════════════════════════════════════════
+   PANTALLA BIENVENIDA
+════════════════════════════════════════════════ */
+function showWelcome() {
+  progressWrap.style.display = 'none';
+  host.innerHTML = `
+    <div class="card screen">
+      <div class="welcome-chick"><div class="chick-bounce"><img src="/imgs/eggy.png" alt="Pollito Egglish"/></div></div>
+      <p class="welcome-title">¿Cuál es tu nivel de inglés?</p>
+      <p class="welcome-sub">Responde 25 preguntas y te diremos exactamente en qué punto estás para aprendas justo desde ahí.</p>
+      <button class="btn-primary btn-green" id="btn-start" onclick="startTest()">
+        <span class="btn-ripple" style="background:rgba(70,163,2,0.35)"></span>
+        <span class="btn-label">¡Hacer el test de nivel!</span>
+      </button>
+      <div class="or-divider">o</div>
+      <button class="btn-ghost" onclick="skipTest()">No sé nada de inglés — empezar desde cero</button>
+    </div>`;
+  attachRipple(document.getElementById('btn-start'), 'btn-ripple');
+}
+
+/* ════════════════════════════════════════════════
+   OMITIR TEST
+════════════════════════════════════════════════ */
+function skipTest() {
+  progressWrap.style.display = 'none';
+  host.innerHTML = `
+    <div class="card screen" style="text-align:center">
+      <div class="welcome-chick"><div class="chick-bounce"><img src="/imgs/eggy.png" alt="Pollito"/></div></div>
+      <p class="welcome-title" style="margin-bottom:10px">¡Perfecto!</p>
+      <p class="welcome-sub" style="margin-bottom:26px">Empezarás desde el nivel A1 con lecciones súper básicas. ¡Tu pollito te va a guiar!</p>
+      <button class="btn-primary btn-green" id="btn-skip-go" onclick="goToProfile('A1')">
+        <span class="btn-ripple" style="background:rgba(70,163,2,0.35)"></span>
+        <span class="btn-label">¡Vamos a empezar!</span>
+      </button>
+    </div>`;
+  attachRipple(document.getElementById('btn-skip-go'), 'btn-ripple');
+}
+
+/* ════════════════════════════════════════════════
+   INICIAR TEST
+════════════════════════════════════════════════ */
+function startTest() {
+  current = 0; score = 0;
+  answers = new Array(QUESTIONS.length).fill(null);
+  progressWrap.style.display = 'block';
+  showQuestion(0);
+}
+
+/* ════════════════════════════════════════════════
+   MOSTRAR PREGUNTA
+════════════════════════════════════════════════ */
+function showQuestion(idx) {
+  setProgress(idx);
+  const q = QUESTIONS[idx];
+  const sectionHtml = q.section ? `<p class="section-instruction">${q.section}</p>` : '';
+  const isLast = idx === QUESTIONS.length - 1;
+  const hasAnswer = answers[idx] !== null;
+
+  const optsHtml = q.opts.map((o, i) => `
+    <button class="opt-btn${answers[idx] === i ? ' selected' : ''}" data-idx="${i}" id="opt-${i}">
+      <span class="opt-ripple"></span>
+      <span class="opt-letter">${LETTERS[i]}</span>
+      <span class="opt-text">${o}</span>
+    </button>`).join('');
+
+  host.innerHTML = `
+    <div class="card screen">
+      ${sectionHtml}
+      <span class="question-num">Pregunta ${idx + 1} / ${QUESTIONS.length}</span>
+      <p class="question-text">${q.q}</p>
+      <div class="options-list">${optsHtml}</div>
+      <button class="btn-next${hasAnswer ? ' ready' : ''}" id="next-btn">
+        <span class="btn-ripple"></span>
+        <span class="btn-label">${isLast ? 'Ver mi resultado' : 'Siguiente'}</span>
+      </button>
+    </div>`;
+
+  /* Vincular eventos */
+  document.querySelectorAll('.opt-btn').forEach(btn => {
+    /* Ripple circular de hover desde cursor */
+    btn.addEventListener('mouseenter', function(e) {
+      const r = btn.getBoundingClientRect();
+      const c = btn.querySelector('.opt-ripple');
+      c.style.top  = (e.clientY - r.top)  + 'px';
+      c.style.left = (e.clientX - r.left) + 'px';
+    });
+    btn.addEventListener('mouseout', function(e) {
+      const r = btn.getBoundingClientRect();
+      const c = btn.querySelector('.opt-ripple');
+      c.style.top  = (e.clientY - r.top)  + 'px';
+      c.style.left = (e.clientX - r.left) + 'px';
+    });
+    /* Click */
+    btn.addEventListener('click', function() {
+      /* efecto ripple de click */
+      btn.classList.remove('is-clicked');
+      void btn.offsetWidth;
+      btn.classList.add('is-clicked');
+      btn.addEventListener('animationend', () => btn.classList.remove('is-clicked'), { once: true });
+      selectAnswer(parseInt(btn.dataset.idx));
+    });
+  });
+
+  /* Botón siguiente */
+  const nextBtn = document.getElementById('next-btn');
+  attachRipple(nextBtn, 'btn-ripple');
+  nextBtn.addEventListener('click', function() {
+    if (!nextBtn.classList.contains('ready')) return;
+    isLast ? finishTest() : nextQuestion();
+  });
+}
+
+/* ════════════════════════════════════════════════
+   SELECCIONAR RESPUESTA
+════════════════════════════════════════════════ */
+function selectAnswer(i) {
+  answers[current] = i;
+  document.querySelectorAll('.opt-btn').forEach((b, j) => b.classList.toggle('selected', j === i));
+  /* Activar botón siguiente con transición a verde */
+  const nextBtn = document.getElementById('next-btn');
+  if (nextBtn) nextBtn.classList.add('ready');
+}
+
+/* ════════════════════════════════════════════════
+   SIGUIENTE / FINALIZAR
+════════════════════════════════════════════════ */
+function nextQuestion() {
+  if (answers[current] === null) return;
+  current++;
+  showQuestion(current);
+}
+
+function finishTest() {
+  score = 0;
+  QUESTIONS.forEach((q, i) => { if (answers[i] === q.correct) score += q.score; });
+  const maxScore = QUESTIONS.reduce((a, q) => a + q.score, 0);
+  const pct = Math.round((score / maxScore) * 100);
+  const level = LEVELS.find(l => score >= l.min && score <= l.max) || LEVELS[LEVELS.length - 1];
+  progressWrap.style.display = 'none';
+  const correct = answers.filter((a, i) => a === QUESTIONS[i].correct).length;
+  showRecommendation(level.code, correct);
+}
+
+/* ════════════════════════════════════════════════
+   DATOS DE NIVEL — descripción extendida para la
+   pantalla de recomendación
+════════════════════════════════════════════════ */
+const LEVEL_ADVICE = {
+  A1: {
+    tag: 'Principiante',
+    pitch: 'Tu pollito acaba de romper el cascarón.',
+    advice: 'Te recomendamos empezar en el nivel A1. Aprenderás saludos, números, colores y frases básicas con lecciones cortitas y muy visuales. ¡No se necesita saber nada previo!',
+    color: '#f5a623',
+    shadow: '#d48800',
+  },
+  A2: {
+    tag: 'Básico',
+    pitch: 'Tu pollito ya da sus primeros pasos.',
+    advice: 'Te recomendamos el nivel A2. Construirás oraciones simples, aprenderás vocabulario del día a día y empezarás a tener pequeñas conversaciones en inglés.',
+    color: '#58cc02',
+    shadow: '#46a302',
+  },
+  B1: {
+    tag: 'Intermedio',
+    pitch: 'Tu pollito ya vuela bajito.',
+    advice: 'Te recomendamos el nivel B1. Trabajarás gramática intermedia, expresarás opiniones y manejarás situaciones cotidianas con más fluidez y confianza.',
+    color: '#1cb0f6',
+    shadow: '#0090d9',
+  },
+  B2: {
+    tag: 'Intermedio-Avanzado',
+    pitch: '¡Tu pollito ya es un águila del idioma!',
+    advice: 'Te recomendamos el nivel B2. Profundizarás en estructuras complejas, comprenderás textos avanzados y te comunicarás con fluidez en casi cualquier situación.',
+    color: '#a855f7',
+    shadow: '#7c3aed',
+  },
+};
+
+/* ════════════════════════════════════════════════
+   PANTALLA DE RECOMENDACIÓN (antes de redirigir)
+════════════════════════════════════════════════ */
+function showRecommendation(levelCode, correct) {
+  const info = LEVEL_ADVICE[levelCode] || LEVEL_ADVICE['A1'];
+
+  host.innerHTML = `
+    <div class="card screen" style="text-align:center">
+
+      <!-- Pollito -->
+      <div class="welcome-chick">
+        <div class="chick-bounce">
+          <img src="/imgs/eggy.png" alt="Pollito"/>
+        </div>
+      </div>
+
+      <!-- Chip de nivel recomendado -->
+      <div style="display:inline-flex;align-items:center;gap:8px;
+                  background:${info.color}22;border:2px solid ${info.color}66;
+                  border-radius:99px;padding:6px 18px;margin-bottom:18px">
+        <span style="width:10px;height:10px;border-radius:50%;
+                     background:${info.color};flex-shrink:0;display:inline-block"></span>
+        <span style="font-size:13px;font-weight:900;color:${info.color};letter-spacing:1px">
+          NIVEL RECOMENDADO
+        </span>
+      </div>
+
+      <!-- Nivel grande -->
+      <p style="font-size:clamp(52px,13vw,86px);font-weight:900;line-height:1;
+                margin-bottom:4px;
+                background:linear-gradient(135deg,${info.color},${info.shadow});
+                -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+                background-clip:text">
+        ${levelCode}
+      </p>
+      <p style="font-size:clamp(17px,4vw,21px);font-weight:900;
+                color:var(--text-main);margin-bottom:6px">
+        ${info.tag}
+      </p>
+      <p style="font-size:14px;font-weight:800;color:var(--text-sub);
+                margin-bottom:14px;font-style:italic">
+        ${info.pitch}
+      </p>
+
+      <!-- Respuestas correctas -->
+      <div class="result-score-pill" style="margin-bottom:18px">
+        <div class="score-pill"><strong>${correct}</strong> / ${QUESTIONS.length} respuestas correctas</div>
+      </div>
+
+      <!-- Caja de consejo -->
+      <div style="background:${info.color}14;border:2px solid ${info.color}33;
+                  border-radius:18px;padding:18px 20px;margin-bottom:26px;text-align:left">
+        <p style="font-size:14px;font-weight:700;color:var(--text-main);line-height:1.65;margin:0">
+          ${info.advice}
+        </p>
+      </div>
+
+      <!-- CTA -->
+      <button class="btn-primary btn-green" id="btn-go-profile"
+              style="--btn-color:${info.color};--btn-shadow:${info.shadow}">
+        <span class="btn-ripple" style="background:rgba(70,163,2,0.35)"></span>
+        <span class="btn-label">¡Empezar en ${levelCode}!</span>
+      </button>
+      <button class="btn-ghost" onclick="startTest()" style="margin-top:12px">
+        Repetir el test
+      </button>
+    </div>`;
+
+  /* Guardar en Firestore + localStorage y redirigir al hacer clic */
+  document.getElementById('btn-go-profile').addEventListener('click', () => {
+    goToProfile(levelCode);
+  });
+  attachRipple(document.getElementById('btn-go-profile'), 'btn-ripple');
+}
+
+/* ════════════════════════════════════════════════
+   GUARDAR NIVEL EN FIRESTORE Y REDIRIGIR
+════════════════════════════════════════════════ */
+async function goToProfile(levelCode) {
+  /* 1. Guardar en localStorage como caché rápida */
+  localStorage.setItem('egglish-level', levelCode);
+
+  /* 2. Actualizar Firestore: nivel + marcar usuario como no-nuevo */
+  try {
+    const { getFirestore, doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js');
+
+    /* Reutilizar la misma instancia de auth/db que usa el resto del sitio,
+       en vez de inicializar una app de Firebase nueva. */
+    const { auth } = await import('/Secciones/Js/firebase-config.js');
+    const db = getFirestore(auth.app);
+
+    /* auth.currentUser puede seguir en null justo después de cargar la
+       página, porque Firebase todavía está restaurando la sesión de forma
+       asíncrona. Esperamos a onAuthStateChanged para tener la certeza. */
+    const user = auth.currentUser || await new Promise((resolve) => {
+      const unsub = onAuthStateChanged(auth, (u) => { unsub(); resolve(u); });
+    });
+
+    if (user) {
+      await updateDoc(doc(db, 'users', user.uid), {
+        isNewUser: false,
+        level: levelCode,
+      });
+    } else {
+      console.warn('[Egglish] goToProfile: no hay usuario autenticado, no se pudo actualizar isNewUser.');
+    }
+  } catch (e) {
+    /* Si Firestore falla, igual redirigimos — el nivel está en localStorage */
+    console.warn('[Egglish] No se pudo actualizar Firestore al salir del test:', e);
+  }
+
+  /* 3. Ir a lecciones */
+  window.location.replace('/Secciones/lecciones.html');
+}
+
+/* ── Arranque ── */
+showWelcome();
+</script>
+</body>
+</html>

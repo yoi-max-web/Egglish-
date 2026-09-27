@@ -574,17 +574,6 @@
       &times;
     </a>
 
-    <button id="dark-mode-toggle" type="button" aria-label="Cambiar modo oscuro" aria-pressed="false"
-       class="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700 shadow-sm">
-      <svg id="dark-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-gray-700 dark:text-white">
-        <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-        <g id="icon-sun" class="hidden">
-          <circle cx="12" cy="12" r="4"></circle>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-        </g>
-      </svg>
-    </button>
-
     <main class="registration-card" style="margin-top: 56px;">
         <header class="card-header">
             <div class="logo-frame">
@@ -644,25 +633,12 @@
         </footer>
     </main>
 
-    <!-- Script de interfaz (Dark Mode) -->
-    <script>
-      (function () {
-        const root = document.documentElement;
-        const darkToggle = document.getElementById('dark-mode-toggle');
-        function syncDarkModeUI() {
-          const isDark = root.classList.contains('dark');
-          document.getElementById('icon-moon').classList.toggle('hidden', isDark);
-          document.getElementById('icon-sun').classList.toggle('hidden', !isDark);
-          darkToggle.setAttribute('aria-pressed', String(isDark));
-        }
-        darkToggle.addEventListener('click', () => {
-          root.classList.toggle('dark');
-          localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
-          syncDarkModeUI();
-        });
-        syncDarkModeUI();
-      })();
-    </script>
+    <!--
+      Modo oscuro: ya no hay botón propio en esta página. El tema se
+      hereda automáticamente del interruptor de index.html, porque el
+      script en el <head> lee la misma clave 'egglish-theme' de
+      localStorage y aplica la clase 'dark' al <html> antes de pintar.
+    -->
 
     <!-- Script de efectos del botón (hover-circle + click-effect) -->
     <script>
@@ -845,27 +821,33 @@
           btnSubmit.disabled = true;
 
           try {
-            // Llamar a tu función en auth.js que guarda en Firebase
+            // registerUser crea la cuenta en Firebase Auth,
+            // guarda { isNewUser: true, level: null, ... } en Firestore
+            // e inicia sesión automáticamente.
             const result = await registerUser({ name, email, age, password });
 
             if (result.ok) {
-              // Si fue exitoso, Firebase ya inició sesión. Ahora SÍ redirigimos.
-              window.location.href = 'perfil.html';
+              // ✅ Cuenta creada e isNewUser:true guardado en Firestore.
+              // Redirigimos directo al placement test.
+              // Cuando el test termine, debe llamar a markTestCompleted(nivel)
+              // de auth.js, que pone isNewUser:false en Firestore → los
+              // futuros logins irán a /Secciones/perfil.html.
+              btnSubmitLabel.textContent = '¡Cuenta creada!';
+              btnSubmit.style.backgroundColor = '#16a34a';
+              window.location.href = '/placement-test.html';
             } else {
-              // Si Firebase devuelve un error (ej. correo duplicado)
+              // Error de Firebase (ej. correo duplicado, contraseña débil)
               formError.textContent = result.error;
               formError.classList.remove('hidden');
-              
-              // Restaurar botón
               btnSubmitLabel.textContent = originalText;
               btnSubmit.disabled = false;
             }
           } catch (error) {
-             console.error("Error inesperado en el registro", error);
-             formError.textContent = "Error inesperado. Inténtalo de nuevo.";
-             formError.classList.remove('hidden');
-             btnSubmitLabel.textContent = originalText;
-             btnSubmit.disabled = false;
+            console.error('[Egglish] Error inesperado en el registro:', error);
+            formError.textContent = 'Error inesperado. Inténtalo de nuevo.';
+            formError.classList.remove('hidden');
+            btnSubmitLabel.textContent = originalText;
+            btnSubmit.disabled = false;
           }
         });
     </script>

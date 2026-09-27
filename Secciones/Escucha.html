@@ -1627,7 +1627,99 @@
     // Nota: el ícono/color de cada tarjeta ahora vive directamente en
     // LESSON_DATA[nivel][i].icon / .color (ver banco de ejercicios arriba).
 
-    let libraryLevel = 'A1';
+    // Nivel real del alumno (viene del test de nivel), guardado en
+    // localStorage como 'egglish-level' (ej. "A1", "b2"...). Si no existe
+    // o no es válido, se usa 'A1' por defecto.
+    const LEVEL_ORDER = ['A1', 'A2', 'B1', 'B2'];
+    function getUserLevel() {
+        const stored = (localStorage.getItem('egglish-level') || '').toUpperCase();
+        return LESSON_DATA[stored] ? stored : 'A1';
+    }
+    const userLevel = getUserLevel();
+    const userLevelIdx = LEVEL_ORDER.indexOf(userLevel);
+    STATE.level = userLevel;
+
+    // ── PROGRESO POR USUARIO (persistencia local) ──────────────
+    // Igual que en lecciones.js y Juegos.js: cada usuario tiene su propia
+    // "libreta" de audios ya completados, identificada con su uid (misma
+    // sesión que guarda egglish-progreso.js). Un audio (tarjeta) no tiene
+    // id propio en LESSON_DATA, así que se identifica por nivel + índice.
+    const cachedUid = (() => {
+        try { return JSON.parse(localStorage.getItem('egglish_session') || 'null')?.uid || 'anonimo'; }
+        catch (e) { return 'anonimo'; }
+    })();
+    const ESCUCHA_STORAGE_KEY = `egglish_escucha_v1_${cachedUid}`;
+
+    function loadEscuchaProgress() {
+        try {
+            const data = JSON.parse(localStorage.getItem(ESCUCHA_STORAGE_KEY)) || {};
+            // 'done' = ya respondió las 5 preguntas sin ningún error (check ✓).
+            // 'intentado' = ya lo hizo pero le quedó algo mal (aviso en la tarjeta).
+            return { done: data.done || {}, intentado: data.intentado || {} };
+        } catch (e) { return { done: {}, intentado: {} }; }
+    }
+    function saveEscuchaProgress() {
+        try { localStorage.setItem(ESCUCHA_STORAGE_KEY, JSON.stringify(escuchaProgress)); } catch (e) {}
+    }
+    const escuchaProgress = loadEscuchaProgress();
+
+    function escuchaCardKey(level, cardIndex) { return `${level}::${cardIndex}`; }
+
+    /** Los niveles POR DEBAJO del nivel obtenido en el placement test se dan
+     *  por superados: se marcan TODAS sus tarjetas de audio como completadas
+     *  (check ✓) para que el alumno pueda repasarlas si quiere, pero no
+     *  tenga que rehacerlas para desbloquear su nivel real (el que le dio
+     *  el examen). Ej.: si el placement test da B2, A1, A2 y B1 quedan con
+     *  check en TODAS sus tarjetas. Si da A2, solo A1 queda con check; B1 y
+     *  B2 permanecen bloqueados hasta completar el 100% de A2 (ver
+     *  getUnlockedEscuchaLevelIdx). Solo se marca lo que aún no esté
+     *  marcado, así nunca se pisa un progreso ya guardado, y se limpia
+     *  cualquier aviso de "intentado sin éxito" que ya no aplica en esos
+     *  niveles. (Misma idea que markLowerLevelsAsDone() en lecciones.js y
+     *  markLowerGamesLevelsAsDone() en Juegos.js). */
+    function markLowerEscuchaLevelsAsDone() {
+        let changed = false;
+        LEVEL_ORDER.slice(0, userLevelIdx).forEach(lvl => {
+            const cards = LESSON_DATA[lvl] || [];
+            cards.forEach((c, i) => {
+                const key = escuchaCardKey(lvl, i);
+                if (!escuchaProgress.done[key]) {
+                    escuchaProgress.done[key] = true;
+                    changed = true;
+                }
+                if (escuchaProgress.intentado[key]) {
+                    delete escuchaProgress.intentado[key];
+                    changed = true;
+                }
+            });
+        });
+        if (changed) saveEscuchaProgress();
+    }
+    markLowerEscuchaLevelsAsDone();
+
+    /** ¿Ya se completaron TODAS las tarjetas de audio de un nivel, sin
+     *  ningún error en cada una? Es la única condición para pasar al
+     *  siguiente nivel: el examen de ubicación NUNCA desbloquea niveles
+     *  por sí solo, solo indica en dónde empieza el alumno. */
+    function isEscuchaLevelFullyDone(level) {
+        const cards = LESSON_DATA[level] || [];
+        return cards.length > 0 && cards.every((c, i) => !!escuchaProgress.done[escuchaCardKey(level, i)]);
+    }
+
+    /** Nivel más alto al que el alumno tiene acceso AHORA MISMO en Escucha:
+     *  nunca por debajo de su nivel de ubicación (userLevelIdx), y sube uno
+     *  más por cada nivel que complete al 100% (sin errores), en cascada.
+     *  Se recalcula siempre a partir de `escuchaProgress.done`, el progreso
+     *  real y propio de CADA usuario. */
+    function getUnlockedEscuchaLevelIdx() {
+        let idx = userLevelIdx;
+        while (idx + 1 < LEVEL_ORDER.length && isEscuchaLevelFullyDone(LEVEL_ORDER[idx])) {
+            idx++;
+        }
+        return idx;
+    }
+
+    let libraryLevel = userLevel;
 
     let hintTimer = null;
     let audioCtx  = null;
@@ -2264,16 +2356,33 @@
         listeningGrid.innerHTML = '';
 
         list.forEach((card, i) => {
+            const key = escuchaCardKey(libraryLevel, i);
+            const completado = !!escuchaProgress.done[key];
+            const pendientePorErrores = !completado && !!escuchaProgress.intentado[key];
+
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'listening-card';
+            btn.className = 'listening-card'
+                + (completado ? ' listening-card-done' : '')
+                + (pendientePorErrores ? ' listening-card-retry' : '');
+            btn.style.position = 'relative';
+            if (pendientePorErrores) {
+                btn.style.background = '#fff4e5';
+                btn.style.border = '2px solid #ff9600';
+            } else if (completado) {
+                btn.style.border = '2px solid #2ecc71';
+            }
+
             btn.innerHTML = `
+                ${completado ? `<span class="listening-check-badge" title="Ya completaste este audio sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">✓</span>` : ''}
+                ${pendientePorErrores ? `<span class="listening-retry-badge" title="Todavía no lo completaste sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ff9600;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">!</span>` : ''}
                 <div class="listening-card-icon ${card.color}">
                     ${iconImgHtml(card.icon, 'card-img', 'emoji-fallback')}
                     <span class="listening-card-badge">${iconImgHtml('🎧', 'badge-img', 'emoji-fallback')}</span>
                 </div>
                 <span class="listening-card-title">${card.topic}</span>
                 <span class="listening-card-progress">${libraryLevel} · ${card.questions.length} preguntas</span>
+                ${pendientePorErrores ? `<span style="display:block;margin-top:6px;padding:6px 8px;border-radius:8px;background:#ffe8c2;color:#9a5b00;font-size:0.72rem;font-weight:700;text-align:center;">Debes completar este audio sin errores para poder avanzar</span>` : ''}
             `;
             btn.addEventListener('click', () => startLessonAt(libraryLevel, i));
             listeningGrid.appendChild(btn);
@@ -2307,9 +2416,66 @@
         loadExercise();
     }
 
+    // El examen (userLevelIdx) solo UBICA en qué nivel empieza el alumno.
+    // A partir de ahí, cada nivel siguiente se desbloquea únicamente cuando
+    // completó el 100% de los audios del nivel actual, SIN errores en
+    // ninguno (ver getUnlockedEscuchaLevelIdx). El candado se repinta cada
+    // vez que el alumno termina un audio, para reflejar el avance sin
+    // recargar la página.
+    function refreshEscuchaLevelTabsLockUI() {
+        const unlockedIdx = getUnlockedEscuchaLevelIdx();
+        Array.from(levelTabs.children).forEach(tab => {
+            const idx = LEVEL_ORDER.indexOf(tab.dataset.level);
+            const isLocked = idx > unlockedIdx;
+            tab.classList.toggle('level-tab-locked', isLocked);
+            tab.style.opacity = isLocked ? '0.45' : '';
+            tab.style.cursor = isLocked ? 'not-allowed' : '';
+            tab.setAttribute('aria-disabled', isLocked ? 'true' : 'false');
+            tab.title = isLocked ? 'Completa todos los audios del nivel actual, sin errores, para desbloquear este' : '';
+        });
+    }
+    Array.from(levelTabs.children).forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.level === userLevel);
+    });
+    refreshEscuchaLevelTabsLockUI();
+
+    // Pequeño aviso flotante para cuando el alumno toca un nivel bloqueado
+    // (no hay un sistema de toasts en esta página, así que se crea uno).
+    function showLevelLockToast(msg) {
+        let toast = document.getElementById('level-lock-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'level-lock-toast';
+            toast.style.cssText = `
+                position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(12px);
+                background:#1f2937; color:#fff; padding:12px 20px; border-radius:999px;
+                font-weight:700; font-size:0.92rem; z-index:99999; box-shadow:0 8px 20px rgba(0,0,0,.3);
+                opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none;
+                white-space:nowrap;
+            `;
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+        });
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(12px)';
+        }, 2200);
+    }
+
     levelTabs.addEventListener('click', (e) => {
         const tab = e.target.closest('.level-tab');
         if (!tab) return;
+        const idx = LEVEL_ORDER.indexOf(tab.dataset.level);
+        if (idx > getUnlockedEscuchaLevelIdx()) {
+            playErrorSound();
+            showLevelLockToast('🔒 Completa todos los audios del nivel actual, sin errores, para desbloquear este.');
+            return;
+        }
         libraryLevel = tab.dataset.level;
         Array.from(levelTabs.children).forEach(t => t.classList.toggle('active', t === tab));
         renderLibrary();
@@ -2383,14 +2549,20 @@
         };
     }
 
-    function openCompletionModal(acc, expGanado) {
+    function openCompletionModal(acc, expGanado, perfecto, yaTeniaCheck) {
         const total = STATE.totalInLevel || 1;
         const stars = acc >= 90 ? '⭐⭐⭐' : acc >= 70 ? '⭐⭐' : acc >= 50 ? '⭐' : '☆';
         const fb = completionFeedbackFor(acc);
 
         completionStars.textContent = stars;
         completionTitle.textContent = fb.title;
-        completionMessage.textContent = fb.message;
+        let mensaje = fb.message;
+        if (!yaTeniaCheck) {
+            mensaje += perfecto
+                ? ' ¡Ganaste el check ✓ de este audio!'
+                : ' Para ganar el check ✓ de este audio debes responder las 5 preguntas sin ningún error.';
+        }
+        completionMessage.textContent = mensaje;
         completionPercent.textContent = acc + '%';
         completionRing.className = 'completion-ring ' + fb.badge;
         completionCorrect.textContent = `${STATE.correctInLevel}/${total}`;
@@ -2449,12 +2621,36 @@
         saveStat('egglish_xp', STATE.xp);
         updateStatsUI();
 
+        // El check ✓ (y el desbloqueo del siguiente nivel) solo cuenta si
+        // respondió las 5 preguntas SIN ningún error. Si le quedó alguna
+        // mal, la tarjeta queda marcada como "intentado" para avisarle en
+        // la biblioteca que debe repetirla sin errores; no se le quita un
+        // check ya ganado en un intento anterior.
+        const key = escuchaCardKey(STATE.level, STATE.cardIndex);
+        const yaTeniaCheck = !!escuchaProgress.done[key];
+        const perfecto = STATE.correctInLevel === total;
+        const unlockedIdxAntes = getUnlockedEscuchaLevelIdx();
+        if (perfecto) {
+            escuchaProgress.done[key] = true;
+        } else if (!yaTeniaCheck) {
+            escuchaProgress.intentado[key] = true;
+        }
+        saveEscuchaProgress();
+        refreshEscuchaLevelTabsLockUI();
+
         // Puntaje/porcentaje y mensaje de felicitación en la ventana modal.
         const expGanado = STATE.correctInLevel * 10 + bonus;
-        openCompletionModal(acc, expGanado);
+        openCompletionModal(acc, expGanado, perfecto, yaTeniaCheck);
 
         celebrate(true);
         playSuccessSound();
+
+        // Si este audio era el último que faltaba del nivel, se acaba de
+        // desbloquear el siguiente: se lo avisamos al alumno.
+        const unlockedIdxDespues = getUnlockedEscuchaLevelIdx();
+        if (unlockedIdxDespues > unlockedIdxAntes) {
+            showLevelLockToast(`🎉 ¡Nivel ${LEVEL_ORDER[unlockedIdxDespues]} desbloqueado!`);
+        }
 
         // Sincroniza el progreso REAL (puntos y ejercicios de escucha completados)
         // con Firebase para que el Perfil lo muestre. Solo cuenta lo ganado en esta

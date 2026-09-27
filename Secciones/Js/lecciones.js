@@ -442,9 +442,64 @@ function registerDayStreak() {
   saveProgress();
 }
 
+/* ================================================================
+   NIVEL REAL DEL ALUMNO (viene del test de nivel)
+   Se guarda en localStorage como 'egglish-level' (ej. "A1", "b2"...).
+   Si no existe o no es válido, se usa 'a1' por defecto.
+================================================================ */
+const LEVEL_ORDER = ['a1', 'a2', 'b1', 'b2'];
+
+function getUserLevel() {
+  const stored = (localStorage.getItem('egglish-level') || '').toLowerCase();
+  return LEVELS[stored] ? stored : 'a1';
+}
+const currentLevel = getUserLevel();
+const currentLevelIdx = LEVEL_ORDER.indexOf(currentLevel);
+
+/** Los niveles POR DEBAJO del nivel del test se dan por superados:
+ *  se marcan como completados (aparecen con el check/corona) para que
+ *  el alumno pueda repasarlos, pero no tiene que rehacerlos para
+ *  desbloquear su nivel real. Solo se marca una vez por tema. */
+function markLowerLevelsAsDone() {
+  let changed = false;
+  LEVEL_ORDER.slice(0, currentLevelIdx).forEach(lvl => {
+    LEVELS[lvl].units.forEach(unit => unit.themes.forEach(themeKey => {
+      if (!progress.done[themeKey]) {
+        progress.done[themeKey] = true;
+        changed = true;
+      }
+    }));
+  });
+  if (changed) saveProgress();
+}
+markLowerLevelsAsDone();
+
+/** ¿Ya se completaron TODOS los temas de TODAS las secciones de un nivel?
+ *  Esta es la única condición para pasar al siguiente nivel: el examen de
+ *  ubicación NUNCA desbloquea niveles por sí solo, solo indica en dónde
+ *  empieza el alumno. */
+function isLevelFullyDone(lvl) {
+  return LEVELS[lvl].units.every(unit => unit.themes.every(themeKey => !!progress.done[themeKey]));
+}
+
+/** Nivel más alto al que el alumno tiene acceso AHORA MISMO:
+ *  - Nunca por debajo de su nivel de ubicación (currentLevelIdx).
+ *  - Sube un nivel más por cada nivel que complete al 100%, en cascada
+ *    (si de una vez completa el siguiente también, sigue subiendo).
+ *  No se guarda aparte: se recalcula siempre a partir de `progress.done`,
+ *  que es el progreso real y propio de CADA usuario (STORAGE_KEY incluye
+ *  su uid), así que cada quien avanza según lo que él mismo completó.*/
+function getUnlockedLevelIdx() {
+  let idx = currentLevelIdx;
+  while (idx + 1 < LEVEL_ORDER.length && isLevelFullyDone(LEVEL_ORDER[idx])) {
+    idx++;
+  }
+  return idx;
+}
+
 function flatThemeOrder() {
   const order = [];
-  ['a1', 'a2', 'b1', 'b2'].forEach(lvl => {
+  LEVEL_ORDER.forEach(lvl => {
     LEVELS[lvl].units.forEach(unit => unit.themes.forEach(t => order.push(t)));
   });
   return order;
@@ -518,14 +573,48 @@ function updateStatsBar() {
 
 function setupLevelTabs() {
   document.querySelectorAll('.level-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
+    const lvl = tab.dataset.level;
+    const idx = LEVEL_ORDER.indexOf(lvl);
+
+    // Un único listener por pestaña. El bloqueo se evalúa EN EL MOMENTO DEL
+    // CLIC (llamando a getUnlockedLevelIdx()) y no al cargar la página, para
+    // que en cuanto el alumno complete el nivel actual la siguiente pestaña
+    // quede disponible al instante, sin recargar.
+    tab.addEventListener('click', (e) => {
+      if (idx > getUnlockedLevelIdx()) {
+        e.preventDefault();
+        if (window.SoundManager) window.SoundManager.playWrong();
+        showToast('🔒 Completa todas las actividades del nivel actual para desbloquear este.');
+        return;
+      }
       if (window.SoundManager) window.SoundManager.playClick();
       document.querySelectorAll('.level-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       document.querySelectorAll('.level-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(`panel-${tab.dataset.level}`)?.classList.add('active');
+      document.getElementById(`panel-${lvl}`)?.classList.add('active');
     });
+
+    tab.classList.toggle('active', lvl === currentLevel);
+    tab.setAttribute('aria-selected', lvl === currentLevel ? 'true' : 'false');
+  });
+
+  refreshLevelTabsLockUI();
+}
+
+/** Repinta SOLO el candado/opacidad de las pestañas según el progreso real
+ *  guardado (progress.done). Se llama al arrancar y cada vez que el alumno
+ *  termina una actividad, para que un nivel recién desbloqueado se vea
+ *  disponible de inmediato, sin duplicar los listeners de clic. */
+function refreshLevelTabsLockUI() {
+  const unlockedIdx = getUnlockedLevelIdx();
+  document.querySelectorAll('.level-tab').forEach(tab => {
+    const idx = LEVEL_ORDER.indexOf(tab.dataset.level);
+    const isLocked = idx > unlockedIdx;
+    tab.classList.toggle('level-tab-locked', isLocked);
+    tab.setAttribute('aria-disabled', String(isLocked));
+    tab.style.opacity = isLocked ? '0.45' : '';
+    tab.style.cursor = isLocked ? 'not-allowed' : '';
   });
 }
 
@@ -538,7 +627,7 @@ function buildPath() {
 
   Object.keys(LEVELS).forEach(lvl => {
     const panel = document.createElement('div');
-    panel.className = 'level-panel';
+    panel.className = 'level-panel' + (lvl === currentLevel ? ' active' : '');
     panel.id = `panel-${lvl}`;
 
     LEVELS[lvl].units.forEach((unit, unitIdx) => {
@@ -581,10 +670,12 @@ function buildPath() {
 
         if (isDone) {
           btn.classList.add('state-done');
+          btn.style.position = 'relative';
           btn.innerHTML = `
             <span class="node-icon">${theme.icon}</span>
             <span class="node-label-inner">${theme.label}</span>
-            <span class="node-crown">👑</span>`;
+            <span class="node-crown">👑</span>
+            <span class="node-check-badge" title="Ya completaste esta lección" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.25);line-height:1;">✓</span>`;
         } else if (prevDone) {
           btn.classList.add('state-current');
           btn.innerHTML = `
@@ -607,9 +698,6 @@ function buildPath() {
 
     pathMain.appendChild(panel);
   });
-
-  const activeLevel = document.querySelector('.level-tab.active')?.dataset.level || 'a1';
-  document.getElementById(`panel-${activeLevel}`)?.classList.add('active');
 
   pathMain.querySelectorAll('.lesson-node').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1207,20 +1295,45 @@ document.getElementById('lose-exit').addEventListener('click', () => {
 
 document.getElementById('completion-continue').addEventListener('click', () => {
   completionModal.classList.remove('open');
-  progress.done[lessonState.themeKey] = true;
+
+  const unlockedIdxAntes = getUnlockedLevelIdx();
+
+  // El check verde (y por lo tanto el desbloqueo del siguiente nivel) solo
+  // cuenta si el alumno respondió TODO bien y no se le acabaron las vidas.
+  // Si tuvo al menos un error o un skip, la lección queda disponible para
+  // repetir (sigue en "EMPEZAR"), pero no se marca como completada en el
+  // mapa. Una vez ganado el check, nunca se le vuelve a quitar por un
+  // intento posterior con peor resultado.
+  const perfecta = lessonState.correctCount === lessonState.questions.length && lessonState.hearts > 0;
+  if (perfecta) {
+    progress.done[lessonState.themeKey] = true;
+  }
   progress.xp = (progress.xp || 0) + lessonState.totalXp;
   registerDayStreak();
   saveProgress();
   floatXP(lessonState.totalXp);
   buildPath();
+  refreshLevelTabsLockUI();
+
+  // Si esta lección era la última que faltaba del nivel, se acaba de
+  // desbloquear el siguiente: se lo avisamos al alumno.
+  const unlockedIdxDespues = getUnlockedLevelIdx();
+  if (unlockedIdxDespues > unlockedIdxAntes) {
+    const nuevoNivel = LEVELS[LEVEL_ORDER[unlockedIdxDespues]].label;
+    showToast(`🎉 ¡Nivel ${nuevoNivel} desbloqueado!`, 'success', 3200);
+  } else if (perfecta) {
+    showToast('✅ ¡Lección completada al 100%!', 'success', 2400);
+  }
 
   // Sincroniza el progreso REAL (puntos, racha y lecciones completadas) con
-  // Firebase para que el Perfil los muestre. Solo cuenta lo ganado en esta lección.
+  // Firebase para que el Perfil los muestre. Solo cuenta lo ganado en esta
+  // lección. "leccionesCompletadas" solo sube cuando quedó perfecta, para
+  // que coincida con lo que muestra el check en el mapa.
   window._egglishProgresoPendiente = import('/Secciones/Js/egglish-progreso.js')
     .then(({ registrarProgreso }) => registrarProgreso({
       exp: lessonState.totalXp,
-      campo: 'leccionesCompletadas',
-      incremento: 1,
+      campo: perfecta ? 'leccionesCompletadas' : null,
+      incremento: perfecta ? 1 : 0,
     }))
     .catch((e) => console.warn('No se pudo sincronizar el progreso con Firebase:', e));
 });

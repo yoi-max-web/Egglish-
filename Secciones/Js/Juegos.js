@@ -413,12 +413,109 @@ function getGameDef(id) {
 //  STATE
 // ══════════════════════════════════════════
 
-let currentLevel = "A1";
+const LEVEL_ORDER = ['A1', 'A2', 'B1', 'B2'];
+
+// Nivel obtenido en el placement test (guardado por placement-test.html).
+// Se normaliza a mayúsculas y se valida contra LEVEL_ORDER: si por algún
+// motivo no existe o viene en un formato inesperado (usuario viejo,
+// localStorage borrado, minúsculas, etc.) caemos a A1 como valor por
+// defecto seguro. (Misma protección que ya usa lecciones.js).
+const userLevel = (() => {
+  const stored = (localStorage.getItem('egglish-level') || '').toUpperCase();
+  return LEVEL_ORDER.includes(stored) ? stored : 'A1';
+})();
+let currentLevel = userLevel;
+const userLevelIdx = LEVEL_ORDER.indexOf(userLevel);
 let currentGame  = null;
 let currentQ     = 0;
 let score        = 0;
 let totalQ       = 0;
 let lastScreen   = "screen-levels";
+
+// ══════════════════════════════════════════
+//  PROGRESO POR USUARIO (persistencia local)
+//  Igual que en lecciones.js: cada usuario tiene su propia "libreta" de
+//  minijuegos ya completados, identificada con su uid (misma sesión que
+//  guarda egglish-progreso.js). Esto es lo que permite:
+//   1) Pintar un check de otro color en el minijuego ya jugado.
+//   2) Saber si TODOS los minijuegos de un nivel están completos, para
+//      desbloquear el siguiente nivel (el examen solo ubica al inicio).
+// ══════════════════════════════════════════
+const cachedUid = (() => {
+  try { return JSON.parse(localStorage.getItem('egglish_session') || 'null')?.uid || 'anonimo'; }
+  catch (e) { return 'anonimo'; }
+})();
+const GAMES_STORAGE_KEY = `egglish_juegos_v1_${cachedUid}`;
+
+function loadGamesProgress() {
+  try {
+    const data = JSON.parse(localStorage.getItem(GAMES_STORAGE_KEY)) || {};
+    // 'done' = ya lo completó sin errores (check ✓). 'intentado' = ya lo
+    // jugó pero le quedó algo mal (para avisarle en la tarjeta del menú).
+    return { done: data.done || {}, intentado: data.intentado || {} };
+  } catch (e) { return { done: {}, intentado: {} }; }
+}
+function saveGamesProgress() {
+  try { localStorage.setItem(GAMES_STORAGE_KEY, JSON.stringify(gamesProgress)); } catch (e) {}
+}
+const gamesProgress = loadGamesProgress();
+
+/** Los niveles POR DEBAJO del nivel obtenido en el placement test se dan
+ *  por superados: se marcan TODOS sus minijuegos como completados (check ✓)
+ *  para que el alumno pueda repasarlos si quiere, pero no tenga que
+ *  rehacerlos para desbloquear su nivel real (el que le dio el examen).
+ *  Ej.: si el placement test da B2, A1, A2 y B1 quedan con check en TODOS
+ *  sus minijuegos. Si da A2, solo A1 queda con check; B1 y B2 permanecen
+ *  bloqueados hasta completar el 100% de A2 (ver getUnlockedGamesLevelIdx).
+ *  Solo se marca lo que aún no esté marcado, así nunca se pisa un progreso
+ *  ya guardado, y se limpia cualquier aviso de "intentado sin éxito" que
+ *  ya no aplica en esos niveles. (Misma idea que markLowerLevelsAsDone()
+ *  en lecciones.js). */
+function markLowerGamesLevelsAsDone() {
+  let changed = false;
+  LEVEL_ORDER.slice(0, userLevelIdx).forEach(lvl => {
+    GAMES.filter(g => g.levels.includes(lvl)).forEach(g => {
+      const key = gameDoneKey(lvl, g.id);
+      if (!gamesProgress.done[key]) {
+        gamesProgress.done[key] = true;
+        changed = true;
+      }
+      if (gamesProgress.intentado[key]) {
+        delete gamesProgress.intentado[key];
+        changed = true;
+      }
+    });
+  });
+  if (changed) saveGamesProgress();
+}
+markLowerGamesLevelsAsDone();
+
+/** Un mismo id de juego ("mc", "fill"...) existe en varios niveles con
+ *  preguntas distintas, así que el progreso se guarda por combinación
+ *  nivel+juego, no solo por id. */
+function gameDoneKey(level, gameId) { return `${level}::${gameId}`; }
+
+/** ¿Ya se completaron TODOS los minijuegos disponibles de un nivel?
+ *  Esta es la única condición para pasar al siguiente nivel: el examen de
+ *  ubicación NUNCA desbloquea niveles por sí solo, solo indica en dónde
+ *  empieza el alumno. */
+function isGamesLevelFullyDone(level) {
+  const juegosDeEsteNivel = GAMES.filter(g => g.levels.includes(level));
+  return juegosDeEsteNivel.length > 0 && juegosDeEsteNivel.every(g => !!gamesProgress.done[gameDoneKey(level, g.id)]);
+}
+
+/** Nivel más alto al que el alumno tiene acceso AHORA MISMO en Juegos:
+ *  nunca por debajo de su nivel de ubicación (userLevelIdx), y sube uno
+ *  más por cada nivel que complete al 100%, en cascada. Se recalcula
+ *  siempre a partir de `gamesProgress.done`, el progreso real y propio de
+ *  CADA usuario. */
+function getUnlockedGamesLevelIdx() {
+  let idx = userLevelIdx;
+  while (idx + 1 < LEVEL_ORDER.length && isGamesLevelFullyDone(LEVEL_ORDER[idx])) {
+    idx++;
+  }
+  return idx;
+}
 
 // Match game state
 let matchSelected = null;
@@ -484,31 +581,94 @@ function buildGrid(level) {
   grid.innerHTML = '';
   const available = GAMES.filter(g => g.levels.includes(level));
   available.forEach(g => {
+    const key = gameDoneKey(level, g.id);
+    const completado = !!gamesProgress.done[key];
+    const pendientePorErrores = !completado && !!gamesProgress.intentado[key];
+
     const card = document.createElement('div');
-    card.className = 'game-card-sel';
+    card.className = 'game-card-sel'
+      + (completado ? ' game-card-done' : '')
+      + (pendientePorErrores ? ' game-card-retry' : '');
+    card.style.position = 'relative';
+    if (pendientePorErrores) {
+      card.style.background = '#fff4e5';
+      card.style.border = '2px solid #ff9600';
+    } else if (completado) {
+      card.style.border = '2px solid #2ecc71';
+    }
+
     card.innerHTML = `
+      ${completado ? `<span class="game-check-badge" title="Ya completaste este juego" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">✓</span>` : ''}
+      ${pendientePorErrores ? `<span class="game-retry-badge" title="Todavía no lo completaste sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ff9600;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">!</span>` : ''}
       <div class="game-card-icon">${g.icon}</div>
       <div>
         <div class="game-card-title">${g.title}</div>
         <span class="game-card-badge badge-${level}">${level}</span>
       </div>
       <div class="game-card-desc">${g.desc}</div>
-      <button class="btn-play btn-${level}" onclick="startGame('${g.id}','${level}')">▶ Jugar</button>
+      ${pendientePorErrores ? `<div class="game-card-warning" style="margin:6px 0 4px;padding:6px 8px;border-radius:8px;background:#ffe8c2;color:#9a5b00;font-size:0.78rem;font-weight:700;text-align:center;">Debes completar esta sin errores para poder avanzar</div>` : ''}
+      <button class="btn-play btn-${level}" onclick="startGame('${g.id}','${level}')">${completado ? '🔁 Repasar' : (pendientePorErrores ? '🔁 Reintentar' : '▶ Jugar')}</button>
     `;
     grid.appendChild(card);
   });
 }
 
+/** Pequeño aviso flotante para cuando el alumno toca un nivel que aún
+ *  no desbloqueó (no había un sistema de toasts en esta página). */
+function showLevelLockToast(msg) {
+  let toast = document.getElementById('level-lock-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'level-lock-toast';
+    toast.style.cssText = `
+      position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(12px);
+      background:#1f2937; color:#fff; padding:12px 20px; border-radius:999px;
+      font-weight:700; font-size:0.92rem; z-index:99999; box-shadow:0 8px 20px rgba(0,0,0,.3);
+      opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none;
+      white-space:nowrap;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(12px)';
+  }, 2200);
+}
+
 function initGameSelector() {
-  // Level tabs
+  // El examen (userLevelIdx) solo UBICA en qué nivel empieza el alumno.
+  // A partir de ahí, cada nivel siguiente se desbloquea únicamente cuando
+  // completó el 100% de los minijuegos del nivel actual (ver
+  // getUnlockedGamesLevelIdx). Por eso el bloqueo se evalúa EN EL MOMENTO
+  // DEL CLIC, no una sola vez al cargar la página: así, en cuanto termina
+  // el último minijuego que le faltaba, el siguiente nivel queda
+  // disponible al instante, sin recargar.
   document.querySelectorAll('.level-tab').forEach(btn => {
+    const idx = LEVEL_ORDER.indexOf(btn.dataset.level);
+
+    btn.style.display = '';
+    btn.classList.toggle('active', btn.dataset.level === currentLevel);
+
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.level-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      if (idx > getUnlockedGamesLevelIdx()) {
+        if (window.SoundManager) SoundManager.playWrong();
+        showLevelLockToast('🔒 Completa todos los minijuegos del nivel actual para desbloquear este.');
+        return;
+      }
       currentLevel = btn.dataset.level;
+      document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
       buildGrid(currentLevel);
     });
   });
+
+  refreshGamesLevelTabsLockUI();
 
   // 🩹 Construye la grilla inicial SIEMPRE cuando el DOM esté listo.
   // Antes esta llamada vivía suelta al final del archivo: si cualquier
@@ -517,6 +677,23 @@ function initGameSelector() {
   // igual que el de escritorio), buildGrid('A1') nunca se ejecutaba y
   // las tarjetas quedaban vacías solo en esos dispositivos.
   buildGrid(currentLevel);
+}
+
+/** Repinta SOLO el candado/opacidad de las pestañas de nivel según el
+ *  progreso real guardado (gamesProgress.done). Se llama al arrancar y
+ *  cada vez que el alumno termina un minijuego, para que un nivel recién
+ *  desbloqueado se vea disponible de inmediato, sin duplicar los
+ *  listeners de clic. */
+function refreshGamesLevelTabsLockUI() {
+  const unlockedIdx = getUnlockedGamesLevelIdx();
+  document.querySelectorAll('.level-tab').forEach(btn => {
+    const idx = LEVEL_ORDER.indexOf(btn.dataset.level);
+    const isLocked = idx > unlockedIdx;
+    btn.classList.toggle('level-tab-locked', isLocked);
+    btn.style.opacity = isLocked ? '0.45' : '';
+    btn.style.cursor = isLocked ? 'not-allowed' : '';
+    btn.setAttribute('aria-disabled', isLocked ? 'true' : 'false');
+  });
 }
 
 if (document.readyState === 'loading') {
@@ -1043,15 +1220,27 @@ function showResults(gameName) {
   const pct = maxScore > 0 ? score / maxScore : 0;
   const def = getGameDef(currentGame);
 
+  const perfecto = pct === 1;
+  const yaTeniaCheck = !!gamesProgress.done[gameDoneKey(currentLevel, currentGame)];
+
   if (window.SoundManager) {
     SoundManager.playVictory();
   }
 
   let title, sub;
-  if (pct === 1)       { title = '🎉 ¡Perfecto!';       sub = '¡Respuestas perfectas! Eres increíble.'; }
-  else if (pct >= .7)  { title = '🌟 ¡Muy bien!';       sub = 'Casi perfecto, ¡sigue así!'; }
-  else if (pct >= .4)  { title = '👍 ¡Buen intento!';   sub = 'Puedes mejorar. ¡Inténtalo de nuevo!'; }
-  else                 { title = '💪 ¡Sigue practicando!'; sub = 'La práctica hace al maestro.'; }
+  if (perfecto) {
+    title = '🎉 ¡Perfecto!';
+    sub = yaTeniaCheck ? '¡Otra vez perfecto! Sigues dominando este juego.' : '¡Respuestas perfectas! Ganaste el check ✓ de este juego.';
+  } else if (pct >= .7) {
+    title = '🌟 ¡Muy bien!';
+    sub = yaTeniaCheck ? 'Casi perfecto, ¡sigue así!' : 'Casi perfecto, ¡sigue así! Para ganar el check ✓ de este juego debes responder todo sin ningún error.';
+  } else if (pct >= .4) {
+    title = '👍 ¡Buen intento!';
+    sub = yaTeniaCheck ? 'Puedes mejorar. ¡Inténtalo de nuevo!' : 'Puedes mejorar. Para ganar el check ✓ de este juego debes responder todo sin ningún error.';
+  } else {
+    title = '💪 ¡Sigue practicando!';
+    sub = yaTeniaCheck ? 'La práctica hace al maestro.' : 'La práctica hace al maestro. Para ganar el check ✓ de este juego debes responder todo sin ningún error.';
+  }
 
   document.getElementById('results-title').textContent    = title;
   document.getElementById('results-subtitle').textContent = sub;
@@ -1078,6 +1267,27 @@ function showResults(gameName) {
   // Confetti
   spawnConfetti();
   showScreen('screen-results');
+
+  // Marca este minijuego para ESTE usuario: si quedó perfecto gana el
+  // check ✓; si no, queda como "intentado sin éxito" para que la tarjeta
+  // del menú se lo recuerde con el aviso de que debe hacerlo sin errores.
+  // No se le quita un check ya ganado en un intento anterior.
+  const unlockedIdxAntes = getUnlockedGamesLevelIdx();
+  if (perfecto) {
+    gamesProgress.done[gameDoneKey(currentLevel, currentGame)] = true;
+  } else if (!yaTeniaCheck) {
+    gamesProgress.intentado[gameDoneKey(currentLevel, currentGame)] = true;
+  }
+  saveGamesProgress();
+  buildGrid(currentLevel);
+  refreshGamesLevelTabsLockUI();
+
+  // Si este minijuego era el último que faltaba del nivel, se acaba de
+  // desbloquear el siguiente: se lo avisamos al alumno.
+  const unlockedIdxDespues = getUnlockedGamesLevelIdx();
+  if (unlockedIdxDespues > unlockedIdxAntes) {
+    showLevelLockToast(`🎉 ¡Nivel ${LEVEL_ORDER[unlockedIdxDespues]} desbloqueado!`);
+  }
 
   // Sincroniza el progreso REAL (puntos y juegos ganados) con Firebase para
   // que el Perfil lo muestre. Solo cuenta lo ganado en esta partida.

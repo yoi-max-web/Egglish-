@@ -1,19 +1,49 @@
 // ============================================================
 //  Secciones/Js/entrar-logic.js
-//  ✅ Redirige a /Secciones/perfil.html tras login exitoso
+//
+//  Lógica de redirección post-login:
+//  - Usuario NUEVO  (isNewUser === true en Firestore) → /placement-test.html
+//    Solo pasa si alguien llega a entrar.html justo después de registrarse
+//    sin haber cerrado sesión. En la práctica, Registro.html redirige directo.
+//  - Usuario VIEJO  (isNewUser === false / campo ausente) → /Secciones/perfil.html
+//
+//  IMPORTANTE: onAuthStateChanged se dispara cuando:
+//    1. El usuario acaba de hacer submit del loginForm (loginUser() llama a
+//       signInWithEmailAndPassword, que autentica la sesión en Firebase).
+//    2. El usuario ya tenía sesión activa al abrir entrar.html (ej. volvió
+//       con la pestaña abierta). En ese caso lo redirigimos igual.
+//  La bandera `redirectHandled` evita dobles disparos.
 // ============================================================
 
 import { loginUser } from './auth.js';
-import { auth } from './firebase-config.js';
+import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-// Si ya hay sesión REAL en Firebase → ir directo al perfil.
-// onAuthStateChanged es la única fuente de verdad; no confiamos
-// en localStorage porque puede quedar un residuo de una sesión
-// vieja (p. ej. de un proyecto de Firebase distinto) que ya no
-// corresponde a ningún usuario autenticado real.
-onAuthStateChanged(auth, (user) => {
-  if (user) {
+// Si ya hay sesión REAL en Firebase → decidir a dónde redirigir.
+// - Usuario NUEVO (isNewUser === true en Firestore) → placement test
+//   (solo ocurre cuando acaba de registrarse y aún no ha hecho el test)
+// - Usuario EXISTENTE (isNewUser === false o campo ausente) → perfil
+let redirectHandled = false;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user || redirectHandled) return;
+
+  try {
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists() && snap.data().isNewUser === true) {
+      // Usuario recién registrado que todavía no ha hecho el placement test
+      redirectHandled = true;
+      window.location.replace('/placement-test.html');
+    } else {
+      // Usuario existente que está iniciando sesión → va a su perfil
+      redirectHandled = true;
+      window.location.replace('/Secciones/perfil.html');
+    }
+  } catch (e) {
+    // Si Firestore falla por alguna razón, mandamos al perfil (usuario conocido)
+    console.warn('[Egglish] No se pudo leer Firestore en onAuthStateChanged:', e);
+    redirectHandled = true;
     window.location.replace('/Secciones/perfil.html');
   }
 });
@@ -113,12 +143,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = form.querySelector('button[type="submit"]');
       if (btn) {
         const lbl = btn.querySelector('.btn-label') || btn;
-        lbl.textContent = '¡Entrando! 🐣';
+        lbl.textContent = '¡Entrando!';
         btn.style.background = '#58cc02';
         btn.style.boxShadow  = '0 4px 0 #46a302';
       }
-      // ✅ Redirige a perfil.html
-      setTimeout(() => window.location.replace('/Secciones/perfil.html'), 700);
+      // ✅ La redirección la maneja onAuthStateChanged arriba,
+      //    que consulta Firestore y decide si ir al test o al perfil.
+      //    No hace falta un setTimeout aquí.
     } else {
       setFormError(result.error);
       form.style.animation = 'egglish-shake .4s ease';

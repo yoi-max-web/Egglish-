@@ -2,6 +2,16 @@
    EGGLISH – PERFIL  |  Perfil.css
    (Navbar y Footer ahora usan Tailwind, igual
     que en Juegos.html — ver perfil.html)
+
+   Cambios en esta versión:
+   - Paleta de fondo claro/oscuro copiada de index.html
+     (--bg claro = #f0f4f8, --bg oscuro = gray-950 #030712,
+     --text oscuro = gray-100 #f3f4f6) para que Perfil se vea
+     igual que el resto del sitio.
+   - Efecto "ripple" de click (.click-effect) copiado de index.html.
+   - Clases nuevas para iconos SVG (candado, cámara, check, cerrar,
+     avatar por defecto) y para <img> que reemplazan los emojis
+     (menú, tips, insignias, logros, estadísticas, medallas).
    ============================================ */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,42 +33,49 @@
   --white:   #ffffff;
   --bg:      #f0f4f8;
   --card:    #ffffff;
-  --text:    #1a1a2e;
-  --mid:     #4b5563;
-  --light:   #9ca3af;
+  --text:    #000000;
+  --mid:     #1e293b;
+  --light:   #475569;
   --border:  #e5e7eb;
   --radius:  20px;
   --shadow:  0 4px 24px rgba(0,0,0,0.10);
   --font:    'Nunito', sans-serif;
-  --tip-bg:      linear-gradient(135deg, #ffe8b8, #ffcf70);
+  --tip-bg:      linear-gradient(135deg, rgba(255,232,184,0.55), rgba(255,207,112,0.55));
   --tip-border:  var(--yellow-d);
   --tip-text:    #6a4a00;
+
+  /* Vidrio (glassmorphism) — igual que Registro.html / entrar.html */
+  --card-bg:      rgba(255, 255, 255, 0.16);
+  --card-border:  rgba(255, 255, 255, 0.35);
+  --card-bg-soft: rgba(255, 255, 255, 0.32);
 }
 
 /* ══════════ MODO OSCURO GLOBAL ══════════
    Se activa cuando <html> tiene la clase "dark"
-   (la añade/quita el botón de tema en perfil.html) */
+   (la añade/quita el botón de tema en perfil.html).
+   Mismos valores que index.html: bg-gray-950 / text-gray-100. */
 html.dark {
-  --bg:      #0f1115;
-  --card:    #1a1d24;
+  --bg:      #030712;
+  --card:    #111827;
   --text:    #ffffff;
   --mid:     #d1d5db;
   --light:   #9ca3af;
-  --border:  #2d313a;
-  --shadow:  0 4px 24px rgba(0,0,0,0.4);
-  --tip-bg:      #0c0c0f;
+  --border:  #1f2937;
+  --shadow:  0 4px 24px rgba(0,0,0,0.45);
+  --tip-bg:      linear-gradient(135deg, rgba(20,20,24,0.55), rgba(10,10,12,0.55));
   --tip-border:  #2a2a2a;
   --tip-text:    #ffffff;
+
+  /* Vidrio (glassmorphism) modo oscuro — igual que Registro.html / entrar.html */
+  --card-bg:      rgba(15, 23, 42, 0.22);
+  --card-border:  rgba(148, 163, 184, 0.25);
+  --card-bg-soft: rgba(15, 23, 42, 0.35);
 }
 
-html.dark .stat-card {
-  background: #22252c;
-}
-
-html.dark .orange-bg     { background: #3a2a1a; }
-html.dark .yellow-bg     { background: #3a3520; }
-html.dark .blue-light-bg { background: #1a2c3a; }
-html.dark .pink-bg       { background: #3a1e28; }
+html.dark .orange-bg     { background: #2a1f10; }
+html.dark .yellow-bg     { background: #2a2712; }
+html.dark .blue-light-bg { background: #0f1f2e; }
+html.dark .pink-bg       { background: #2a1620; }
 
 body {
   font-family: var(--font);
@@ -73,6 +90,186 @@ a {
   text-decoration: none;
   color: inherit;
 }
+
+/* ══════════ FONDO ANIMADO ══════════
+   Mismo degradado en movimiento que Registro.html / entrar.html,
+   solo tonos de azul, con variante para modo oscuro. */
+#page-bg {
+  position: fixed;
+  inset: 0;
+  /* z-index 400: por encima del body base pero por debajo de la
+     pantalla de bloqueo (z-index 450) y del navbar (z-index 200).
+     Así el degradado se ve tanto en el perfil normal como en la
+     pantalla de "Tu sesión ha finalizado". */
+  z-index: 400;
+  overflow: hidden;
+  background: linear-gradient(120deg,
+      #eaf6ff, #bfe8ff, #7ec8ff, #1cb0f6, #4c9cff, #bfe8ff, #eaf6ff);
+  background-size: 400% 400%;
+  animation: gradient-move 18s ease infinite;
+}
+html.dark #page-bg {
+  background: linear-gradient(120deg,
+      #0b172a, #172554, #0c4a8f, #0090d9, #1cb0f6, #172554, #0b172a);
+  background-size: 400% 400%;
+}
+@keyframes gradient-move {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #page-bg { animation: none; }
+}
+
+/* El header, el contenido principal y el footer deben pintarse
+   por ENCIMA del fondo animado (z-index 400).
+   FIX: el header debe quedar SIEMPRE por encima del contenido y
+   del footer, para que no se lo tape al hacer scroll. Antes los
+   tres compartían el mismo z-index (401), y al empatar ganaba el
+   que aparece después en el HTML (.main-content), por eso el
+   contenido se superponía al menú. */
+header {
+  position: relative;
+  z-index: 500;
+}
+
+.main-content, footer {
+  position: relative;
+  z-index: 401;
+}
+
+/* ══════════ MENÚ (navbar y offcanvas) — vidrio (glassmorphism) ══════════ */
+.site-navbar {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 2px solid var(--card-border);
+}
+.site-offcanvas {
+  background: var(--card-bg-soft);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 2px solid var(--card-border);
+}
+
+/* ══════════ BORDE EN MOVIMIENTO (beam), igual que Registro.html ══════════
+   Un anillo delgado con un brillo que gira alrededor de cada caja. */
+@property --beam {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes beam-spin { to { --beam: 360deg; } }
+
+.profile-card,
+.info-card,
+.stats-section,
+.achievements-section,
+.tip-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.profile-card::before,
+.info-card::before,
+.stats-section::before,
+.achievements-section::before,
+.tip-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--beam), transparent 0 70%, #f8fafc 85%, #94a3b8 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: beam-spin 4s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-card::before,
+  .info-card::before,
+  .stats-section::before,
+  .achievements-section::before,
+  .tip-card::after {
+    animation: none;
+  }
+}
+
+/* Transición global de tema (igual que index.html), para que las
+   tarjetas y bordes cambien de color con la misma suavidad. */
+header, nav, .profile-card, .info-card, .tip-card, .stats-section,
+.achievements-section, .achievement-item, .stat-card, button, a {
+  transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+}
+
+/* ══════════ EFECTO DE CLICK (ripple), copiado de index.html ══════════ */
+.click-effect {
+  position: relative;
+  overflow: hidden;
+}
+.click-effect:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: inherit;
+  background-color: rgba(255, 255, 255, 0.55);
+  transform: scale(0.001, 0.001);
+  pointer-events: none;
+  z-index: 3;
+}
+.click-effect.is-clicked:before {
+  animation: click-ripple 0.7s ease-out;
+}
+@keyframes click-ripple {
+  50%  { transform: scale(1.4, 1.4); opacity: 0; }
+  99%  { transform: scale(0.001, 0.001); opacity: 0; }
+  100% { transform: scale(0.001, 0.001); opacity: 0.55; }
+}
+
+/* ══════════ ICONOS (SVG e imágenes) ══════════
+   Los emojis se reemplazaron por:
+   - iconos SVG en línea para elementos funcionales (candado de
+     sesión, cámara del avatar, check de logro completado, cerrar
+     modal, avatar por defecto, spinner de carga). Estos NO son
+     archivos: el dibujo está escrito directamente en el HTML/JS,
+     así que no hay ninguna imagen que reemplazar ahí.
+   - <img> apuntando a archivos reales dentro de /imgs/ (logo,
+     menú, tips, insignias, logros y estadísticas). TODAS las rutas
+     que empiezan con "/imgs/algo.png" buscan ese archivo en la
+     carpeta "imgs" que debe estar en la RAÍZ de tu proyecto/servidor
+     (al mismo nivel que index.html), no dentro de /Secciones/.
+     Para cambiar una imagen: sube el archivo con ese mismo nombre
+     a esa carpeta, o cambia el "src" del <img> para que apunte al
+     nombre real de tu archivo.
+   Los tamaños de abajo se subieron un poco (antes se veían muy
+   chicos, casi como un emoji). Si quieres un ícono todavía más
+   grande, solo aumenta su width/height aquí. */
+.icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.icon-img--sm { width: 18px; height: 18px; }
+.icon-img--lg { width: 32px; height: 32px; }
+
+/* Íconos del menú (Lecciones, Escucha, Juegos, Perfil) */
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.spin { animation: icon-spin 0.9s linear infinite; }
+@keyframes icon-spin { to { transform: rotate(360deg); } }
 
 /* ══════════ MAIN LAYOUT ══════════ */
 .main-content {
@@ -92,14 +289,16 @@ a {
   flex-shrink: 0;
 }
 
-/* PROFILE CARD */
+/* PROFILE CARD — vidrio (glassmorphism) */
 .profile-card {
-  background: var(--card);
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius);
   padding: 28px 24px;
   box-shadow: var(--shadow);
   text-align: center;
-  border: 2px solid var(--border);
+  border: 2px solid var(--card-border);
 }
 
 .avatar-wrapper {
@@ -118,14 +317,17 @@ a {
 }
 
 /* Variante del avatar cuando el usuario aún no tiene foto de perfil:
-   círculo de color con su inicial, mismo tamaño/borde que avatar-img */
+   círculo de color con un icono SVG genérico de persona (ya no
+   muestra la inicial del nombre), mismo tamaño/borde que avatar-img */
 .avatar-img.avatar-initial {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.6rem;
-  font-weight: 900;
-  color: var(--white);
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+}
+.avatar-img.avatar-initial svg {
+  width: 54%;
+  height: 54%;
 }
 
 .avatar-edit-btn {
@@ -137,7 +339,6 @@ a {
   border-radius: 50%;
   border: 2px solid var(--white);
   background: var(--yellow);
-  font-size: 0.85rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -145,6 +346,7 @@ a {
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
   transition: transform .15s;
 }
+.avatar-edit-btn svg { display: block; }
 .avatar-edit-btn:hover { transform: scale(1.1); }
 .avatar-edit-btn:disabled { opacity: 0.7; cursor: default; transform: none; }
 
@@ -161,18 +363,24 @@ a {
   margin-bottom: 8px;
 }
 .profile-joined {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--mid);
 }
 
-/* INFO CARDS */
+/* INFO CARDS — vidrio (glassmorphism) */
 .info-card {
-  background: var(--card);
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius);
   padding: 20px 20px;
   box-shadow: var(--shadow);
-  border: 2px solid var(--border);
+  border: 2px solid var(--card-border);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -194,10 +402,11 @@ a {
   align-items: center;
   gap: 8px;
 }
+.card-title-icon img { width: 34px; height: 34px; object-fit: contain; } /* ícono junto al título de cada tarjeta (ej. Insignias) */
 .link-blue {
   font-size: 0.78rem;
   font-weight: 800;
-  color: var(--blue);
+  color: var(--text);
   text-decoration: none;
   letter-spacing: 0.03em;
 }
@@ -227,6 +436,8 @@ a {
   align-items: flex-start;
   gap: 12px;
   background: var(--tip-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 2px solid var(--tip-border);
   border-radius: var(--radius);
   padding: 18px 20px;
@@ -251,10 +462,10 @@ a {
 }
 .tip-icon {
   position: relative;
-  font-size: 1.3rem;
   line-height: 1.3;
   flex-shrink: 0;
 }
+.tip-icon img { width: 28px; height: 28px; object-fit: contain; } /* ícono de la bombilla del "Consejo del día" */
 .tip-text {
   position: relative;
   font-size: 0.86rem;
@@ -273,31 +484,87 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  width: 64px;
+  gap: 5px;
+  width: 68px;
   text-align: center;
   cursor: pointer;
-  transition: transform .15s;
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1);
 }
 .badge-item:hover,
 .badge-item:focus-visible {
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.06);
   outline: none;
 }
+
+/* ── Forma de medalla (pentágono/escudo con clip-path) ── */
 .badge-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 54px;
+  height: 58px;
+  /* Forma de escudo de medalla */
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
-  background: linear-gradient(135deg, var(--yellow), var(--orange));
-  border: 2px solid var(--white);
-  box-shadow: 0 3px 10px rgba(245,166,35,0.35);
+  position: relative;
+  flex-shrink: 0;
+  transition: filter .2s ease;
+}
+.badge-item:hover .badge-icon {
+  filter: brightness(1.12) drop-shadow(0 4px 10px rgba(0,0,0,0.25));
+}
+
+/* ── Nivel 1 → Bronce ── */
+.badge-icon.badge-lvl-1 {
+  background: linear-gradient(160deg, #f0a060 0%, #cd7f32 40%, #8b4513 100%);
+  box-shadow: 0 4px 14px rgba(205,127,50,0.45);
+}
+/* ── Nivel 2 → Plata ── */
+.badge-icon.badge-lvl-2 {
+  background: linear-gradient(160deg, #f0f0f0 0%, #c0c0c0 40%, #808080 100%);
+  box-shadow: 0 4px 14px rgba(150,150,150,0.4);
+}
+/* ── Nivel 3 → Oro ── */
+.badge-icon.badge-lvl-3 {
+  background: linear-gradient(160deg, #ffe77a 0%, #f5a623 40%, #c77d00 100%);
+  box-shadow: 0 4px 14px rgba(245,166,35,0.5);
+}
+/* ── Nivel 4 → Diamante/Platino ── */
+.badge-icon.badge-lvl-4 {
+  background: linear-gradient(160deg, #e8f4ff 0%, #7ec8ff 35%, #1cb0f6 65%, #005f8a 100%);
+  box-shadow: 0 4px 16px rgba(28,176,246,0.55);
+}
+
+/* Brillo animado sobre la medalla */
+.badge-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: badge-shine 3s ease-in-out infinite;
+}
+@keyframes badge-shine {
+  0%   { background-position: -100% 0; }
+  60%  { background-position: 200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Modo oscuro: rebaja el brillo para no saturar */
+html.dark .badge-icon.badge-lvl-1 { filter: brightness(0.9); }
+html.dark .badge-icon.badge-lvl-2 { filter: brightness(0.85); }
+html.dark .badge-icon.badge-lvl-3 { filter: brightness(0.88); }
+html.dark .badge-icon.badge-lvl-4 { filter: brightness(0.88); }
+
+.badge-icon img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  position: relative; /* por encima del ::after */
+  z-index: 1;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
 }
 .badge-name {
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 800;
   color: var(--mid);
   line-height: 1.2;
@@ -335,7 +602,8 @@ a {
   max-width: 280px;
   animation: badge-toast-in .35s ease-out, badge-toast-out .4s ease-in 3.6s forwards;
 }
-.badge-toast-icon { font-size: 1.5rem; flex-shrink: 0; }
+.badge-toast-icon { flex-shrink: 0; }
+.badge-toast-icon img { width: 28px; height: 28px; object-fit: contain; } /* ícono del aviso ("toast") cuando se gana una insignia */
 @keyframes badge-toast-in {
   from { transform: translateX(120%); opacity: 0; }
   to   { transform: translateX(0); opacity: 1; }
@@ -391,8 +659,6 @@ a {
   border: none;
   background: var(--bg);
   color: var(--mid);
-  font-weight: 900;
-  font-size: 0.85rem;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -401,17 +667,33 @@ a {
 .badge-detail-close:hover { background: var(--border); }
 .badge-detail-icon {
   width: 80px;
-  height: 80px;
+  height: 86px;
   margin: 0 auto 16px;
-  border-radius: 50%;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.2rem;
-  background: linear-gradient(135deg, var(--yellow), var(--orange));
-  border: 3px solid var(--white);
-  box-shadow: 0 4px 16px rgba(245,166,35,0.4);
+  /* Color base: oro. Se sobreescribe con .badge-detail-icon.badge-lvl-N desde JS */
+  background: linear-gradient(160deg, #ffe77a 0%, #f5a623 40%, #c77d00 100%);
+  box-shadow: 0 6px 20px rgba(245,166,35,0.45);
 }
+.badge-detail-icon.badge-lvl-1 {
+  background: linear-gradient(160deg, #f0a060 0%, #cd7f32 40%, #8b4513 100%);
+  box-shadow: 0 6px 20px rgba(205,127,50,0.45);
+}
+.badge-detail-icon.badge-lvl-2 {
+  background: linear-gradient(160deg, #f0f0f0 0%, #c0c0c0 40%, #808080 100%);
+  box-shadow: 0 6px 20px rgba(150,150,150,0.4);
+}
+.badge-detail-icon.badge-lvl-3 {
+  background: linear-gradient(160deg, #ffe77a 0%, #f5a623 40%, #c77d00 100%);
+  box-shadow: 0 6px 20px rgba(245,166,35,0.45);
+}
+.badge-detail-icon.badge-lvl-4 {
+  background: linear-gradient(160deg, #e8f4ff 0%, #7ec8ff 35%, #1cb0f6 65%, #005f8a 100%);
+  box-shadow: 0 6px 20px rgba(28,176,246,0.5);
+}
+.badge-detail-icon img { width: 48px; height: 48px; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.35)); }
 .badge-detail-name {
   font-size: 1.1rem;
   font-weight: 900;
@@ -440,13 +722,15 @@ a {
   color: var(--text);
 }
 
-/* ══════════ ESTADÍSTICAS ══════════ */
+/* ══════════ ESTADÍSTICAS — vidrio (glassmorphism) ══════════ */
 .stats-section {
-  background: var(--card);
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow);
-  border: 2px solid var(--border);
+  border: 2px solid var(--card-border);
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -463,16 +747,19 @@ a {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--bg);
+  background: var(--card-bg-soft);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border);
   border-radius: 14px;
   padding: 16px 14px;
 }
 
 .stat-icon {
-  font-size: 1.8rem;
   line-height: 1;
   flex-shrink: 0;
 }
+.stat-icon img { width: 38px; height: 38px; object-fit: contain; } /* ícono de racha (fuego) y puntos (estrella) */
 
 .stat-value {
   font-size: 1.4rem;
@@ -487,13 +774,15 @@ a {
   margin-top: 2px;
 }
 
-/* ══════════ LOGROS ══════════ */
+/* ══════════ LOGROS — vidrio (glassmorphism) ══════════ */
 .achievements-section {
-  background: var(--card);
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow);
-  border: 2px solid var(--border);
+  border: 2px solid var(--card-border);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -509,6 +798,7 @@ a {
   align-items: center;
   gap: 8px;
 }
+.achievements-title-row img { width: 30px; height: 30px; object-fit: contain; } /* ícono junto al título "Mis Logros" */
 
 .achievement-item {
   display: flex;
@@ -516,7 +806,8 @@ a {
   gap: 16px;
   padding: 14px;
   border-radius: 14px;
-  border: 2px solid var(--border);
+  background: transparent;
+  border: 2px solid var(--card-border);
   transition: border-color .2s, box-shadow .2s, background .2s;
 }
 .achievement-item:hover {
@@ -526,7 +817,7 @@ a {
 
 /* Reto completado: se tacha y se resalta en verde */
 .achievement-item--maxed {
-  background: var(--bg);
+  background: var(--card-bg-soft);
   border-color: var(--green);
 }
 .achievement-item--maxed:hover {
@@ -546,10 +837,10 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
   flex-shrink: 0;
   position: relative;
 }
+.achievement-icon img { width: 32px; height: 32px; object-fit: contain; } /* ícono dentro del cuadro de cada logro/reto */
 .orange-bg     { background: #fff3e0; }
 .yellow-bg     { background: #fffbe6; }
 .blue-light-bg { background: #e8f4fd; }
@@ -561,9 +852,9 @@ a {
   position: absolute;
   bottom: -4px;
   right: -4px;
-  font-size: 0.85rem;
   line-height: 1;
 }
+.check-badge svg { display: block; }
 
 .achievement-info {
   display: flex;

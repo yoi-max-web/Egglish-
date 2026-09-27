@@ -1,5 +1,29 @@
+/*
+  ══════════════════════════════════════════════════════════════════════
+  Perfil.js — lógica de la página de perfil (perfil.html)
+  ══════════════════════════════════════════════════════════════════════
+  Qué hace este archivo, de arriba a abajo:
+  1. Utilidades de sesión en localStorage (getCachedSession, lockSession...).
+  2. Cálculo de racha, insignias y logros a partir de los datos de Firestore.
+  3. Funciones "fillX" / "renderX" que TOMAN los datos ya calculados y los
+     escriben en el HTML (fillProfile, fillStats, renderAchievements...).
+  4. onAuthStateChanged (más abajo) es el punto de entrada real: se dispara
+     cuando Firebase confirma sesión (o no) y desde ahí se llama a todas
+     las funciones "fillX/renderX" de arriba.
+  5. cerrarSesion(), adaptNavbar() y bindAvatarUpload() al final.
+
+  Sobre las IMÁGENES:
+  - Los íconos fijos del menú, tips, insignias, logros y estadísticas son
+    archivos estáticos: sus rutas ("/imgs/algo.png") están en el HTML
+    (perfil.html), no aquí en el JS. Para cambiarlos, edita el "src" del
+    <img> en perfil.html o reemplaza el archivo en la carpeta /imgs/.
+  - La FOTO DE PERFIL (avatar) es distinta: la sube el usuario desde el
+    botón de la cámara, bindAvatarUpload() la comprime y la guarda en
+    Firebase Storage (no en /imgs/), y luego renderAvatar() la muestra.
+  ══════════════════════════════════════════════════════════════════════
+*/
 import { auth, db } from '/Secciones/Js/firebase-config.js';
-import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { onAuthStateChanged, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const SESSION_KEY = 'egglish_session';
@@ -7,6 +31,20 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 // Sesión "en memoria" del usuario actual, usada por el handler de subida de foto
 let currentSession = null;
+
+// ── Iconos SVG en línea (reemplazan a los emojis funcionales) ─────────
+// Avatar por defecto: icono genérico de persona, ya no se usa la inicial
+// del nombre.
+const DEFAULT_AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v2.4h19.6v-2.4c0-3.3-6.5-4.9-9.8-4.9z"/></svg>`;
+
+// Ícono de cámara (botón de editar foto de perfil)
+const CAMERA_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`;
+
+// Spinner de carga (mientras se sube la foto)
+const SPINNER_SVG = `<svg class="spin" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"></circle><path d="M21 12a9 9 0 0 0-9-9"></path></svg>`;
+
+// Check verde para logros completados
+const CHECK_BADGE_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#58cc02" stroke="#ffffff" stroke-width="2"></circle><path d="M8 12l3 3 5-5" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>`;
 
 function getCachedSession() { try { const raw = localStorage.getItem(SESSION_KEY); return raw ? JSON.parse(raw) : null; } catch { return null; } }
 function saveCachedSession(data) { try { localStorage.setItem(SESSION_KEY, JSON.stringify(data)); } catch {} }
@@ -26,12 +64,6 @@ function unlockSession() {
   document.documentElement.classList.remove('egg-locked');
 }
 
-function getAvatarColor(name) {
-  const colors = ['#1cb0f6', '#58cc02', '#f5a623', '#ff4b4b', '#9b59b6', '#e67e22', '#2ecc71', '#e74c3c'];
-  const index = (name?.charCodeAt(0) || 0) % colors.length;
-  return colors[index];
-}
-
 function generateUsername(name) {
   if (!name) return '@usuario';
   return '@' + name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
@@ -39,10 +71,11 @@ function generateUsername(name) {
 
 // La fecha de registro real viene de Firebase Auth (user.metadata.creationTime),
 // se guarda en la sesión cacheada como `fechaRegistro` (ISO) y se formatea aquí.
+// El ícono de calendario ya vive en el HTML (<img>), aquí solo se arma el texto.
 function formatJoinDate(fechaRegistroISO) {
   const date = fechaRegistroISO ? new Date(fechaRegistroISO) : null;
-  if (!date || isNaN(date.getTime())) return '📅 Se unió recientemente';
-  return `📅 Se unió en ${date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
+  if (!date || isNaN(date.getTime())) return 'Se unió recientemente';
+  return `Se unió en ${date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`;
 }
 
 // ── Racha (Streak) ─────────────────────
@@ -81,11 +114,14 @@ async function validarRachaEnFirebase(session) {
 //   - juegosGanados         -> incrementar en Juegos al ganar/terminar una partida
 // Ningún valor está hardcodeado: si el campo no existe aún, el logro
 // simplemente se muestra en 0/objetivo hasta que el usuario juegue.
+//
+// El campo `icon` ahora es una RUTA DE IMAGEN (no un emoji). Coloca tus
+// archivos en /Secciones/icons/ con estos nombres, o cambia las rutas.
 const ACHIEVEMENTS_CONFIG = [
   {
     id: 'racha',
     name: 'Incendiario',
-    icon: '🔥',
+    icon: '/imgs/streak-removebg-preview.png',
     colorClass: 'orange-bg',
     field: 'racha',
     tiers: [
@@ -98,7 +134,7 @@ const ACHIEVEMENTS_CONFIG = [
   {
     id: 'puntos',
     name: 'Sabio',
-    icon: '⭐',
+    icon: '/imgs/mago.png',
     colorClass: 'yellow-bg',
     field: 'exp',
     tiers: [
@@ -111,7 +147,7 @@ const ACHIEVEMENTS_CONFIG = [
   {
     id: 'lecciones',
     name: 'Estudiante aplicado',
-    icon: '📖',
+    icon: '/imgs/book-removebg-preview.png',
     colorClass: 'blue-light-bg',
     field: 'leccionesCompletadas',
     tiers: [
@@ -124,7 +160,7 @@ const ACHIEVEMENTS_CONFIG = [
   {
     id: 'escucha',
     name: 'Oído de oro',
-    icon: '🎧',
+    icon: '/imgs/audifonos-removebg-preview.png',
     colorClass: 'pink-bg',
     field: 'escuchaCompletados',
     tiers: [
@@ -137,7 +173,7 @@ const ACHIEVEMENTS_CONFIG = [
   {
     id: 'juegos',
     name: 'Jugador estrella',
-    icon: '🎮',
+    icon: '/imgs/ChatGPT_Image_27_sept_2026__02_43_52_p.m.-removebg-preview.png',
     colorClass: 'orange-bg',
     field: 'juegosGanados',
     tiers: [
@@ -155,7 +191,7 @@ const ACHIEVEMENTS_EXTRA = [
   {
     id: 'todoterreno',
     name: 'Todoterreno',
-    icon: '🚀',
+    icon: '/imgs/car.png',
     colorClass: 'blue-light-bg',
     field: 'totalActividades', // suma de leccionesCompletadas + escuchaCompletados + juegosGanados
     tiers: [
@@ -168,7 +204,7 @@ const ACHIEVEMENTS_EXTRA = [
   {
     id: 'racha-hierro',
     name: 'Racha de hierro',
-    icon: '🛡️',
+    icon: '/imgs/flame.png',
     colorClass: 'orange-bg',
     field: 'racha',
     tiers: [
@@ -181,7 +217,7 @@ const ACHIEVEMENTS_EXTRA = [
   {
     id: 'leyenda-puntos',
     name: 'Leyenda de puntos',
-    icon: '👑',
+    icon: '/imgs/copita.png',
     colorClass: 'yellow-bg',
     field: 'exp',
     tiers: [
@@ -223,13 +259,13 @@ function renderAchievement(cfg, rawValue) {
   const progressLabel = maxed ? `${activeTier.threshold} / ${activeTier.threshold}` : `${value} / ${activeTier.threshold}`;
   const barClass = maxed ? 'progress-bar--yellow' : 'progress-bar--blue';
   const iconCompletedClass = maxed ? 'achievement-icon--completed' : '';
-  const checkBadge = maxed ? '<span class="check-badge">✅</span>' : '';
+  const checkBadge = maxed ? `<span class="check-badge">${CHECK_BADGE_SVG}</span>` : '';
   const itemClass = maxed ? 'achievement-item achievement-item--maxed' : 'achievement-item';
   const nameClass = maxed ? 'achievement-name achievement-name--done' : 'achievement-name';
 
   return `
     <div class="${itemClass}">
-      <div class="achievement-icon ${iconCompletedClass} ${cfg.colorClass}">${cfg.icon}${checkBadge}</div>
+      <div class="achievement-icon ${iconCompletedClass} ${cfg.colorClass}"><img src="${cfg.icon}" alt="${cfg.name}"/>${checkBadge}</div>
       <div class="achievement-info">
         <div class="achievement-top-row">
           <span class="${nameClass}">${cfg.name}</span>
@@ -293,7 +329,7 @@ function mostrarNotificacionInsignia(insignia) {
   if (!container) return;
   const toast = document.createElement('div');
   toast.className = 'badge-toast';
-  toast.innerHTML = `<span class="badge-toast-icon">${insignia.icon}</span><span>¡Insignia obtenida!<br>${insignia.name}</span>`;
+  toast.innerHTML = `<span class="badge-toast-icon"><img src="${insignia.icon}" alt=""/></span><span>¡Insignia obtenida!<br>${insignia.name}</span>`;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 4000);
 }
@@ -317,11 +353,11 @@ function renderBadges(session) {
   const container = document.getElementById('badges-container');
   if (container) {
     if (insignias.length === 0) {
-      container.innerHTML = '<p class="badges-empty">Aún no tienes insignias. ¡Completa retos para coleccionarlas! 🏅</p>';
+      container.innerHTML = '<p class="badges-empty">Aún no tienes insignias. ¡Completa retos para coleccionarlas!</p>';
     } else {
       container.innerHTML = insignias.map((ins, i) => `
         <div class="badge-item" data-index="${i}" tabindex="0" role="button" aria-label="Ver detalle de ${ins.name}">
-          <div class="badge-icon">${ins.icon}</div>
+          <div class="badge-icon"><img src="${ins.icon}" alt=""/></div>
           <span class="badge-name">${ins.name}</span>
         </div>
       `).join('');
@@ -336,7 +372,7 @@ function abrirDetalleInsignia(insignia) {
   const backdrop = document.getElementById('badge-detail-backdrop');
   const modal = document.getElementById('badge-detail-modal');
   if (!backdrop || !modal) return;
-  document.getElementById('badge-detail-icon').textContent = insignia.icon;
+  document.getElementById('badge-detail-icon').innerHTML = `<img src="${insignia.icon}" alt=""/>`;
   document.getElementById('badge-detail-name').textContent = insignia.name;
   document.getElementById('badge-detail-desc').textContent = insignia.desc || '';
   backdrop.classList.add('open');
@@ -398,11 +434,13 @@ function fillStats(session) {
 }
 
 // ── Avatar (foto de perfil persistente) ─────────────────────
+// Si el usuario tiene foto (fotoURL), se muestra como <img>. Si no,
+// se muestra un círculo con el icono SVG genérico de persona (ya NO
+// se usa la inicial del nombre).
 function renderAvatar(session) {
   const wrapper = document.querySelector('.avatar-wrapper');
   if (!wrapper) return;
   const existing = document.getElementById('avatar-display');
-  const name = session?.name || '';
 
   if (session?.fotoURL) {
     if (existing && existing.tagName === 'IMG') {
@@ -417,112 +455,165 @@ function renderAvatar(session) {
       if (existing) existing.replaceWith(img); else wrapper.prepend(img);
     }
   } else {
-    const initial = name ? name.charAt(0).toUpperCase() : '?';
-    const color = getAvatarColor(name);
     if (existing && existing.tagName === 'DIV' && existing.classList.contains('avatar-initial')) {
-      existing.textContent = initial;
-      existing.style.background = color;
-    } else {
-      const div = document.createElement('div');
-      div.id = 'avatar-display';
-      div.className = 'avatar-img avatar-initial';
-      div.style.background = color;
-      div.textContent = initial;
-      if (existing) existing.replaceWith(div); else wrapper.prepend(div);
+      return; // ya está mostrando el icono por defecto, nada que actualizar
     }
+    const div = document.createElement('div');
+    div.id = 'avatar-display';
+    div.className = 'avatar-img avatar-initial';
+    div.innerHTML = DEFAULT_AVATAR_SVG;
+    if (existing) existing.replaceWith(div); else wrapper.prepend(div);
   }
-}
-
-const MAX_AVATAR_DIMENSION = 320;
-const AVATAR_JPEG_QUALITY = 0.82;
-
-// Convierte el archivo elegido en una imagen comprimida (base64/data URL),
-// redimensionada para que quepa cómodamente en localStorage y en Firestore.
-function comprimirImagenAvatar(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('No se pudo leer el archivo.'));
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('El archivo no es una imagen válida.'));
-      img.onload = () => {
-        let { width, height } = img;
-        if (width > height && width > MAX_AVATAR_DIMENSION) {
-          height = Math.round((height * MAX_AVATAR_DIMENSION) / width);
-          width = MAX_AVATAR_DIMENSION;
-        } else if (height >= width && height > MAX_AVATAR_DIMENSION) {
-          width = Math.round((width * MAX_AVATAR_DIMENSION) / height);
-          height = MAX_AVATAR_DIMENSION;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', AVATAR_JPEG_QUALITY));
-      };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-function bindAvatarUpload() {
-  const editBtn = document.getElementById('avatar-edit-btn');
-  const fileInput = document.getElementById('avatar-file-input');
-  if (!editBtn || !fileInput) return;
-
-  editBtn.addEventListener('click', () => fileInput.click());
-
-  fileInput.addEventListener('change', async (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    if (!currentSession || !currentSession.uid) { fileInput.value = ''; return; }
-    if (!file.type || !file.type.startsWith('image/')) {
-      alert('Selecciona un archivo de imagen válido (JPG, PNG, etc).');
-      fileInput.value = '';
-      return;
-    }
-
-    const originalLabel = editBtn.textContent;
-    editBtn.textContent = '⏳';
-    editBtn.disabled = true;
-
-    try {
-      const dataUrl = await comprimirImagenAvatar(file);
-
-      // Se guarda YA en localStorage: la foto queda persistente en este
-      // navegador aunque falle la sincronización con Firestore.
-      currentSession.fotoURL = dataUrl;
-      saveCachedSession(currentSession);
-      renderAvatar(currentSession);
-
-      // Sincroniza también con Firestore (no bloquea la UI si falla).
-      try {
-        await updateDoc(doc(db, 'users', currentSession.uid), { fotoURL: dataUrl });
-      } catch (err) {
-        console.warn('La foto se guardó en este navegador, pero no se pudo sincronizar con Firestore:', err);
-      }
-    } catch (err) {
-      console.warn('Error procesando la foto de perfil:', err);
-      alert('No se pudo actualizar la foto de perfil. Inténtalo con otra imagen.');
-    } finally {
-      editBtn.textContent = originalLabel;
-      editBtn.disabled = false;
-      fileInput.value = '';
-    }
-  });
 }
 
 // ── Perfil general ─────────────────────
 function fillProfile(session) {
-  const { name, email, age } = session;
+  const { name, email, age, bio } = session;
   renderAvatar(session);
   document.querySelector('.profile-name').textContent = name || 'Usuario';
   document.querySelector('.profile-username').textContent = generateUsername(name);
-  document.querySelector('.profile-joined').textContent = formatJoinDate(session.fechaRegistro);
+  const joinedText = document.getElementById('profile-joined-text');
+  if (joinedText) joinedText.textContent = formatJoinDate(session.fechaRegistro);
   document.getElementById('profile-email').textContent = email || '';
   if (document.getElementById('profile-age')) document.getElementById('profile-age').textContent = age ? `${age} años` : '';
+  const bioEl = document.getElementById('profile-bio');
+  if (bioEl) {
+    if (bio) { bioEl.textContent = bio; bioEl.classList.remove('hidden'); }
+    else { bioEl.textContent = ''; bioEl.classList.add('hidden'); }
+  }
+}
+
+// ── Editar perfil (modal) ─────────────────────
+// Nombre → se guarda en Firebase Auth (displayName), porque `session.name`
+// viene de ahí (user.displayName), no de Firestore. Bio y edad → sí viven
+// en el documento de Firestore del usuario (colección "users").
+function abrirModalEditarPerfil() {
+  if (!currentSession) return;
+  const backdrop = document.getElementById('edit-profile-backdrop');
+  const modal = document.getElementById('edit-profile-modal');
+  if (!backdrop || !modal) return;
+  document.getElementById('edit-profile-name').value = currentSession.name || '';
+  document.getElementById('edit-profile-bio').value = currentSession.bio || '';
+  document.getElementById('edit-profile-age').value = currentSession.age || '';
+  const errorEl = document.getElementById('edit-profile-error');
+  if (errorEl) errorEl.style.display = 'none';
+  backdrop.classList.add('open');
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+function cerrarModalEditarPerfil() {
+  const backdrop = document.getElementById('edit-profile-backdrop');
+  const modal = document.getElementById('edit-profile-modal');
+  if (!backdrop || !modal) return;
+  backdrop.classList.remove('open');
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+}
+
+async function guardarEdicionPerfil() {
+  if (!currentSession || !currentSession.uid) return;
+  const saveBtn = document.getElementById('edit-profile-save');
+  const errorEl = document.getElementById('edit-profile-error');
+  if (errorEl) errorEl.style.display = 'none';
+
+  const nuevoNombre = document.getElementById('edit-profile-name').value.trim();
+  const nuevaBio = document.getElementById('edit-profile-bio').value.trim();
+  const edadRaw = document.getElementById('edit-profile-age').value;
+  const nuevaEdad = edadRaw ? Number(edadRaw) : null;
+
+  if (!nuevoNombre) {
+    if (errorEl) { errorEl.textContent = 'El nombre no puede estar vacío.'; errorEl.style.display = 'block'; }
+    return;
+  }
+  if (nuevaEdad !== null && (!Number.isInteger(nuevaEdad) || nuevaEdad < 8 || nuevaEdad > 18)) {
+    if (errorEl) { errorEl.textContent = 'La edad debe ser un número entero entre 8 y 18 años.'; errorEl.style.display = 'block'; }
+    return;
+  }
+
+  const originalLabel = saveBtn ? saveBtn.textContent : '';
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Guardando...'; }
+
+  try {
+    // Solo tocamos Firebase Auth si el nombre realmente cambió.
+    if (nuevoNombre !== currentSession.name && auth.currentUser) {
+      await updateProfile(auth.currentUser, { displayName: nuevoNombre });
+    }
+    await updateDoc(doc(db, 'users', currentSession.uid), {
+      bio: nuevaBio,
+      age: nuevaEdad,
+    });
+
+    currentSession.name = nuevoNombre;
+    currentSession.bio = nuevaBio;
+    currentSession.age = nuevaEdad;
+    saveCachedSession(currentSession);
+    fillProfile(currentSession);
+    cerrarModalEditarPerfil();
+  } catch (err) {
+    console.warn('No se pudo guardar el perfil:', err);
+    if (errorEl) { errorEl.textContent = 'No se pudo guardar. Intenta de nuevo.'; errorEl.style.display = 'block'; }
+  } finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = originalLabel; }
+  }
+}
+
+function bindEditProfile() {
+  const openBtn = document.getElementById('btn-editar-perfil');
+  if (!openBtn) return;
+  const closeBtn = document.getElementById('edit-profile-close');
+  const cancelBtn = document.getElementById('edit-profile-cancel');
+  const saveBtn = document.getElementById('edit-profile-save');
+  const backdrop = document.getElementById('edit-profile-backdrop');
+
+  openBtn.addEventListener('click', abrirModalEditarPerfil);
+  if (closeBtn) closeBtn.addEventListener('click', cerrarModalEditarPerfil);
+  if (cancelBtn) cancelBtn.addEventListener('click', cerrarModalEditarPerfil);
+  if (backdrop) backdrop.addEventListener('click', cerrarModalEditarPerfil);
+  if (saveBtn) saveBtn.addEventListener('click', guardarEdicionPerfil);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarModalEditarPerfil(); });
+}
+
+// ── Compartir perfil ─────────────────────
+// No escribe nada en Firestore: solo arma un resumen con los datos que
+// ya están cargados en `currentSession` y los comparte (Web Share API
+// en celular, o portapapeles como alternativa en escritorio).
+function bindCompartirPerfil() {
+  const btn = document.getElementById('btn-compartir-perfil');
+  const feedback = document.getElementById('compartir-feedback');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    if (!currentSession) return;
+    const insignias = getInsigniasGanadas(currentSession).length;
+    const racha = currentSession.racha ?? 0;
+    const diaLabel = racha === 1 ? 'día' : 'días';
+    const texto =
+      `¡Estoy aprendiendo inglés en Egglish! 🐣\n` +
+      `🔥 Racha: ${racha} ${diaLabel}\n` +
+      `⭐ Puntos: ${currentSession.exp ?? 0}\n` +
+      `🏅 Insignias: ${insignias}\n` +
+      `¡Únete tú también! https://egglish.misaeltech.com`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Mi progreso en Egglish', text: texto });
+      } catch (err) {
+        // El usuario canceló el diálogo nativo: no hacemos nada más.
+      }
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(texto);
+      if (feedback) {
+        feedback.style.display = 'block';
+        setTimeout(() => { feedback.style.display = 'none'; }, 2500);
+      }
+    } catch (err) {
+      alert(texto);
+    }
+  });
 }
 
 // ── Tip dorado aleatorio ─────────────────────
@@ -557,6 +648,8 @@ document.addEventListener('DOMContentLoaded', () => {
   bindAvatarUpload();
   bindVerTodosRetos();
   bindBadgeDetailModal();
+  bindEditProfile();
+  bindCompartirPerfil();
   mostrarTipAleatorio();
 
   const cached = getCachedSession();
@@ -614,6 +707,7 @@ onAuthStateChanged(auth, async (user) => {
     leccionesCompletadas: 0,
     escuchaCompletados: 0,
     juegosGanados: 0,
+    bio: '',
   };
   try {
     const snap = await getDoc(doc(db, 'users', user.uid));
@@ -646,8 +740,20 @@ onAuthStateChanged(auth, async (user) => {
   renderAchievements(session);
 });
 
-async function cerrarSesion() { lockSession(); try { await signOut(auth); } catch (_) {} window.location.href = '/index.html'; }
+// Cerrar sesión: bloquea la vista (lockSession) y cierra sesión en Firebase.
+// A PROPÓSITO no navega a ninguna página aquí: es la pantalla de bloqueo
+// (#session-locked-screen, ver lockSession más arriba) la que le da al
+// usuario los botones "Iniciar sesión" / "Ir al inicio" para que ELIJA.
+// Si en algún momento vuelves a agregar un window.location.href aquí,
+// la redirección automática (el bug que reportaste) regresaría.
+async function cerrarSesion() { lockSession(); try { await signOut(auth); } catch (_) {} }
 
+// Botones de "Cerrar sesión" / "Entrar" en la barra superior.
+// Se escriben DOS VECES a propósito: una en #navbar-auth-zone (la barra
+// de escritorio) y otra en #navbar-auth-zone-mobile (el menú lateral
+// móvil). No es un error ni un menú duplicado: son dos lugares distintos
+// del HTML que nunca se muestran al mismo tiempo (uno es "hidden md:flex"
+// y el otro vive dentro del panel que solo aparece en pantallas chicas).
 function adaptNavbar(session) {
   const authZoneDesktop = document.getElementById('navbar-auth-zone');
   const authZoneMobile = document.getElementById('navbar-auth-zone-mobile');
@@ -665,4 +771,85 @@ function adaptNavbar(session) {
   const logoutBtnMobile = document.getElementById('btn-cerrar-sesion-mobile');
   if (logoutBtn) logoutBtn.addEventListener('click', cerrarSesion);
   if (logoutBtnMobile) logoutBtnMobile.addEventListener('click', cerrarSesion);
+}
+
+const MAX_AVATAR_DIMENSION = 320;
+const AVATAR_JPEG_QUALITY = 0.82;
+
+// Convierte el archivo elegido en una imagen comprimida (base64/data URL),
+// redimensionada para que quepa cómodamente en localStorage y en Firestore.
+function comprimirImagenAvatar(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('El archivo no es una imagen válida.'));
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > MAX_AVATAR_DIMENSION) {
+          height = Math.round((height * MAX_AVATAR_DIMENSION) / width);
+          width = MAX_AVATAR_DIMENSION;
+        } else if (height >= width && height > MAX_AVATAR_DIMENSION) {
+          width = Math.round((width * MAX_AVATAR_DIMENSION) / height);
+          height = MAX_AVATAR_DIMENSION;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', AVATAR_JPEG_QUALITY));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function bindAvatarUpload() {
+  const editBtn = document.getElementById('avatar-edit-btn');
+  const fileInput = document.getElementById('avatar-file-input');
+  if (!editBtn || !fileInput) return;
+
+  editBtn.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (!currentSession || !currentSession.uid) { fileInput.value = ''; return; }
+    if (!file.type || !file.type.startsWith('image/')) {
+      alert('Selecciona un archivo de imagen válido (JPG, PNG, etc).');
+      fileInput.value = '';
+      return;
+    }
+
+    const originalIcon = editBtn.innerHTML;
+    editBtn.innerHTML = SPINNER_SVG;
+    editBtn.disabled = true;
+
+    try {
+      const dataUrl = await comprimirImagenAvatar(file);
+
+      // Se guarda YA en localStorage: la foto queda persistente en este
+      // navegador aunque falle la sincronización con Firestore.
+      currentSession.fotoURL = dataUrl;
+      saveCachedSession(currentSession);
+      renderAvatar(currentSession);
+
+      // Sincroniza también con Firestore (no bloquea la UI si falla).
+      try {
+        await updateDoc(doc(db, 'users', currentSession.uid), { fotoURL: dataUrl });
+      } catch (err) {
+        console.warn('La foto se guardó en este navegador, pero no se pudo sincronizar con Firestore:', err);
+      }
+    } catch (err) {
+      console.warn('Error procesando la foto de perfil:', err);
+      alert('No se pudo actualizar la foto de perfil. Inténtalo con otra imagen.');
+    } finally {
+      editBtn.innerHTML = originalIcon || CAMERA_SVG;
+      editBtn.disabled = false;
+      fileInput.value = '';
+    }
+  });
 }
