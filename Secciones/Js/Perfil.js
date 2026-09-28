@@ -64,9 +64,17 @@ function unlockSession() {
   document.documentElement.classList.remove('egg-locked');
 }
 
-function generateUsername(name) {
-  if (!name) return '@usuario';
-  return '@' + name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+// Muestra solo primer nombre + primer apellido.
+//   "Yoimar Joseph Serrano Cruz" -> "Yoimar Serrano"
+//   "Ana Pérez"                  -> "Ana Pérez"
+//   "Ana"                        -> "Ana"
+// Solo afecta lo que se VE en la tarjeta: session.name conserva el nombre
+// completo (el modal de editar perfil lo sigue usando completo).
+function formatShortName(fullName) {
+  const partes = (fullName || '').trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 0) return 'Usuario';
+  const apellido = partes[2] || partes[1];
+  return apellido ? `${partes[0]} ${apellido}` : partes[0];
 }
 
 // La fecha de registro real viene de Firebase Auth (user.metadata.creationTime),
@@ -468,14 +476,11 @@ function renderAvatar(session) {
 
 // ── Perfil general ─────────────────────
 function fillProfile(session) {
-  const { name, email, age, bio } = session;
+  const { name, bio } = session;
   renderAvatar(session);
-  document.querySelector('.profile-name').textContent = name || 'Usuario';
-  document.querySelector('.profile-username').textContent = generateUsername(name);
+  document.querySelector('.profile-name').textContent = formatShortName(name);
   const joinedText = document.getElementById('profile-joined-text');
   if (joinedText) joinedText.textContent = formatJoinDate(session.fechaRegistro);
-  document.getElementById('profile-email').textContent = email || '';
-  if (document.getElementById('profile-age')) document.getElementById('profile-age').textContent = age ? `${age} años` : '';
   const bioEl = document.getElementById('profile-bio');
   if (bioEl) {
     if (bio) { bioEl.textContent = bio; bioEl.classList.remove('hidden'); }
@@ -650,6 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindBadgeDetailModal();
   bindEditProfile();
   bindCompartirPerfil();
+  bindLogoutButton();
   mostrarTipAleatorio();
 
   const cached = getCachedSession();
@@ -748,7 +754,15 @@ onAuthStateChanged(auth, async (user) => {
 // la redirección automática (el bug que reportaste) regresaría.
 async function cerrarSesion() { lockSession(); try { await signOut(auth); } catch (_) {} }
 
-// Botones de "Cerrar sesión" / "Entrar" en la barra superior.
+// Botón "Cerrar sesión" de la tarjeta de perfil: reutiliza cerrarSesion().
+function bindLogoutButton() {
+  const btn = document.getElementById('btn-cerrar-sesion-perfil');
+  if (btn) btn.addEventListener('click', cerrarSesion);
+}
+
+// Botones de "Entrar" / "Registrarse" en la barra superior (solo sin sesión).
+// Con sesión iniciada la barra ya no muestra "Cerrar sesión": ese botón
+// vive ahora en la tarjeta de perfil.
 // Se escriben DOS VECES a propósito: una en #navbar-auth-zone (la barra
 // de escritorio) y otra en #navbar-auth-zone-mobile (el menú lateral
 // móvil). No es un error ni un menú duplicado: son dos lugares distintos
@@ -760,17 +774,13 @@ function adaptNavbar(session) {
   if (!authZoneDesktop && !authZoneMobile) return;
 
   if (session) {
-    if (authZoneDesktop) authZoneDesktop.innerHTML = `<button id="btn-cerrar-sesion" type="button" class="text-sm font-bold text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full shadow-hard-soft transition-colors">Cerrar sesión</button>`;
-    if (authZoneMobile) authZoneMobile.innerHTML = `<button id="btn-cerrar-sesion-mobile" type="button" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-bold text-white bg-red-500 hover:bg-red-600 shadow-hard-soft transition-colors">Cerrar sesión</button>`;
+    if (authZoneDesktop) authZoneDesktop.innerHTML = '';
+    if (authZoneMobile) { authZoneMobile.innerHTML = ''; authZoneMobile.classList.add('hidden'); }
   } else {
     if (authZoneDesktop) authZoneDesktop.innerHTML = `<a href="/entrar.html" class="text-sm font-bold text-[#4b5563] dark:text-gray-300 hover:text-[#1a1a2e] px-3 py-2 no-underline">→ Entrar</a><a href="/Secciones/Registro.html" class="text-sm font-black text-white bg-egg-yellow px-5 py-2.5 rounded-full shadow-hard-soft no-underline">Registrarse</a>`;
-    if (authZoneMobile) authZoneMobile.innerHTML = `<a href="/entrar.html" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-bold text-[#1a1a2e] dark:text-white border-2 border-gray-200 no-underline">→ Entrar</a><a href="/Secciones/Registro.html" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-black text-white bg-egg-yellow shadow-hard-soft no-underline">Registrarse</a>`;
+    if (authZoneMobile) { authZoneMobile.classList.remove('hidden'); authZoneMobile.innerHTML = `<a href="/entrar.html" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-bold text-[#1a1a2e] dark:text-white border-2 border-gray-200 no-underline">→ Entrar</a><a href="/Secciones/Registro.html" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-black text-white bg-egg-yellow shadow-hard-soft no-underline">Registrarse</a>`; }
   }
   if (authZoneDesktop) authZoneDesktop.classList.remove('hidden');
-  const logoutBtn = document.getElementById('btn-cerrar-sesion');
-  const logoutBtnMobile = document.getElementById('btn-cerrar-sesion-mobile');
-  if (logoutBtn) logoutBtn.addEventListener('click', cerrarSesion);
-  if (logoutBtnMobile) logoutBtnMobile.addEventListener('click', cerrarSesion);
 }
 
 const MAX_AVATAR_DIMENSION = 320;

@@ -22,7 +22,7 @@
   </script>
   <style>
     #session-locked-screen { display: none; }
-    html.egg-locked body > *:not(#session-locked-screen) { display: none !important; }
+    html.egg-locked body > *:not(#session-locked-screen):not(#page-bg) { display: none !important; }
     html.egg-locked #session-locked-screen { display: flex; }
   </style>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -54,6 +54,49 @@
   <style>
     .shadow-hard-soft { box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
   </style>
+  <style>
+    /* Vidrio + fondo animado + beam plateado (de Perfil.css) */
+    :root{--card-bg:rgba(255,255,255,.16);--card-border:rgba(255,255,255,.35);--card-bg-soft:rgba(255,255,255,.32);--egg-shadow:0 4px 24px rgba(0,0,0,.10)}
+    html.dark{--card-bg:rgba(15,23,42,.22);--card-border:rgba(148,163,184,.25);--card-bg-soft:rgba(15,23,42,.35);--egg-shadow:0 4px 24px rgba(0,0,0,.45)}
+    #page-bg{position:fixed;inset:0;z-index:400;overflow:hidden;background:linear-gradient(120deg,#eaf6ff,#bfe8ff,#7ec8ff,#1cb0f6,#4c9cff,#bfe8ff,#eaf6ff);background-size:400% 400%;animation:gradient-move 18s ease infinite}
+    html.dark #page-bg{background:linear-gradient(120deg,#0b172a,#172554,#0c4a8f,#0090d9,#1cb0f6,#172554,#0b172a);background-size:400% 400%}
+    @keyframes gradient-move{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    header{position:relative;z-index:500}
+    .screen,#main-footer{position:relative;z-index:401}
+    .site-navbar{background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:2px solid var(--card-border)}
+    .site-offcanvas{background:var(--card-bg-soft);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:2px solid var(--card-border)}
+    .nav-icon{width:22px;height:22px;object-fit:contain;flex-shrink:0}
+    @property --beam{syntax:'<angle>';inherits:false;initial-value:0deg}
+    @keyframes beam-spin{to{--beam:360deg}}
+    .game-card-sel,.game-card,.results-card{position:relative;isolation:isolate;background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:2px solid var(--card-border);box-shadow:var(--egg-shadow)}
+    .game-card-sel::before,.game-card::before,.results-card::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:2px;background:conic-gradient(from var(--beam),transparent 0 70%,#f8fafc 85%,#94a3b8 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:beam-spin 4s linear infinite;pointer-events:none;z-index:-1}
+    @media (prefers-reduced-motion:reduce){#page-bg,.game-card-sel::before,.game-card::before,.results-card::before{animation:none}}
+    /* Hero (de index.html): azul #1b75ff / #0b172a + ondas, estrellas, círculos y pastillas */
+    .hero-banner.hero-banner-bg{position:relative;overflow:hidden;background:#1b75ff}
+    html.dark .hero-banner.hero-banner-bg{background:#0b172a}
+    .hero-banner-bg .waves-dark,html.dark .hero-banner-bg .waves-light{display:none}
+    html.dark .hero-banner-bg .waves-dark{display:block}
+    .hero-waves{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+    .hero-star,.hero-circle,.hero-pill{position:absolute;pointer-events:none}
+    .hero-star{animation:star-float 3s ease-in-out infinite}.hero-circle{border-radius:50%;animation:circle-float 4s ease-in-out infinite}.hero-pill{border-radius:999px;animation:circle-float 3.5s ease-in-out infinite}
+    @keyframes star-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-6px) scale(1.15)}}
+    @keyframes circle-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .hero-banner-bg>.hero-content{position:relative;z-index:10}
+    /* Espacios listos para TUS imágenes (busca data-slot="...") */
+    .egg-img-slot{display:inline-block;font-style:normal;flex-shrink:0;vertical-align:middle;width:96px;height:96px}
+    .egg-img-slot--sm{width:34px;height:34px}
+    .hero-chick-slot{width:200px;height:200px;margin:0 auto 8px}
+    /* Mini footer (de perfil.html) */
+    /* Lecciones: fondo transparente (se ve el fondo animado de la página) */
+    .screen .game-bg,.screen .game-bg[class*="game-bg--"],.screen .results-bg{background:transparent}
+    .screen .game-header .game-name,.screen .game-header .stars-row,.screen .game-header .stars-row span,.screen .game-header .btn-back{color:#0b172a}
+    html.dark .screen .game-header .game-name,html.dark .screen .game-header .stars-row,html.dark .screen .game-header .stars-row span,html.dark .screen .game-header .btn-back{color:#fff}
+    .hover-circle-btn{position:relative;overflow:hidden;isolation:isolate}
+    .hover-circle-btn .btn-label{position:relative;z-index:2}
+    .hover-circle-btn .hover-circle{position:absolute;top:50%;left:50%;display:block;width:0;height:0;border-radius:50%;transform:translate(-50%,-50%);transition:width .4s ease-in-out,height .4s ease-in-out;pointer-events:none;z-index:1;background:rgba(0,0,0,.18)}
+    .hover-circle-btn:hover:not(:disabled) .hover-circle{width:250%;height:250%}
+    .egg-mini-footer{display:flex;align-items:center;justify-content:center;gap:8px;border-top:2px solid var(--card-border);margin-top:40px;padding:20px 16px}
+  </style>
   <script>
     /* Aplica el modo oscuro ANTES de pintar la página para evitar parpadeo */
     if (localStorage.getItem('egglish-theme') === 'dark' ||
@@ -64,110 +107,64 @@
 </head>
 <body>
 
+<!-- Fondo animado (copiado de perfil.html) -->
+<div id="page-bg" aria-hidden="true"></div>
+
 <!-- ── Pantalla de bloqueo de sesión ─────────────────────────────────────
      Se muestra (vía la clase html.egg-locked) cuando no hay sesión válida:
      al recargar sin login, al volver con el botón "Atrás" tras cerrar
      sesión (bfcache), o al pulsar "Cerrar sesión". Nunca deja ver el
      contenido real del juego. -->
-<div id="session-locked-screen" class="fixed inset-0 z-[500] flex-col items-center justify-center gap-5 bg-white dark:bg-gray-900 px-6 text-center">
-  <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Egglish" class="w-16 h-16 object-contain"/>
-  <div class="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-950 flex items-center justify-center text-3xl">🔒</div>
-  <h1 class="text-xl sm:text-2xl font-black text-[#1a1a2e] dark:text-white">Tu sesión ha finalizado</h1>
-  <p class="text-sm sm:text-base font-semibold text-gray-500 dark:text-gray-400 max-w-sm">
-    Debes iniciar sesión de nuevo para seguir jugando.
-  </p>
-  <div class="flex flex-col sm:flex-row gap-3 mt-2 w-full max-w-xs sm:max-w-none justify-center">
-    <a href="/entrar.html" class="text-sm font-black text-white bg-egg-blue hover:bg-egg-blue-d px-6 py-3 rounded-full shadow-hard-soft no-underline">Iniciar sesión</a>
-    <a href="/index.html" class="text-sm font-black text-[#1a1a2e] dark:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-6 py-3 rounded-full no-underline">Ir al inicio</a>
+<div id="session-locked-screen" class="fixed inset-0 flex-col items-center justify-center px-6 text-center" style="z-index:450;background:transparent;">
+  <div class="flex flex-col items-center gap-5 rounded-3xl px-8 py-10 max-w-sm w-full" style="background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:2px solid var(--card-border);box-shadow:0 8px 32px rgba(0,0,0,.18);">
+    <img src="/imgs/eggy.png" alt="Egglish" class="w-28 h-28 object-contain drop-shadow-md"/>
+    <div class="w-14 h-14 rounded-full flex items-center justify-center" style="background:rgba(28,176,246,.15);color:#1cb0f6;">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+    </div>
+    <div>
+      <h1 class="text-xl sm:text-2xl font-black text-black dark:text-white">Tu sesión ha finalizado</h1>
+      <p class="text-sm sm:text-base font-semibold mt-2 text-slate-800 dark:text-gray-300">Debes iniciar sesión de nuevo para seguir jugando.</p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3 w-full justify-center">
+      <a href="/index.html" class="text-sm font-black text-white bg-egg-blue hover:bg-egg-blue-d px-6 py-3 rounded-full shadow-hard-soft no-underline">Ir a inicio</a>
+    </div>
   </div>
 </div>
 
 <header>
- <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
-
-    <!-- Botón hamburguesa (solo móvil) + Logo -->
+ <nav class="site-navbar fixed top-0 left-0 w-full z-[500] flex items-center justify-between px-4 md:px-8 h-[68px]" style="position:fixed !important;top:0 !important;left:0 !important;width:100% !important;z-index:9999 !important;">
     <div class="flex items-center gap-1 sm:gap-2 min-w-0">
-      <button
-        id="egg-menu-btn"
-        type="button"
-        aria-label="Abrir menú de navegación"
-        aria-expanded="false"
-        aria-controls="egg-offcanvas"
-        class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
+      <button id="egg-menu-btn" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="egg-offcanvas" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
-
-      <!-- <a href="" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0"> -->
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
-        <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
+      <a href="/index.html" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
+        <img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+        <span class="text-base sm:text-xl font-black text-black dark:text-white whitespace-nowrap truncate">Egglish</span>
       </a>
     </div>
-
-    <!-- Links de navegación (escritorio) -->
     <ul class="hidden md:flex items-center gap-1 list-none m-0 p-0">
-      <li><a href="/Secciones/lecciones.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">📖 Lecciones</a></li>
-      <li><a href="/Secciones/Escucha.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎯 Escucha</a></li>
-      <li><a href="/Secciones/juegos.html" class="px-3 py-2 rounded-full text-sm font-bold text-egg-blue dark:text-egg-blue no-underline">🎮 Juegos</a></li>
-      <li><a href="/Secciones/perfil.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">👤 Perfil</a></li>
+      <li><a href="/Secciones/lecciones.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/book-removebg-preview.png" alt="" class="nav-icon"/>Lecciones</a></li>
+      <li><a href="/Secciones/Escucha.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/audifonos-removebg-preview.png" alt="" class="nav-icon"/>Escucha</a></li>
+      <li><a href="/Secciones/juegos.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-egg-blue-d dark:text-sky-300 no-underline"><img src="/imgs/ChatGPT_Image_27_sept_2026__02_43_52_p.m.-removebg-preview.png" alt="" class="nav-icon"/>Juegos</a></li>
+      <li><a href="/Secciones/perfil.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/sssss-removebg-preview.png" alt="" class="nav-icon"/>Perfil</a></li>
     </ul>
-
     <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-      <button id="btn-cerrar-sesion" type="button" class="hidden md:inline-block text-sm font-bold text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full shadow-hard-soft no-underline transition-colors">Cerrar sesión</button>
-
-      <!-- Botón de cambiar tema (idéntico al de index.html) -->
-      <button
-        id="dark-mode-toggle"
-        type="button"
-        aria-label="Cambiar modo oscuro"
-        aria-pressed="false"
-        class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
-      >
-        <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
-          <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-          <g id="icon-sun" class="hidden">
-            <circle cx="12" cy="12" r="4"></circle>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-          </g>
-        </svg>
-      </button>
-
-      <!-- Botón de silenciar/activar sonido (SoundManager) -->
-      <button
-        id="sound-toggle"
-        type="button"
-        aria-label="Silenciar sonido"
-        aria-pressed="false"
-        class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
-      >
-        <svg id="sound-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
-          <path id="icon-sound-on" d="M11 5 6 9H2v6h4l5 4V5Z M15.54 8.46a5 5 0 0 1 0 7.07 M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-          <g id="icon-sound-off" class="hidden">
-            <path d="M11 5 6 9H2v6h4l5 4V5Z"></path>
-            <line x1="23" y1="9" x2="17" y2="15"></line>
-            <line x1="17" y1="9" x2="23" y2="15"></line>
-          </g>
-        </svg>
-      </button>
+      <div id="navbar-auth-zone" class="hidden md:flex items-center gap-2 sm:gap-3"></div>
     </div>
   </nav>
 </header>
-<div class="h-[68px]"></div>
+<div style="height:68px;" aria-hidden="true"></div>
 <!-- ── MENÚ HAMBURGUESA OFF-CANVAS ── -->
 <div id="egg-offcanvas-wrap" class="md:hidden">
   <div
     id="egg-backdrop"
-    class="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[220] opacity-0 pointer-events-none transition-opacity duration-300 ease-out"
+    class="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[10020] opacity-0 pointer-events-none transition-opacity duration-300 ease-out"
     aria-hidden="true"
   ></div>
 
   <aside
     id="egg-offcanvas"
-    class="fixed top-0 left-0 h-full w-[78%] max-w-[320px] bg-white dark:bg-gray-900 z-[230] -translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col"
+    class="fixed top-0 left-0 h-full w-[78%] max-w-[320px] site-offcanvas z-[10021] -translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col"
     role="dialog"
     aria-modal="true"
     aria-label="Menú de navegación"
@@ -175,7 +172,7 @@
   >
     <div class="flex items-center justify-between px-5 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 shrink-0">
       <div class="flex items-center gap-2.5">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 object-contain"/>
+        <img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 object-contain"/>
         <span class="text-lg font-black text-[#1a1a2e] dark:text-white">Egglish</span>
       </div>
       <button
@@ -193,30 +190,28 @@
 
     <nav class="flex-1 overflow-y-auto px-3 py-4">
       <ul class="flex flex-col gap-1 list-none m-0 p-0">
-        <li><a href="/Secciones/lecciones.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">📖 Lecciones</a></li>
-        <li><a href="/Secciones/Escucha.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎯 Escucha</a></li>
-        <li><a href="/Secciones/juegos.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-egg-blue bg-blue-50 dark:bg-blue-950 no-underline">🎮 Juegos</a></li>
-        <li><a href="/Secciones/perfil.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">👤 Perfil</a></li>
+        <li><a href="/Secciones/lecciones.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/book-removebg-preview.png" alt="" class="nav-icon"/><span>Lecciones</span></a></li>
+        <li><a href="/Secciones/Escucha.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/audifonos-removebg-preview.png" alt="" class="nav-icon"/><span>Escucha</span></a></li>
+        <li><a href="/Secciones/juegos.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-egg-blue-d dark:text-sky-300 bg-blue-50 dark:bg-blue-950 no-underline"><img src="/imgs/ChatGPT_Image_27_sept_2026__02_43_52_p.m.-removebg-preview.png" alt="" class="nav-icon"/><span>Juegos</span></a></li>
+        <li><a href="/Secciones/perfil.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/sssss-removebg-preview.png" alt="" class="nav-icon"/><span>Perfil</span></a></li>
       </ul>
     </nav>
-
-    <div class="px-4 py-5 border-t-2 border-gray-200 dark:border-gray-800 flex flex-col gap-3 shrink-0">
-      <button id="btn-cerrar-sesion-mobile" type="button" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-bold text-white bg-red-500 hover:bg-red-600 shadow-hard-soft no-underline transition-colors">Cerrar sesión</button>
-    </div>
   </aside>
 </div>
  
 
 <!-- ── SCREEN 0: LEVEL SELECTOR ── -->
 <div id="screen-levels" class="screen active">
-  <div class="hero-banner">
-    <div class="hero-blobs">
-      <div class="blob blob1"></div>
-      <div class="blob blob2"></div>
-      <div class="blob blob3"></div>
-    </div>
+  <div class="hero-banner hero-banner-bg">
+    <!-- Ondas/decoración del hero (de index.html) -->
+      <svg class="hero-waves waves-light" viewBox="0 0 500 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><path d="M-60 120 Q80 60 200 140 Q320 220 460 130 Q540 80 600 110 L600 0 L-60 0 Z" fill="#4c9cff" opacity=".55"/><path d="M-60 580 Q100 490 240 560 Q370 630 500 530 Q560 490 600 510 L600 700 L-60 700 Z" fill="#4c9cff" opacity=".45"/></svg>
+      <svg class="hero-waves waves-dark" viewBox="0 0 500 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><path d="M-60 120 Q80 60 200 140 Q320 220 460 130 Q540 80 600 110 L600 0 L-60 0 Z" fill="#172554" opacity=".7"/><path d="M-60 580 Q100 490 240 560 Q370 630 500 530 Q560 490 600 510 L600 700 L-60 700 Z" fill="#172554" opacity=".65"/></svg>
+      <svg class="hero-star" style="top:12%;left:10%;width:18px;height:18px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg><svg class="hero-star" style="top:20%;right:12%;width:14px;height:14px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg><svg class="hero-star" style="bottom:16%;left:18%;width:22px;height:22px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+      <div class="hero-circle" style="width:14px;height:14px;background:#22d3ee;top:30%;left:6%;opacity:.9"></div><div class="hero-circle" style="width:10px;height:10px;background:#22d3ee;bottom:24%;right:9%;opacity:.8"></div>
+      <div class="hero-pill" style="width:28px;height:10px;background:#f5a623;top:38%;right:6%;transform:rotate(30deg);opacity:.85"></div><div class="hero-pill" style="width:24px;height:9px;background:#f5a623;bottom:30%;left:8%;transform:rotate(-20deg);opacity:.8"></div>
     <div class="hero-content">
-      <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="hero-chick" alt="pollito"/>
+      <!-- TU IMAGEN: pon aquí tu mascota/ilustración (ej. <img src="/imgs/tu-imagen.png" class="w-full h-full object-contain" alt="">) -->
+      <img src="/imgs/eggy.png" class="hero-chick" alt="" onerror="this.style.visibility='hidden'"/>
       <h1 class="hero-title">¡A jugar y aprender!</h1>
       <p class="hero-sub">Elige tu nivel y escoge un juego</p>
     </div>
@@ -224,10 +219,10 @@
 
   <div class="levels-section">
     <div class="level-tabs">
-      <button class="level-tab active" data-level="A1">🐣 A1 <span>Básico</span></button>
-      <button class="level-tab" data-level="A2">🐥 A2 <span>Elemental</span></button>
-      <button class="level-tab" data-level="B1">🦅 B1 <span>Intermedio</span></button>
-      <button class="level-tab" data-level="B2">🦉 B2 <span>Avanzado</span></button>
+      <button class="level-tab active" data-level="A1"><img src="/imgs/egg.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> A1 <span>Básico</span></button>
+      <button class="level-tab" data-level="A2"><img src="/imgs/eggy.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> A2 <span>Elemental</span></button>
+      <button class="level-tab" data-level="B1"><img src="/imgs/Bigger-removebg-preview.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> B1 <span>Intermedio</span></button>
+      <button class="level-tab" data-level="B2"><img src="/imgs/e-removebg-preview.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> B2 <span>Avanzado</span></button>
     </div>
 
     <div class="games-grid" id="games-grid">
@@ -240,14 +235,14 @@
 <div id="screen-mc" class="screen game-screen">
   <div class="game-bg">
     <div class="game-header">
-      <button class="btn-back" onclick="goBack()">← Salir</button>
+      <button class="btn-back hover-circle-btn" onclick="goBack()"><span class="hover-circle"></span><span class="btn-label">Salir</span></button>
       <div class="game-title-row">
         <span class="game-tag" id="mc-level-tag">A1</span>
-        <span class="game-name" id="mc-game-name">🎯 Opción Múltiple</span>
+        <span class="game-name" id="mc-game-name">Opción Múltiple</span>
       </div>
       <div class="stars-row">
-        <span id="mc-timer" class="timer-badge" style="display:none;">⏱ 8</span>
-        <span class="star-icon">⭐</span><span id="mc-score">0</span>
+        <span id="mc-timer" class="timer-badge" style="display:none;">8</span>
+        <img src="/imgs/star-removebg-preview.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="mc-score">0</span>
       </div>
     </div>
 
@@ -260,7 +255,7 @@
 
       <div class="question-area">
         <div class="question-mascot">
-          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="mascot" class="q-mascot-img" id="mc-mascot-img"/>
+          <img src="/imgs/mascota-pregunta.png" class="q-mascot-img" id="mc-mascot-img" alt="" onerror="this.style.visibility='hidden'"/>
           <span class="question-emoji" id="mc-emoji" style="display:none;"></span>
         </div>
         <p class="question-text" id="mc-question">¿Cómo se dice 'Huevo' en inglés?</p>
@@ -273,7 +268,7 @@
       <div class="explain-box" id="mc-explain">
         <p class="explain-result" id="mc-explain-result"></p>
         <p class="explain-text" id="mc-explain-text"></p>
-        <button class="btn-next" id="mc-next-btn" onclick="nextMC()">Siguiente →</button>
+        <button class="btn-next hover-circle-btn" id="mc-next-btn" onclick="nextMC()"><span class="hover-circle"></span><span class="btn-label">Siguiente</span></button>
       </div>
     </div>
   </div>
@@ -283,12 +278,12 @@
 <div id="screen-match" class="screen game-screen">
   <div class="game-bg game-bg--green">
     <div class="game-header">
-      <button class="btn-back" onclick="goBack()">← Salir</button>
+      <button class="btn-back hover-circle-btn" onclick="goBack()"><span class="hover-circle"></span><span class="btn-label">Salir</span></button>
       <div class="game-title-row">
         <span class="game-tag" id="match-level-tag">A1</span>
-        <span class="game-name" id="match-game-name">🔗 Conecta Palabras</span>
+        <span class="game-name" id="match-game-name">Conecta Palabras</span>
       </div>
-      <div class="stars-row"><span class="star-icon">⭐</span><span id="match-score">0</span></div>
+      <div class="stars-row"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="match-score">0</span></div>
     </div>
 
     <div class="game-card">
@@ -306,12 +301,12 @@
 <div id="screen-fill" class="screen game-screen">
   <div class="game-bg game-bg--purple">
     <div class="game-header">
-      <button class="btn-back" onclick="goBack()">← Salir</button>
+      <button class="btn-back hover-circle-btn" onclick="goBack()"><span class="hover-circle"></span><span class="btn-label">Salir</span></button>
       <div class="game-title-row">
         <span class="game-tag" id="fill-level-tag">A2</span>
-        <span class="game-name" id="fill-game-name">✏️ Completa la Frase</span>
+        <span class="game-name" id="fill-game-name">Completa la Frase</span>
       </div>
-      <div class="stars-row"><span class="star-icon">⭐</span><span id="fill-score">0</span></div>
+      <div class="stars-row"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="fill-score">0</span></div>
     </div>
 
     <div class="game-card">
@@ -324,12 +319,12 @@
       <p class="question-text" id="fill-sentence"></p>
       <div class="word-bank" id="fill-bank"></div>
       <div class="fill-answer-row" id="fill-answer-row"></div>
-      <button class="btn-check" id="fill-check-btn" onclick="checkFill()">Verificar ✓</button>
+      <button class="btn-check hover-circle-btn" id="fill-check-btn" onclick="checkFill()"><span class="hover-circle"></span><span class="btn-label">Verificar</span></button>
 
       <div class="explain-box" id="fill-explain">
         <p class="explain-result" id="fill-explain-result"></p>
         <p class="explain-text" id="fill-explain-text"></p>
-        <button class="btn-next" id="fill-next-btn" onclick="nextFill()">Siguiente →</button>
+        <button class="btn-next hover-circle-btn" id="fill-next-btn" onclick="nextFill()"><span class="hover-circle"></span><span class="btn-label">Siguiente</span></button>
       </div>
     </div>
   </div>
@@ -339,12 +334,12 @@
 <div id="screen-listen" class="screen game-screen">
   <div class="game-bg game-bg--orange">
     <div class="game-header">
-      <button class="btn-back" onclick="goBack()">← Salir</button>
+      <button class="btn-back hover-circle-btn" onclick="goBack()"><span class="hover-circle"></span><span class="btn-label">Salir</span></button>
       <div class="game-title-row">
         <span class="game-tag" id="listen-level-tag">B1</span>
-        <span class="game-name" id="listen-game-name">🔊 Escucha y Elige</span>
+        <span class="game-name" id="listen-game-name">Escucha y Elige</span>
       </div>
-      <div class="stars-row"><span class="star-icon">⭐</span><span id="listen-score">0</span></div>
+      <div class="stars-row"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="listen-score">0</span></div>
     </div>
 
     <div class="game-card">
@@ -354,7 +349,7 @@
         <span id="listen-q-total">de 5</span>
       </div>
       <div class="listen-area">
-        <button class="btn-speak" id="btn-speak" onclick="speakWord()">🔊</button>
+        <button class="btn-speak" id="btn-speak" onclick="speakWord()"><img src="/imgs/altavoz.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/></button>
         <p class="listen-hint">Presiona el botón y escucha la palabra</p>
       </div>
       <div class="options-grid" id="listen-options"></div>
@@ -362,7 +357,7 @@
       <div class="explain-box" id="listen-explain">
         <p class="explain-result" id="listen-explain-result"></p>
         <p class="explain-text" id="listen-explain-text"></p>
-        <button class="btn-next" id="listen-next-btn" onclick="nextListen()">Siguiente →</button>
+        <button class="btn-next hover-circle-btn" id="listen-next-btn" onclick="nextListen()"><span class="hover-circle"></span><span class="btn-label">Siguiente</span></button>
       </div>
     </div>
   </div>
@@ -374,12 +369,12 @@
 <div id="screen-order" class="screen game-screen">
   <div class="game-bg game-bg--teal">
     <div class="game-header">
-      <button class="btn-back" onclick="goBack()">← Salir</button>
+      <button class="btn-back hover-circle-btn" onclick="goBack()"><span class="hover-circle"></span><span class="btn-label">Salir</span></button>
       <div class="game-title-row">
         <span class="game-tag" id="order-level-tag">B1</span>
-        <span class="game-name" id="order-game-name">🌐 Traduce la Frase</span>
+        <span class="game-name" id="order-game-name">Traduce la Frase</span>
       </div>
-      <div class="stars-row"><span class="star-icon">⭐</span><span id="order-score">0</span></div>
+      <div class="stars-row"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="order-score">0</span></div>
     </div>
 
     <div class="game-card">
@@ -392,12 +387,12 @@
       <p class="question-text" id="order-sentence"></p>
       <div class="word-bank" id="order-bank"></div>
       <div class="fill-answer-row" id="order-answer-row"></div>
-      <button class="btn-check" id="order-check-btn" onclick="checkOrder()">Verificar ✓</button>
+      <button class="btn-check hover-circle-btn" id="order-check-btn" onclick="checkOrder()"><span class="hover-circle"></span><span class="btn-label">Verificar</span></button>
 
       <div class="explain-box" id="order-explain">
         <p class="explain-result" id="order-explain-result"></p>
         <p class="explain-text" id="order-explain-text"></p>
-        <button class="btn-next" id="order-next-btn" onclick="nextOrder()">Siguiente →</button>
+        <button class="btn-next hover-circle-btn" id="order-next-btn" onclick="nextOrder()"><span class="hover-circle"></span><span class="btn-label">Siguiente</span></button>
       </div>
     </div>
   </div>
@@ -408,69 +403,29 @@
   <div class="results-bg">
     <div class="results-card">
       <div class="results-mascot-wrap">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="results-mascot" alt="pollito"/>
+        <img src="/imgs/mascota-resultados.png" class="results-mascot" alt="" onerror="this.style.visibility='hidden'"/>
         <div class="confetti-container" id="confetti-container"></div>
       </div>
       <h2 id="results-title">¡Excelente!</h2>
       <p id="results-subtitle">Completaste el juego</p>
       <div class="results-score-box">
-        <span class="results-stars">⭐</span>
+        <img src="/imgs/estrella.png" class="results-stars egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/>
         <span id="results-score-val">0</span>
         <span class="results-score-label">puntos</span>
       </div>
       <div class="results-badges" id="results-badges"></div>
       <div class="results-actions">
-        <button class="btn-play-again" onclick="playAgain()">🔄 Jugar de nuevo</button>
-        <button class="btn-go-levels" onclick="goLevels()">🏠 Ver juegos</button>
+        <button class="btn-play-again hover-circle-btn" onclick="playAgain()"><span class="hover-circle"></span><span class="btn-label">Jugar de nuevo</span></button>
+        <button class="btn-go-levels hover-circle-btn" onclick="goLevels()"><span class="hover-circle"></span><span class="btn-label">Ver juegos</span></button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ══════════════ FOOTER (extraído tal cual de index.html) ══════════════ -->
-<footer id="main-footer" class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
-  <div class="max-w-screen-xl mx-auto">
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10 mb-14 text-left">
-      <div>
-        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Sobre nosotros</h4>
-        <ul class="flex flex-col gap-2.5">
-          <li><a href="../soporte.html#mision" class="text-sm font-bold text-white/90 hover:text-white no-underline">Misión</a></li>
-          <li><a href="../soporte.html#metodo" class="text-sm font-bold text-white/90 hover:text-white no-underline">Método de enseñanza</a></li>
-          <li><a href="../soporte.html#creadores" class="text-sm font-bold text-white/90 hover:text-white no-underline">Creadores</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Ayuda y soporte</h4>
-        <ul class="flex flex-col gap-2.5">
-          <li><a href="../soporte.html#ayuda" class="text-sm font-bold text-white/90 hover:text-white no-underline">Centro de ayuda</a></li>
-          <li><a href="../soporte.html#contacto" class="text-sm font-bold text-white/90 hover:text-white no-underline">Contáctanos</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Términos y privacidad</h4>
-        <ul class="flex flex-col gap-2.5 mb-6">
-          <li><a href="../soporte.html#terminos" class="text-sm font-bold text-white/90 hover:text-white no-underline">Términos</a></li>
-          <li><a href="../soporte.html#terminos" class="text-sm font-bold text-white/90 hover:text-white no-underline">Privacidad</a></li>
-        </ul>
-        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Social</h4>
-        <ul class="flex flex-col gap-2.5">
-          <li><a href="https://www.instagram.com/egglish.oficial/" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li>
-          <li><a href="https://www.tiktok.com/@egglish.oficial" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-      <div class="flex items-center gap-2.5">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/>
-        <span class="font-black text-lg text-white">Egglish</span>
-      </div>
-      <p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p>
-    </div>
-  </div>
+<footer id="main-footer" class="egg-mini-footer">
+  <img src="/imgs/eggy.png" alt="" class="w-6 h-6 object-contain" aria-hidden="true"/>
+  <span style="font-size:.85rem;font-weight:800;">@egglish 2026</span>
 </footer>
 
 <!-- ══════════════ TEMA + MENÚ OFF-CANVAS ══════════════ -->
@@ -622,12 +577,12 @@
   })();
 </script>
 <script src="/Secciones/Js/Juegos.js"></script>
-<!-- ★ EGGLISH AUTH ★ -->
+<!--  EGGLISH AUTH  -->
 <script type="module">
   import { initIndexGuards } from '/Secciones/Js/guards.js';
   initIndexGuards();
 </script>
-<!-- ★ EGGLISH — Bloqueo de sesión (mismo patrón que perfil.html/Escucha.html) ★
+<!--  EGGLISH — Bloqueo de sesión (mismo patrón que perfil.html/Escucha.html) 
      IMPORTANTE: guards.js ya es el único responsable de vigilar el estado
      de auth en vivo y redirigir si hace falta — este bloque NO agrega un
      segundo onAuthStateChanged (podría pisarle la sesión por una carrera
@@ -672,7 +627,7 @@
   }
 </script>
 <script>
-  // 🩹 Espera a que termine de sincronizar el progreso (exp, racha, logros)
+  //  Espera a que termine de sincronizar el progreso (exp, racha, logros)
   // ANTES de navegar a perfil.html, para evitar que la lectura de Firestore
   // en perfil.html llegue antes que la escritura de esta página y muestre 0.
   document.addEventListener('click', function (e) {
@@ -689,293 +644,23 @@
   }, true);
 </script>
 
-<!-- ══════════════ CHATBOT FLOTANTE (CHATBASE) ══════════════ -->
-<style>
-  #egg-chat-bubble {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #1cb0f6;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10000;
-    border: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  #egg-chat-bubble:hover {
-    transform: scale(1.06);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  }
-  #egg-chat-bubble svg {
-    width: 28px;
-    height: 28px;
-    stroke: #fff;
-  }
-  /* Botón rojo "Salir" centrado en la parte superior del chat */
-  #egg-chat-close-top {
-    position: absolute;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10001;
-    background: #ef4444;
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    padding: 6px 24px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 13px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    transition: background 0.15s ease, transform 0.15s ease;
-    display: none;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-  }
-  #egg-chat-close-top:hover {
-    background: #dc2626;
-    transform: translateX(-50%) scale(1.04);
-  }
-  /* En móvil: ocultar el botón flotante cuando el chat está abierto,
-     para que no tape el ícono de grabar audio de Chatbase */
-  @media (max-width: 480px) {
-    #egg-chat-bubble.chat-open {
-      display: none !important;
-    }
-  }
-  #egg-chat-window {
-    position: fixed;
-    bottom: 96px;
-    right: 24px;
-    width: 340px;
-    max-width: calc(100vw - 32px);
-    /* Ventana más compacta que antes. Usamos --vvh (altura real visible,
-       actualizada por JS con la Visual Viewport API) en vez de 100vh: así,
-       si el teclado del móvil se abre, la ventana se encoge en vez de
-       quedar "tapada" y esconder el input de texto/audio en la parte de
-       abajo. --vvh cae a 100dvh si el navegador no soporta esa API. */
-    height: min(560px, calc(var(--vvh, 100dvh) - 120px));
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    z-index: 9999;
-    display: none;
-    background: #fff;
-    opacity: 0;
-    transform: translateY(20px) scale(0.96);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-  /* Pantalla realmente angosta (teléfono en vertical): ahí sí el chat se abre
-     a pantalla completa para garantizar que el campo de texto siempre sea
-     visible. OJO: esto se basa solo en el ANCHO, no en el alto — una ventana
-     de escritorio corta (pero ancha) NO debe activar el modo pantalla completa,
-     solo debe encogerse verticalmente (ver height arriba, con margen de 120px). */
-  @media (max-width: 480px) {
-    #egg-chat-window {
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      bottom: auto;
-      width: auto;
-      height: calc(var(--vvh, 100dvh) - 24px);
-      max-width: none;
-    }
-    #egg-chat-bubble {
-      right: 16px;
-      bottom: 16px;
-    }
-  }
-  #egg-chat-window.open {
-    display: block;
-  }
-  #egg-chat-window.show {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  /* Contenedor interno: el iframe se ajusta EXACTO a este tamaño, sin min-height,
-     así nunca se recorta el encabezado del bot ni ninguna parte del contenido. */
-  #egg-chat-body {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  #egg-chat-body iframe {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-  #egg-chat-body iframe.loaded {
-    opacity: 1;
-  }
-  #egg-chat-loading {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: #fff;
-    transition: opacity 0.25s ease;
-  }
-  #egg-chat-loading.hidden-loading {
-    opacity: 0;
-    pointer-events: none;
-  }
-  #egg-chat-spinner {
-    width: 34px;
-    height: 34px;
-    border: 4px solid #e5e7eb;
-    border-top-color: #1cb0f6;
-    border-radius: 50%;
-    animation: egg-spin 0.8s linear infinite;
-  }
-  @keyframes egg-spin {
-    to { transform: rotate(360deg); }
-  }
-  #egg-chat-loading span {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    color: #6b7280;
-  }
-</style>
-
-<button id="egg-chat-bubble" type="button" aria-label="Abrir chat de ayuda" aria-expanded="false" aria-controls="egg-chat-window">
-  <svg id="egg-chat-icon-open" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-  </svg>
-  <svg id="egg-chat-icon-close" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-</button>
-
-<div id="egg-chat-window" role="dialog" aria-label="Chat de ayuda">
-  <!-- Botón rojo Salir en la parte superior del chat, junto al encabezado "Eggy" -->
-  <button id="egg-chat-close-top" type="button" aria-label="Cerrar chat de ayuda">Salir</button>
-  <div id="egg-chat-body">
-    <div id="egg-chat-loading">
-      <div id="egg-chat-spinner"></div>
-      <span>Cargando chat…</span>
-    </div>
-    <!-- El iframe se inserta con JS solo cuando el usuario abre el chat por -->
-    <!-- primera vez (lazy-load), así la página principal carga más rápido -->
-    <!-- y el chat no se "reinicia" cada vez que se abre y cierra. -->
-  </div>
-</div>
-
 <script>
+  // Hover "círculo que nace donde entra el cursor" (index.html), en vanilla JS y delegado
+  // para que también funcione con los botones que Juegos.js crea dinámicamente.
   (function () {
-    const bubble = document.getElementById('egg-chat-bubble');
-    const win = document.getElementById('egg-chat-window');
-    const body = document.getElementById('egg-chat-body');
-    const loading = document.getElementById('egg-chat-loading');
-    const iconOpen = document.getElementById('egg-chat-icon-open');
-    const iconClose = document.getElementById('egg-chat-icon-close');
-    const closeTopBtn = document.getElementById('egg-chat-close-top');
-    if (!bubble || !win || !body || !loading) return;
-
-    let isOpen = false;
-    let iframeCreated = false;
-    let iframeLoaded = false;
-
-    // Mantiene --vvh = altura real visible de la pantalla (excluye el
-    // teclado del móvil cuando está abierto). Sin esto, en iOS/Android
-    // la ventana del chat puede quedar más alta que el área visible y el
-    // input de texto/audio de Chatbase queda tapado por el teclado.
-    function syncViewportHeight() {
-      const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-      document.documentElement.style.setProperty('--vvh', vh + 'px');
+    function place(e) {
+      var b = e.target.closest && e.target.closest('.hover-circle-btn');
+      if (!b || (e.relatedTarget && b.contains(e.relatedTarget))) return;
+      var c = b.querySelector('.hover-circle'), r = b.getBoundingClientRect();
+      if (c) { c.style.top = (e.clientY - r.top) + 'px'; c.style.left = (e.clientX - r.left) + 'px'; }
     }
-    syncViewportHeight();
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', syncViewportHeight);
-      window.visualViewport.addEventListener('scroll', syncViewportHeight);
-    } else {
-      window.addEventListener('resize', syncViewportHeight);
-    }
-
-    function ensureIframe() {
-      if (iframeCreated) return;
-      iframeCreated = true;
-      const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.chatbase.co/chatbot-iframe/-Wg5knMaJ19dwVd0Kr9x9';
-      iframe.setAttribute('allow', 'microphone');
-      iframe.setAttribute('frameborder', '0');
-      iframe.addEventListener('load', () => {
-        // Pequeño margen para que el bot termine de pintar su interfaz
-        // antes de esconder el spinner y evitar el "flash" en blanco.
-        setTimeout(() => {
-          iframe.classList.add('loaded');
-          loading.classList.add('hidden-loading');
-          // El botón "Salir" aparece SOLO cuando el chat ya terminó de cargar
-          iframeLoaded = true;
-          if (isOpen) {
-            if (closeTopBtn) closeTopBtn.style.display = 'block';
-            bubble.classList.add('chat-open');
-          }
-        }, 300);
-      });
-      body.appendChild(iframe);
-    }
-
-    function openChat() {
-      isOpen = true;
-      ensureIframe();
-      win.classList.add('open');
-      requestAnimationFrame(() => win.classList.add('show'));
-      iconOpen.classList.add('hidden');
-      iconClose.classList.remove('hidden');
-      bubble.setAttribute('aria-expanded', 'true');
-      bubble.setAttribute('aria-label', 'Cerrar chat de ayuda');
-      // Ocultar la burbuja INMEDIATAMENTE en móvil para que la X no
-      // tape el botón de enviar mientras el iframe todavía está cargando.
-      bubble.classList.add('chat-open');
-      // El botón "Salir" solo aparece cuando el iframe termina de cargar.
-      // En reaperturas (iframeLoaded ya es true) aparece de inmediato.
-      if (iframeLoaded) {
-        if (closeTopBtn) closeTopBtn.style.display = 'block';
-      }
-    }
-
-    function closeChat() {
-      isOpen = false;
-      win.classList.remove('show');
-      iconOpen.classList.remove('hidden');
-      iconClose.classList.add('hidden');
-      bubble.setAttribute('aria-expanded', 'false');
-      bubble.setAttribute('aria-label', 'Abrir chat de ayuda');
-      // Ocultar botón "Salir" y restaurar burbuja flotante
-      if (closeTopBtn) closeTopBtn.style.display = 'none';
-      bubble.classList.remove('chat-open');
-      setTimeout(() => {
-        if (!isOpen) win.classList.remove('open');
-      }, 200);
-    }
-
-    bubble.addEventListener('click', () => {
-      isOpen ? closeChat() : openChat();
-    });
-
-    // Botón rojo "Salir" en la cabecera del chat
-    if (closeTopBtn) {
-      closeTopBtn.addEventListener('click', closeChat);
-    }
+    document.addEventListener('mouseover', place);
+    document.addEventListener('mouseout', place);
   })();
 </script>
-
+<!-- ══════════════ CHATBASE (script de embed oficial) ══════════════ -->
+<script>
+(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="tsTu0jiI2QFUFPkTBF5fJ";script.domain="[www.chatbase.co](https://www.chatbase.co)";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+</script>
 </body>
 </html>

@@ -256,13 +256,10 @@
           </button>
           <input type="file" id="avatar-file-input" accept="image/*" hidden />
         </div>
-        <!-- "Cargando..." y "@usuario" son placeholders: Perfil.js los
-             reemplaza en cuanto sabe quién inició sesión. -->
+        <!-- "Cargando..." es un placeholder: Perfil.js lo reemplaza con
+             "Primer nombre + primer apellido" (ver formatShortName). -->
         <h2 class="profile-name">Cargando...</h2>
-        <p class="profile-username">@usuario</p>
         <p class="profile-joined"><img src="/imgs/cal-removebg-preview.png" alt="" class="icon-img icon-img--sm"/><span id="profile-joined-text">—</span></p>
-        <p id="profile-email" style="font-size:0.85rem;color:var(--mid);font-weight:700;margin-top:4px;"></p>
-        <p id="profile-age" style="font-size:0.85rem;color:var(--mid);font-weight:700;margin-top:2px;"></p>
         <!-- Bio: campo nuevo en Firestore (bio), oculto si está vacío -->
         <p id="profile-bio" class="hidden" style="font-size:0.85rem;color:var(--text);font-weight:700;margin-top:10px;line-height:1.4;"></p>
         <!-- Abre el modal de edición (nombre, bio, edad); ver #edit-profile-modal más abajo -->
@@ -270,6 +267,14 @@
           style="margin-top:16px;font-size:0.8rem;font-weight:800;color:var(--text);background:none;border:2px solid #1cb0f6;border-radius:999px;padding:8px 18px;cursor:pointer;">
           Editar perfil
         </button>
+        <!-- CERRAR SESIÓN (movido aquí desde la barra de navegación).
+             Usa la misma función cerrarSesion() de Perfil.js que usaba el
+             botón viejo del menú. -->
+        <div style="margin-top:12px;">
+          <button type="button" id="btn-cerrar-sesion-perfil" class="click-effect text-sm font-bold text-white bg-red-500 hover:bg-red-600 px-6 py-2 rounded-full shadow-hard-soft transition-colors">
+            Cerrar sesión
+          </button>
+        </div>
       </div>
 
       <!-- CONSEJO ALEATORIO: cambia cada vez que el usuario inicia sesión -->

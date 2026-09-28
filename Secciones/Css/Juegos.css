@@ -49,8 +49,12 @@ html.dark {
   --shadow:  0 4px 24px rgba(0,0,0,0.45);
 }
 
-html, body {
-  overflow-x: hidden; /* evita que un desbordamiento invisible en móvil "esconda" contenido a un costado */
+html {
+  overflow-x: hidden;
+}
+body {
+  overflow-x: hidden; /* fallback */
+  overflow-x: clip;   /* clip NO crea contenedor de scroll: evita que el móvil recorte el contenido */
 }
 body {
   font-family: var(--font);
@@ -82,7 +86,7 @@ a {
 /* ══════════ HERO BANNER ══════════ */
 .hero-banner {
   background: var(--blue);
-  padding: 48px 32px 64px;
+  padding: 30px 32px 38px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -94,7 +98,7 @@ a {
 }
 .hero-chick {
   display: block;
-  width: 96px; height: 96px; object-fit: contain;
+  width: 160px; height: 160px; object-fit: contain;
   filter: drop-shadow(0 8px 16px rgba(0,0,0,.2));
   animation: chick-bounce 2s ease-in-out infinite;
 }
@@ -102,7 +106,7 @@ a {
   0%,100% { transform: translateY(0) rotate(-3deg); }
   50%      { transform: translateY(-12px) rotate(3deg); }
 }
-.hero-title { font-size: 2.2rem; font-weight: 900; color: var(--white); margin: 12px 0 6px; text-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.hero-title { font-size: 2rem; font-weight: 900; color: var(--white); margin: 8px 0 4px; text-shadow: 0 2px 8px rgba(0,0,0,.15); }
 .hero-sub   { font-size: 1.05rem; font-weight: 700; color: rgba(255,255,255,.85); }
 
 /* ══════════ LEVELS SECTION ══════════ */
@@ -212,8 +216,8 @@ a {
 
 /* QUESTION AREA */
 .question-area { display: flex; align-items: center; gap: 16px; }
-.q-mascot-img  { width: 72px; height: 72px; object-fit: contain; flex-shrink: 0; }
-.question-emoji { font-size: 3.4rem; line-height: 1; flex-shrink: 0; }
+.q-mascot-img  { width: 120px; height: 120px; object-fit: contain; flex-shrink: 0; }
+.question-emoji { font-size: 5.6rem; line-height: 1; flex-shrink: 0; }
 .question-text { font-size: 1.4rem; font-weight: 900; color: var(--text); line-height: 1.3; }
 
 /* TIMER (juegos con tiempo límite, p.ej. "Opuestos Rápidos") */
@@ -355,7 +359,7 @@ a {
   position: relative; overflow: hidden;
 }
 .results-mascot-wrap { position: relative; display: inline-block; margin-bottom: 16px; }
-.results-mascot { width: 100px; height: 100px; object-fit: contain; animation: chick-bounce 2s ease-in-out infinite; }
+.results-mascot { width: 168px; height: 168px; object-fit: contain; animation: chick-bounce 2s ease-in-out infinite; }
 .confetti-container { position: absolute; inset: 0; pointer-events: none; }
 .confetti-piece {
   position: absolute; width: 8px; height: 8px; border-radius: 2px;
@@ -412,3 +416,89 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ══════════ TARJETAS MÁS COMPACTAS (escritorio) ══════════ */
+.games-grid { grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 16px; }
+.games-grid .game-card-sel { padding: 18px; gap: 8px; }
+.games-grid .game-card-icon img { width: 96px !important; height: 96px !important; }
+.games-grid .game-card-sel .btn-play { padding: 8px 0; }
+/* Tarjeta en rojo cuando esa partida ya no suma puntos */
+.games-grid .game-card-sel.game-card-nopoints {
+  background: rgba(239,68,68,.15) !important;
+  border: 2px solid #ef4444 !important;
+}
+
+/* ══════════ MÓVIL: tarjetas horizontales, pequeñas y livianas ══════════ */
+@media (max-width: 700px) {
+  /* Hero e imágenes más contenidas */
+  .hero-banner { padding: 16px 16px 24px; }
+  .hero-chick  { width: 112px; height: 112px; }
+  .hero-title  { margin: 8px 0 4px; }
+  .hero-sub    { font-size: .95rem; }
+
+  /* Pestañas de nivel en 2 x 2 */
+  .level-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+  .level-tab  { padding: 8px 12px; border-radius: 12px; }
+  .level-tab .egg-img-slot { width: 28px; height: 28px; }
+
+  /* Rejilla: 1 columna, separación corta */
+  .games-grid { grid-template-columns: 1fr; gap: 12px; }
+
+  /* Tarjeta: imagen a la izquierda, texto a la derecha, botón abajo */
+  .games-grid .game-card-sel {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    column-gap: 12px; row-gap: 6px;
+    align-items: start;
+    padding: 12px 14px;
+    border-radius: 16px;
+    /* Sin blur ni borde animado: con 10 tarjetas a la vez saturan la GPU del
+       celular y dejaban de pintarse las últimas. */
+    background: var(--card);
+    border: 2px solid var(--border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,.10);
+  }
+  .games-grid .game-card-sel::before { display: none; }
+  .games-grid .game-card-sel:hover { transform: none; }
+
+  .games-grid .game-card-icon { grid-column: 1; grid-row: 1 / span 2; }
+  .games-grid .game-card-icon img { width: 72px !important; height: 72px !important; }
+  .games-grid .game-card-sel > div:nth-of-type(2) { grid-column: 2; }   /* título + badge */
+  .games-grid .game-card-desc  { grid-column: 2; font-size: .78rem; line-height: 1.3; }
+  .games-grid .game-card-title { font-size: .98rem; }
+  .games-grid .game-card-warning,
+  .games-grid .game-card-plays,
+  .games-grid .btn-play { grid-column: 1 / -1; }
+  .games-grid .game-card-plays   { font-size: .78rem !important; margin: 2px 0 !important; }
+  .games-grid .game-card-warning { font-size: .72rem !important; margin: 2px 0 !important; }
+  .games-grid .game-card-sel .btn-play { margin-top: 2px; padding: 8px 0; font-size: .85rem; }
+
+  /* Imágenes dentro de los juegos más contenidas */
+  .q-mascot-img { width: 76px; height: 76px; }
+  .question-emoji { font-size: 3.4rem; }
+  .question-emoji img { height: 104px !important; }
+  .match-btn img { height: 64px !important; }
+  .question-text { font-size: 1.15rem; }
+  .results-mascot { width: 112px; height: 112px; }
+}
+
+
+/* ══════════ TARJETAS ARRASTRABLES (fill / order) ══════════ */
+.word-chip, .answer-chip {
+  touch-action: none;            /* permite arrastrar con el dedo sin que la página haga scroll */
+  user-select: none; -webkit-user-select: none;
+  cursor: grab;
+}
+.answer-chip.chip-placeholder { opacity: .3; }
+.chip-ghost {
+  position: fixed; z-index: 100000; margin: 0;
+  pointer-events: none; cursor: grabbing;
+  box-shadow: 0 10px 24px rgba(0,0,0,.28);
+  transform: scale(1.08) rotate(-2deg);
+  display: flex; align-items: center; justify-content: center;
+  white-space: nowrap;
+}
+.chip-ghost.word-chip:hover { background: #eff9ff; color: var(--blue); }

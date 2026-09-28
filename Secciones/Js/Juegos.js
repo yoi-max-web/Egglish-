@@ -54,11 +54,11 @@ const DATA = {
 
     // 2) Emparejar vocabulario (motor: match, con emojis)
     "vocab-match": [
-      { es:"🍎", en:"Apple" },
-      { es:"🐶", en:"Dog"   },
-      { es:"📚", en:"Book"  },
-      { es:"☀️", en:"Sun"   },
-      { es:"🚗", en:"Car"   },
+      { es:"[IMG: Apple]", en:"Apple" },
+      { es:"[IMG: Dog]", en:"Dog"   },
+      { es:"[IMG: Book]", en:"Book"  },
+      { es:"[IMG: Sun]", en:"Sun"   },
+      { es:"[IMG: Car]", en:"Car"   },
     ],
 
     // 3) Selección rápida de opuestos (motor: mc, con temporizador)
@@ -81,11 +81,11 @@ const DATA = {
 
     // 5) Identificador de imágenes/conceptos (motor: mc, con emoji grande)
     "image-id": [
-      { emoji:"🍌", q:"¿Qué palabra representa este emoji?", opts:["Banana","Grape","Lemon","Melon"], ans:0, expl:"🍌 es 'Banana' en inglés." },
-      { emoji:"🐱", q:"¿Qué palabra representa este emoji?", opts:["Dog","Cat","Bird","Fish"],         ans:1, expl:"🐱 es 'Cat' (gato)." },
-      { emoji:"🏠", q:"¿Qué palabra representa este emoji?", opts:["Car","Tree","House","Door"],       ans:2, expl:"🏠 es 'House' (casa)." },
-      { emoji:"☂️", q:"¿Qué palabra representa este emoji?", opts:["Umbrella","Hat","Coat","Shoe"],    ans:0, expl:"☂️ es 'Umbrella' (paraguas)." },
-      { emoji:"🎂", q:"¿Qué palabra representa este emoji?", opts:["Bread","Cake","Pizza","Soup"],     ans:1, expl:"🎂 es 'Cake' (pastel)." },
+      { emoji:"[IMG: Banana]", q:"¿Qué palabra representa esta imagen?", opts:["Banana","Grape","Lemon","Melon"], ans:0, expl:"Es 'Banana'en inglés." },
+      { emoji:"[IMG: Cat]", q:"¿Qué palabra representa esta imagen?", opts:["Dog","Cat","Bird","Fish"], ans:1, expl:"Es 'Cat' (gato)." },
+      { emoji:"[IMG: House]", q:"¿Qué palabra representa esta imagen?", opts:["Car","Tree","House","Door"], ans:2, expl:"Es 'House' (casa)." },
+      { emoji:"[IMG: Umbrella]", q:"¿Qué palabra representa esta imagen?", opts:["Umbrella","Hat","Coat","Shoe"], ans:0, expl:"Es 'Umbrella' (paraguas)." },
+      { emoji:"[IMG: Cake]", q:"¿Qué palabra representa esta imagen?", opts:["Bread","Cake","Pizza","Soup"], ans:1, expl:"Es 'Cake' (pastel)." },
     ],
 
     // 6) Escucha activa básica (motor: listen)
@@ -362,52 +362,90 @@ const DATA = {
 
 const GAMES = [
   // ── Juegos originales ──
-  { id:"mc",        engine:"mc",     levels:["A1","A2","B1"], icon:"🎯", title:"Opción Múltiple",   desc:"Lee la pregunta y elige la respuesta correcta entre 4 opciones.",              screen:"screen-mc" },
-  { id:"match",     engine:"match",  levels:["A1"],           icon:"🔗", title:"Conecta Palabras",  desc:"Empareja cada palabra en español con su traducción en inglés.",                screen:"screen-match", instruction:"Toca una palabra en español y luego su traducción en inglés" },
-  { id:"fill",      engine:"fill",   levels:["A2","B1"],      icon:"✏️", title:"Completa la Frase", desc:"Arrastra las palabras correctas para completar la oración.",                   screen:"screen-fill" },
-  { id:"listen",    engine:"listen", levels:["A1","A2"],      icon:"🔊", title:"Escucha y Elige",   desc:"Escucha la palabra (texto a voz) y elige su significado en español.",          screen:"screen-listen" },
-  { id:"translate", engine:"order",  levels:["B1"],           icon:"🌐", title:"Traduce la Frase",  desc:"Ordena las palabras para traducir la oración correctamente al inglés.",        screen:"screen-order", label:"Traduce al inglés:" },
+  { id:"mc",        engine:"mc",     levels:["A1","A2","B1"], icon:"", title:"Opción Múltiple",   desc:"Lee la pregunta y elige la respuesta correcta entre 4 opciones.",              screen:"screen-mc" },
+  { id:"match",     engine:"match",  levels:["A1"],           icon:"", title:"Conecta Palabras",  desc:"Empareja cada palabra en español con su traducción en inglés.",                screen:"screen-match", instruction:"Toca una palabra en español y luego su traducción en inglés" },
+  { id:"fill",      engine:"fill",   levels:["A2","B1"],      icon:"", title:"Completa la Frase", desc:"Arrastra las palabras correctas para completar la oración.",                   screen:"screen-fill" },
+  { id:"listen",    engine:"listen", levels:["A1","A2"],      icon:"", title:"Escucha y Elige",   desc:"Escucha la palabra (texto a voz) y elige su significado en español.",          screen:"screen-listen" },
+  { id:"translate", engine:"order",  levels:["B1"],           icon:"", title:"Traduce la Frase",  desc:"Ordena las palabras para traducir la oración correctamente al inglés.",        screen:"screen-order", label:"Traduce al inglés:" },
 
   // ── 7 minijuegos NUEVOS Nivel A1 ──
-  { id:"order-basic",  engine:"order", levels:["A1"], icon:"🧩", title:"Ordena la Frase",         desc:"Arrastra las palabras en el orden correcto para formar una oración básica.", screen:"screen-order", label:"Ordena la frase:" },
-  { id:"vocab-match",  engine:"match", levels:["A1"], icon:"🖼️", title:"Emparejar Vocabulario",   desc:"Relaciona cada imagen con la palabra correcta en inglés.",                   screen:"screen-match", instruction:"Toca un emoji y luego su palabra en inglés" },
-  { id:"opposites",    engine:"mc",    levels:["A1"], icon:"⚡", title:"Opuestos Rápidos",        desc:"Elige el opuesto correcto antes de que se acabe el tiempo.",                 screen:"screen-mc", timerSec:8 },
-  { id:"fill-basic",   engine:"fill",  levels:["A1"], icon:"📝", title:"Completa el Espacio",     desc:"Elige la palabra correcta para llenar el espacio en blanco.",                screen:"screen-fill" },
-  { id:"image-id",     engine:"mc",    levels:["A1"], icon:"🔍", title:"Identifica el Concepto",  desc:"Observa el emoji y elige qué palabra en inglés lo representa.",              screen:"screen-mc" },
-  { id:"listen-basic", engine:"listen",levels:["A1"], icon:"👂", title:"Escucha Activa",          desc:"Escucha la palabra y elige su significado en español.",                      screen:"screen-listen" },
-  { id:"spellcheck",   engine:"mc",    levels:["A1"], icon:"🕵️", title:"Detective Ortográfico",   desc:"Encuentra la palabra que está mal escrita entre las opciones.",              screen:"screen-mc" },
+  { id:"order-basic",  engine:"order", levels:["A1"], icon:"", title:"Ordena la Frase",         desc:"Arrastra las palabras en el orden correcto para formar una oración básica.", screen:"screen-order", label:"Ordena la frase:" },
+  { id:"vocab-match",  engine:"match", levels:["A1"], icon:"", title:"Emparejar Vocabulario",   desc:"Relaciona cada imagen con la palabra correcta en inglés.",                   screen:"screen-match", instruction:"Toca un emoji y luego su palabra en inglés" },
+  { id:"opposites",    engine:"mc",    levels:["A1"], icon:"", title:"Opuestos Rápidos",        desc:"Elige el opuesto correcto antes de que se acabe el tiempo.",                 screen:"screen-mc", timerSec:8 },
+  { id:"fill-basic",   engine:"fill",  levels:["A1"], icon:"", title:"Completa el Espacio",     desc:"Elige la palabra correcta para llenar el espacio en blanco.",                screen:"screen-fill" },
+  { id:"image-id",     engine:"mc",    levels:["A1"], icon:"", title:"Identifica el Concepto",  desc:"Observa la imagen y elige qué palabra en inglés lo representa.",              screen:"screen-mc" },
+  { id:"listen-basic", engine:"listen",levels:["A1"], icon:"", title:"Escucha Activa",          desc:"Escucha la palabra y elige su significado en español.",                      screen:"screen-listen" },
+  { id:"spellcheck",   engine:"mc",    levels:["A1"], icon:"", title:"Detective Ortográfico",   desc:"Encuentra la palabra que está mal escrita entre las opciones.",              screen:"screen-mc" },
 
   // ── 7 minijuegos NUEVOS Nivel A2 ──
-  { id:"past-simple",       engine:"fill",  levels:["A2"], icon:"⏳", title:"Conjuga en Pasado",       desc:"Completa la oración con la forma correcta del verbo en pasado simple.", screen:"screen-fill" },
-  { id:"compound-order",    engine:"order", levels:["A2"], icon:"🔀", title:"Organiza la Oración",     desc:"Ordena las palabras para formar una oración compuesta correcta.",       screen:"screen-order", label:"Ordena la oración:" },
-  { id:"connectors",        engine:"mc",    levels:["A2"], icon:"🔗", title:"Elige el Conector",       desc:"Selecciona el conector correcto para unir las ideas.",                  screen:"screen-mc" },
-  { id:"dialogue-fill",     engine:"fill",  levels:["A2"], icon:"💬", title:"Completa el Diálogo",     desc:"Lee el diálogo y completa la respuesta que falta.",                     screen:"screen-fill" },
-  { id:"categorize",        engine:"mc",    levels:["A2"], icon:"🏷️", title:"Categoriza la Palabra",   desc:"Identifica si la palabra es sustantivo, verbo, adjetivo o adverbio.",   screen:"screen-mc" },
-  { id:"reverse-translate", engine:"order", levels:["A2"], icon:"🔄", title:"Traducción Inversa",      desc:"Ordena las palabras en español para traducir la frase al español.",     screen:"screen-order", label:"Traduce al español:" },
-  { id:"prepositions",      engine:"fill",  levels:["A2"], icon:"📍", title:"Frases Preposicionales",  desc:"Elige la preposición correcta para completar la frase.",                screen:"screen-fill" },
+  { id:"past-simple",       engine:"fill",  levels:["A2"], icon:"", title:"Conjuga en Pasado",       desc:"Completa la oración con la forma correcta del verbo en pasado simple.", screen:"screen-fill" },
+  { id:"compound-order",    engine:"order", levels:["A2"], icon:"", title:"Organiza la Oración",     desc:"Ordena las palabras para formar una oración compuesta correcta.",       screen:"screen-order", label:"Ordena la oración:" },
+  { id:"connectors",        engine:"mc",    levels:["A2"], icon:"", title:"Elige el Conector",       desc:"Selecciona el conector correcto para unir las ideas.",                  screen:"screen-mc" },
+  { id:"dialogue-fill",     engine:"fill",  levels:["A2"], icon:"", title:"Completa el Diálogo",     desc:"Lee el diálogo y completa la respuesta que falta.",                     screen:"screen-fill" },
+  { id:"categorize",        engine:"mc",    levels:["A2"], icon:"", title:"Categoriza la Palabra",   desc:"Identifica si la palabra es sustantivo, verbo, adjetivo o adverbio.",   screen:"screen-mc" },
+  { id:"reverse-translate", engine:"order", levels:["A2"], icon:"", title:"Traducción Inversa",      desc:"Ordena las palabras en español para traducir la frase al español.",     screen:"screen-order", label:"Traduce al español:" },
+  { id:"prepositions",      engine:"fill",  levels:["A2"], icon:"", title:"Frases Preposicionales",  desc:"Elige la preposición correcta para completar la frase.",                screen:"screen-fill" },
 
   // ── 7 minijuegos NUEVOS Nivel B1 ──
-  { id:"phrasal-verbs",     engine:"mc",    levels:["B1"], icon:"🧲", title:"Phrasal Verbs en Contexto", desc:"Elige el significado correcto del phrasal verb según el contexto.",        screen:"screen-mc" },
-  { id:"passive-transform", engine:"order", levels:["B1"], icon:"🔄", title:"Transforma la Voz",         desc:"Ordena las palabras para transformar la oración activa en voz pasiva.",    screen:"screen-order", label:"Transforma a voz pasiva:" },
-  { id:"conditionals-id",   engine:"mc",    levels:["B1"], icon:"🔀", title:"Identifica el Condicional", desc:"Identifica si la oración es primer o segundo condicional.",                screen:"screen-mc" },
-  { id:"paragraph-fill",    engine:"fill",  levels:["B1"], icon:"📄", title:"Completa el Párrafo",       desc:"Completa cada oración del párrafo con la palabra o tiempo verbal correcto.", screen:"screen-fill" },
-  { id:"synonyms-context",  engine:"mc",    levels:["B1"], icon:"📖", title:"Sinónimos en Contexto",     desc:"Elige el sinónimo correcto de la palabra resaltada según el contexto.",    screen:"screen-mc" },
-  { id:"perfect-vs-simple", engine:"fill",  levels:["B1"], icon:"⏱️", title:"Perfecto vs Simple",        desc:"Elige entre tiempos perfectos y simples según las pistas de la oración.",  screen:"screen-fill" },
-  { id:"coherence-errors",  engine:"mc",    levels:["B1"], icon:"🧭", title:"Corrige la Coherencia",     desc:"Encuentra la oración que no encaja con la idea general del párrafo.",      screen:"screen-mc" },
+  { id:"phrasal-verbs",     engine:"mc",    levels:["B1"], icon:"", title:"Phrasal Verbs en Contexto", desc:"Elige el significado correcto del phrasal verb según el contexto.",        screen:"screen-mc" },
+  { id:"passive-transform", engine:"order", levels:["B1"], icon:"", title:"Transforma la Voz",         desc:"Ordena las palabras para transformar la oración activa en voz pasiva.",    screen:"screen-order", label:"Transforma a voz pasiva:" },
+  { id:"conditionals-id",   engine:"mc",    levels:["B1"], icon:"", title:"Identifica el Condicional", desc:"Identifica si la oración es primer o segundo condicional.",                screen:"screen-mc" },
+  { id:"paragraph-fill",    engine:"fill",  levels:["B1"], icon:"", title:"Completa el Párrafo",       desc:"Completa cada oración del párrafo con la palabra o tiempo verbal correcto.", screen:"screen-fill" },
+  { id:"synonyms-context",  engine:"mc",    levels:["B1"], icon:"", title:"Sinónimos en Contexto",     desc:"Elige el sinónimo correcto de la palabra resaltada según el contexto.",    screen:"screen-mc" },
+  { id:"perfect-vs-simple", engine:"fill",  levels:["B1"], icon:"", title:"Perfecto vs Simple",        desc:"Elige entre tiempos perfectos y simples según las pistas de la oración.",  screen:"screen-fill" },
+  { id:"coherence-errors",  engine:"mc",    levels:["B1"], icon:"", title:"Corrige la Coherencia",     desc:"Encuentra la oración que no encaja con la idea general del párrafo.",      screen:"screen-mc" },
 
   // ── 7 minijuegos Nivel B2 (nuevo nivel avanzado) ──
-  { id:"subordinate-clauses", engine:"order", levels:["B2"], icon:"🧩", title:"Oraciones Subordinadas",      desc:"Ordena las palabras para formar oraciones con cláusulas subordinadas complejas.", screen:"screen-order", label:"Ordena la oración subordinada:" },
-  { id:"past-modals",         engine:"mc",    levels:["B2"], icon:"🕵️", title:"Modales de Deducción Pasada", desc:"Elige el modal correcto para expresar deducción sobre el pasado.",               screen:"screen-mc" },
-  { id:"register",            engine:"mc",    levels:["B2"], icon:"🎩", title:"Registro Formal/Informal",    desc:"Distingue entre expresiones formales e informales en distintos contextos.",       screen:"screen-mc" },
-  { id:"idioms",               engine:"mc",    levels:["B2"], icon:"🗝️", title:"Expresiones Idiomáticas",     desc:"Elige el significado correcto de expresiones idiomáticas en inglés.",             screen:"screen-mc" },
-  { id:"discourse-connectors", engine:"fill",  levels:["B2"], icon:"🔗", title:"Conectores Discursivos",      desc:"Completa la oración con el conector discursivo avanzado más adecuado.",           screen:"screen-fill" },
-  { id:"mixed-conditionals",   engine:"fill",  levels:["B2"], icon:"🌗", title:"Condicionales Mixtos",        desc:"Completa la oración combinando dos tiempos de condicionales distintos.",          screen:"screen-fill" },
-  { id:"nuance",               engine:"mc",    levels:["B2"], icon:"🎭", title:"Matices de Significado",      desc:"Identifica la diferencia sutil de significado entre dos expresiones.",            screen:"screen-mc" },
+  { id:"subordinate-clauses", engine:"order", levels:["B2"], icon:"", title:"Oraciones Subordinadas",      desc:"Ordena las palabras para formar oraciones con cláusulas subordinadas complejas.", screen:"screen-order", label:"Ordena la oración subordinada:" },
+  { id:"past-modals",         engine:"mc",    levels:["B2"], icon:"", title:"Modales de Deducción Pasada", desc:"Elige el modal correcto para expresar deducción sobre el pasado.",               screen:"screen-mc" },
+  { id:"register",            engine:"mc",    levels:["B2"], icon:"", title:"Registro Formal/Informal",    desc:"Distingue entre expresiones formales e informales en distintos contextos.",       screen:"screen-mc" },
+  { id:"idioms",               engine:"mc",    levels:["B2"], icon:"", title:"Expresiones Idiomáticas",     desc:"Elige el significado correcto de expresiones idiomáticas en inglés.",             screen:"screen-mc" },
+  { id:"discourse-connectors", engine:"fill",  levels:["B2"], icon:"", title:"Conectores Discursivos",      desc:"Completa la oración con el conector discursivo avanzado más adecuado.",           screen:"screen-fill" },
+  { id:"mixed-conditionals",   engine:"fill",  levels:["B2"], icon:"", title:"Condicionales Mixtos",        desc:"Completa la oración combinando dos tiempos de condicionales distintos.",          screen:"screen-fill" },
+  { id:"nuance",               engine:"mc",    levels:["B2"], icon:"", title:"Matices de Significado",      desc:"Identifica la diferencia sutil de significado entre dos expresiones.",            screen:"screen-mc" },
 ];
 
 function getGameDef(id) {
   return GAMES.find(g => g.id === id);
 }
+
+// ══════════════════════════════════════════
+//  IMÁGENES DE LAS TARJETAS
+//  Las imágenes de los juegos de A1 se reutilizan en los demás niveles,
+//  eligiendo la que mejor combina con la descripción de cada tarjeta.
+//  (Si un juego no aparece aquí, usa /imgs/juego-<id>.png)
+// ══════════════════════════════════════════
+const IMG_MC        = '/imgs/juego-mc.png';            // preguntas de opción múltiple
+const IMG_MATCH     = '/imgs/juego-match.png';         // emparejar / clasificar
+const IMG_LISTEN    = '/imgs/juego-listen.png';        // escuchar
+const IMG_ORDER     = '/imgs/juego-order-basic.png';   // ordenar / traducir frases
+const IMG_VOCAB     = '/imgs/juego-vocab-match.png';   // vocabulario
+const IMG_OPPOSITES = '/imgs/juego-opposites.png';     // contrastes / comparar
+const IMG_FILL      = '/imgs/juego-fill-basic.png';    // completar espacios
+const IMG_IMAGE_ID  = '/imgs/juego-image-id.png';      // identificar conceptos
+const IMG_SPELL     = '/imgs/juego-spellcheck.png';    // detectar errores
+
+const GAME_IMG = {
+  // ── A1 ── (la #9, "Escucha Activa", ahora usa /imgs/au.png)
+  'mc': IMG_MC, 'match': IMG_MATCH, 'listen': IMG_LISTEN, 'order-basic': IMG_ORDER,
+  'vocab-match': IMG_VOCAB, 'opposites': IMG_OPPOSITES, 'fill-basic': IMG_FILL,
+  'image-id': IMG_IMAGE_ID, 'listen-basic': '/imgs/au.png', 'spellcheck': IMG_SPELL,
+  // ── juegos originales que también viven en A2 / B1 ──
+  'fill': IMG_FILL, 'translate': IMG_ORDER,
+  // ── A2 ──
+  'past-simple': IMG_FILL, 'compound-order': IMG_ORDER, 'connectors': IMG_MC,
+  'dialogue-fill': IMG_FILL, 'categorize': IMG_MATCH, 'reverse-translate': IMG_ORDER,
+  'prepositions': IMG_FILL,
+  // ── B1 ──
+  'phrasal-verbs': IMG_MC, 'passive-transform': IMG_ORDER, 'conditionals-id': IMG_MC,
+  'paragraph-fill': IMG_FILL, 'synonyms-context': IMG_OPPOSITES, 'perfect-vs-simple': IMG_FILL,
+  'coherence-errors': IMG_SPELL,
+  // ── B2 ──
+  'subordinate-clauses': IMG_ORDER, 'past-modals': IMG_MC, 'register': IMG_OPPOSITES,
+  'idioms': IMG_IMAGE_ID, 'discourse-connectors': IMG_FILL, 'mixed-conditionals': IMG_FILL,
+  'nuance': IMG_MATCH,
+};
+function gameImg(id) { return GAME_IMG[id] || `/imgs/juego-${id}.png`; }
 
 // ══════════════════════════════════════════
 //  STATE
@@ -452,13 +490,47 @@ function loadGamesProgress() {
     const data = JSON.parse(localStorage.getItem(GAMES_STORAGE_KEY)) || {};
     // 'done' = ya lo completó sin errores (check ✓). 'intentado' = ya lo
     // jugó pero le quedó algo mal (para avisarle en la tarjeta del menú).
-    return { done: data.done || {}, intentado: data.intentado || {} };
-  } catch (e) { return { done: {}, intentado: {} }; }
+    return { done: data.done || {}, intentado: data.intentado || {}, plays: data.plays || {} };
+  } catch (e) { return { done: {}, intentado: {}, plays: {} }; }
 }
 function saveGamesProgress() {
   try { localStorage.setItem(GAMES_STORAGE_KEY, JSON.stringify(gamesProgress)); } catch (e) {}
 }
 const gamesProgress = loadGamesProgress();
+
+// ══════════════════════════════════════════
+//  PUNTOS POR NIVEL (sin límite de partidas)
+//  - Solo la 1.ª partida de cada juego (por usuario y nivel) suma puntos.
+//  - Después se puede volver a jugar TODAS las veces que quiera,
+//    pero esas partidas ya no suman puntos (se le avisa antes).
+//  - Puntos por juego según nivel (cambia los valores aquí).
+// ══════════════════════════════════════════
+const LEVEL_POINTS = { A1: 20, A2: 30, B1: 40, B2: 50 };
+const POINT_PLAYS = 1;
+function playsOf(level, id) { return gamesProgress.plays[gameDoneKey(level, id)] || 0; }
+// Puntos por respuesta correcta = puntos del nivel / preguntas (mantiene el  en vivo coherente)
+function pointsPerQ() { return Math.max(1, Math.round((LEVEL_POINTS[currentLevel] || 20) / (totalQ || 5))); }
+
+function confirmarSinPuntos() {
+  return new Promise(res => {
+    const dark = document.documentElement.classList.contains('dark');
+    const o = document.createElement('div');
+    o.style.cssText = 'position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)';
+    const btn = 'flex:1;border-radius:999px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;';
+    o.innerHTML = `<div style="max-width:360px;width:100%;text-align:center;padding:24px;border-radius:24px;font-family:inherit;background:${dark ? '#0f172a' : '#fff'};color:${dark ? '#f1f5f9' : '#1a1a2e'};border:2px solid ${dark ? '#1e293b' : '#e5e7eb'}">
+      <h3 style="font-weight:900;font-size:1.2rem;margin-bottom:8px">Esta partida no sumará puntos</h3>
+      <p style="font-weight:700;font-size:.9rem;margin-bottom:18px">Solo la primera partida de cada juego da puntos. Puedes jugarlo las veces que quieras, pero ya no se sumarán a tu perfil.</p>
+      <div style="display:flex;gap:10px">
+        <button data-r="0" class="hover-circle-btn" style="${btn}background:transparent;color:inherit;border:2px solid #94a3b8"><span class="hover-circle"></span><span class="btn-label">Cancelar</span></button>
+        <button data-r="1" class="hover-circle-btn" style="${btn}background:#1cb0f6;color:#fff;border:none"><span class="hover-circle"></span><span class="btn-label">Jugar igual</span></button>
+      </div></div>`;
+    o.addEventListener('click', e => {
+      const b = e.target.closest('button[data-r]'); if (!b && e.target !== o) return;
+      o.remove(); res(!!b && b.dataset.r === '1');
+    });
+    document.body.appendChild(o);
+  });
+}
 
 /** Los niveles POR DEBAJO del nivel obtenido en el placement test se dan
  *  por superados: se marcan TODOS sus minijuegos como completados (check ✓)
@@ -554,7 +626,7 @@ function showScreen(id) {
   const s = document.getElementById(id);
   if (!s) { console.warn(`showScreen: no existe #${id}`); return; }
   s.classList.add('active');
-  // 🩹 Defensivo: si el footer no existe (o cambia de id en el futuro),
+  //  Defensivo: si el footer no existe (o cambia de id en el futuro),
   // ya no rompe toda la función a mitad de camino — antes esto detenía
   // en seco showResults() y por eso el progreso nunca llegaba a guardarse.
   const footer = document.getElementById('main-footer');
@@ -564,6 +636,7 @@ function showScreen(id) {
 
 function goBack() {
   clearInterval(mcTimerInterval);
+  buildGrid(currentLevel);
   showScreen('screen-levels');
 }
 function goLevels(){ showScreen('screen-levels'); }
@@ -597,17 +670,24 @@ function buildGrid(level) {
       card.style.border = '2px solid #2ecc71';
     }
 
+    const plays = playsOf(level, g.id);
+    // Cuando ya jugó la partida que da puntos, se avisa (tarjeta en rojo) pero puede seguir jugando
+    const sinPuntos = plays >= POINT_PLAYS;
+    if (sinPuntos) card.classList.add('game-card-nopoints');
+    const playInfo = sinPuntos ? 'Si haces esta lección no te sumará más puntos' : '';
+
     card.innerHTML = `
       ${completado ? `<span class="game-check-badge" title="Ya completaste este juego" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">✓</span>` : ''}
       ${pendientePorErrores ? `<span class="game-retry-badge" title="Todavía no lo completaste sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ff9600;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">!</span>` : ''}
-      <div class="game-card-icon">${g.icon}</div>
+      <div class="game-card-icon"><img src="${gameImg(g.id)}" alt="" style="width:112px;height:112px;object-fit:contain" onerror="this.style.visibility='hidden'"/></div>
       <div>
         <div class="game-card-title">${g.title}</div>
         <span class="game-card-badge badge-${level}">${level}</span>
       </div>
       <div class="game-card-desc">${g.desc}</div>
       ${pendientePorErrores ? `<div class="game-card-warning" style="margin:6px 0 4px;padding:6px 8px;border-radius:8px;background:#ffe8c2;color:#9a5b00;font-size:0.78rem;font-weight:700;text-align:center;">Debes completar esta sin errores para poder avanzar</div>` : ''}
-      <button class="btn-play btn-${level}" onclick="startGame('${g.id}','${level}')">${completado ? '🔁 Repasar' : (pendientePorErrores ? '🔁 Reintentar' : '▶ Jugar')}</button>
+      ${playInfo ? `<div class="game-card-plays" style="font-size:.85rem;font-weight:800;margin:6px 0;text-align:center;color:#ef4444;">${playInfo}</div>` : ''}
+      <button class="btn-play btn-${level} hover-circle-btn" onclick="startGame('${g.id}','${level}')"><span class="hover-circle"></span><span class="btn-label">${completado ? 'Repasar' : (pendientePorErrores ? 'Reintentar' : 'Jugar')}</span></button>
     `;
     grid.appendChild(card);
   });
@@ -658,7 +738,7 @@ function initGameSelector() {
     btn.addEventListener('click', () => {
       if (idx > getUnlockedGamesLevelIdx()) {
         if (window.SoundManager) SoundManager.playWrong();
-        showLevelLockToast('🔒 Completa todos los minijuegos del nivel actual para desbloquear este.');
+        showLevelLockToast('Completa todos los minijuegos del nivel actual para desbloquear este.');
         return;
       }
       currentLevel = btn.dataset.level;
@@ -670,7 +750,7 @@ function initGameSelector() {
 
   refreshGamesLevelTabsLockUI();
 
-  // 🩹 Construye la grilla inicial SIEMPRE cuando el DOM esté listo.
+  //  Construye la grilla inicial SIEMPRE cuando el DOM esté listo.
   // Antes esta llamada vivía suelta al final del archivo: si cualquier
   // otra línea del script fallaba antes de llegar a ese punto (por
   // ejemplo por una API que algunos navegadores móviles no soportan
@@ -709,6 +789,12 @@ if (document.readyState === 'loading') {
 // ══════════════════════════════════════════
 
 function startGame(gameId, level) {
+  const n = playsOf(level, gameId);
+  if (n >= POINT_PLAYS) { confirmarSinPuntos().then(ok => { if (ok) launchGame(gameId, level); }); return; }
+  launchGame(gameId, level);
+}
+
+function launchGame(gameId, level) {
   const def = getGameDef(gameId);
   if (!def) { console.warn(`startGame: juego desconocido "${gameId}"`); return; }
   if (!DATA[level] || !DATA[level][gameId]) { console.warn(`startGame: sin datos para "${gameId}" en nivel "${level}"`); return; }
@@ -717,6 +803,9 @@ function startGame(gameId, level) {
   currentLevel = level;
   currentQ     = 0;
   score        = 0;
+  // La partida cuenta al empezar (así no se puede abandonar para repetir con puntos)
+  gamesProgress.plays[gameDoneKey(level, gameId)] = playsOf(level, gameId) + 1;
+  saveGamesProgress();
 
   switch (def.engine) {
     case 'mc':     startMC(gameId, level);     break;
@@ -742,7 +831,7 @@ function startMC(gameId, level) {
   currentQ  = 0;
   totalQ    = qs.length;
   document.getElementById('mc-level-tag').textContent = level;
-  document.getElementById('mc-game-name').textContent = `${def.icon} ${def.title}`;
+  document.getElementById('mc-game-name').textContent = def.title;
   document.getElementById('mc-score').textContent = 0;
   renderMC();
   showScreen('screen-mc');
@@ -762,7 +851,8 @@ function renderMC() {
   if (q.emoji) {
     mascotImg.style.display = 'none';
     emojiSpan.style.display = '';
-    emojiSpan.textContent   = q.emoji;
+    const m = /^\[IMG: (.+)\]$/.exec(q.emoji);
+    if (m) emojiSpan.innerHTML = `<img src="/imgs/vocab-${m[1].toLowerCase()}.png" alt="${m[1]}" style="height:148px;object-fit:contain" onerror="this.style.visibility='hidden'"/>`; else emojiSpan.textContent = q.emoji;
   } else {
     mascotImg.style.display = '';
     emojiSpan.style.display = 'none';
@@ -786,10 +876,10 @@ function renderMC() {
     timerEl.style.display = '';
     timerEl.classList.remove('urgent');
     mcTimerRemaining = def.timerSec;
-    timerEl.textContent = `⏱ ${mcTimerRemaining}`;
+    timerEl.textContent = `${mcTimerRemaining}`;
     mcTimerInterval = setInterval(() => {
       mcTimerRemaining--;
-      timerEl.textContent = `⏱ ${mcTimerRemaining}`;
+      timerEl.textContent = `${mcTimerRemaining}`;
       if (mcTimerRemaining <= 3) timerEl.classList.add('urgent');
       if (mcTimerRemaining <= 0) {
         clearInterval(mcTimerInterval);
@@ -819,7 +909,7 @@ function handleMC(btn, chosen, correct, grid) {
   });
   const isCorrect = chosen === correct;
   if (isCorrect) {
-    score += 10;
+    score += pointsPerQ();
     document.getElementById('mc-score').textContent = score;
     btn.classList.add('correct');
     if (window.SoundManager) SoundManager.playCorrect();
@@ -852,7 +942,7 @@ function startMatch(gameId, level) {
   score         = 0;
   totalQ        = matchPairs.length;
   document.getElementById('match-level-tag').textContent = level;
-  document.getElementById('match-game-name').textContent = `${def.icon} ${def.title}`;
+  document.getElementById('match-game-name').textContent = def.title;
   document.getElementById('match-instruction-text').textContent = def.instruction || 'Toca un elemento y luego su pareja correcta';
   document.getElementById('match-score').textContent = 0;
   document.getElementById('match-feedback').textContent = '';
@@ -878,7 +968,8 @@ function startMatch(gameId, level) {
 function makeMatchBtn(word, lang) {
   const btn = document.createElement('button');
   btn.className = 'match-btn';
-  btn.textContent = word;
+  const m = /^\[IMG: (.+)\]$/.exec(word);
+  if (m) btn.innerHTML = `<img src="/imgs/vocab-${m[1].toLowerCase()}.png" alt="${m[1]}" style="height:96px;object-fit:contain" onerror="this.style.visibility='hidden'"/>`; else btn.textContent = word;
   btn.dataset.lang = lang;
   btn.dataset.word = word;
   btn.onclick = () => handleMatch(btn);
@@ -915,16 +1006,16 @@ function handleMatch(btn) {
 
   if (correct) {
     [a,b].forEach(x => { x.classList.remove('selected'); x.classList.add('correct'); });
-    score += 10;
+    score += pointsPerQ();
     matchDone++;
     document.getElementById('match-score').textContent = score;
-    document.getElementById('match-feedback').textContent = '✅ ¡Correcto!';
+    document.getElementById('match-feedback').textContent = '¡Correcto!';
     document.getElementById('match-feedback').style.color = '#58cc02';
     if (window.SoundManager) SoundManager.playCorrect();
     if (matchDone >= matchPairs.length) setTimeout(() => showResults(getGameDef(matchGameId).title), 800);
   } else {
     [a,b].forEach(x => { x.classList.remove('selected'); x.classList.add('wrong'); });
-    document.getElementById('match-feedback').textContent = '❌ Inténtalo de nuevo';
+    document.getElementById('match-feedback').textContent = 'Inténtalo de nuevo';
     document.getElementById('match-feedback').style.color = '#ff4b4b';
     if (window.SoundManager) SoundManager.playWrong();
     setTimeout(() => {
@@ -949,7 +1040,7 @@ function startFill(gameId, level) {
   score       = 0;
   totalQ      = fillData.length;
   document.getElementById('fill-level-tag').textContent = level;
-  document.getElementById('fill-game-name').textContent = `${def.icon} ${def.title}`;
+  document.getElementById('fill-game-name').textContent = def.title;
   document.getElementById('fill-score').textContent = 0;
   renderFill();
   showScreen('screen-fill');
@@ -982,29 +1073,11 @@ function renderFill() {
     chip.className = 'word-chip';
     chip.textContent = w;
     chip.dataset.word = w;
-    chip.onclick = () => addToFillAnswer(chip);
     bank.appendChild(chip);
   });
 
   document.getElementById('fill-answer-row').innerHTML = '';
   document.getElementById('fill-check-btn').disabled = false;
-}
-
-function addToFillAnswer(chip) {
-  if (chip.classList.contains('used')) return;
-  chip.classList.add('used');
-  fillAnswers.push(chip.dataset.word);
-
-  const row = document.getElementById('fill-answer-row');
-  const ac = document.createElement('button');
-  ac.className = 'answer-chip';
-  ac.textContent = chip.dataset.word;
-  ac.onclick = () => {
-    fillAnswers.splice(fillAnswers.indexOf(chip.dataset.word),1);
-    ac.remove();
-    chip.classList.remove('used');
-  };
-  row.appendChild(ac);
 }
 
 function checkFill() {
@@ -1014,7 +1087,7 @@ function checkFill() {
 
   if (correct) {
     row.style.border = '2.5px solid #58cc02';
-    score += 10;
+    score += pointsPerQ();
     document.getElementById('fill-score').textContent = score;
     if (window.SoundManager) SoundManager.playCorrect();
   } else {
@@ -1050,7 +1123,7 @@ function startListen(gameId, level) {
   score     = 0;
   totalQ    = listenSession.length;
   document.getElementById('listen-level-tag').textContent = level;
-  document.getElementById('listen-game-name').textContent = `${def.icon} ${def.title}`;
+  document.getElementById('listen-game-name').textContent = def.title;
   document.getElementById('listen-score').textContent = 0;
   renderListen();
   showScreen('screen-listen');
@@ -1097,7 +1170,7 @@ function handleListen(btn, chosen, correct, grid) {
   });
   const isCorrect = chosen === correct;
   if (isCorrect) {
-    score += 10;
+    score += pointsPerQ();
     document.getElementById('listen-score').textContent = score;
     if (window.SoundManager) SoundManager.playCorrect();
   } else {
@@ -1129,7 +1202,7 @@ function startOrder(gameId, level) {
   score        = 0;
   totalQ       = orderSession.length;
   document.getElementById('order-level-tag').textContent = level;
-  document.getElementById('order-game-name').textContent = `${def.icon} ${def.title}`;
+  document.getElementById('order-game-name').textContent = def.title;
   document.getElementById('order-label').textContent = def.label || 'Ordena la frase:';
   document.getElementById('order-score').textContent = 0;
   renderOrder();
@@ -1152,29 +1225,11 @@ function renderOrder() {
     chip.className = 'word-chip';
     chip.textContent = w;
     chip.dataset.word = w;
-    chip.onclick = () => addToOrderAnswer(chip);
     bank.appendChild(chip);
   });
 
   document.getElementById('order-answer-row').innerHTML = '';
   document.getElementById('order-check-btn').disabled = false;
-}
-
-function addToOrderAnswer(chip) {
-  if (chip.classList.contains('used')) return;
-  chip.classList.add('used');
-  orderAnswers.push(chip.dataset.word);
-
-  const row = document.getElementById('order-answer-row');
-  const ac = document.createElement('button');
-  ac.className = 'answer-chip';
-  ac.textContent = chip.dataset.word;
-  ac.onclick = () => {
-    orderAnswers.splice(orderAnswers.indexOf(chip.dataset.word),1);
-    ac.remove();
-    chip.classList.remove('used');
-  };
-  row.appendChild(ac);
 }
 
 function checkOrder() {
@@ -1184,7 +1239,7 @@ function checkOrder() {
 
   if (correct) {
     row.style.border = '2.5px solid #58cc02';
-    score += 10;
+    score += pointsPerQ();
     document.getElementById('order-score').textContent = score;
     if (window.SoundManager) SoundManager.playCorrect();
   } else {
@@ -1216,9 +1271,12 @@ let lastGameName = '';
 
 function showResults(gameName) {
   lastGameName = gameName;
-  const maxScore = totalQ * 10;
+  const maxScore = totalQ * pointsPerQ();
   const pct = maxScore > 0 ? score / maxScore : 0;
   const def = getGameDef(currentGame);
+  const nPartida = playsOf(currentLevel, currentGame);
+  const conPuntos = nPartida <= POINT_PLAYS;
+  const puntosGanados = conPuntos ? Math.min(LEVEL_POINTS[currentLevel] || 20, score) : 0;
 
   const perfecto = pct === 1;
   const yaTeniaCheck = !!gamesProgress.done[gameDoneKey(currentLevel, currentGame)];
@@ -1229,33 +1287,35 @@ function showResults(gameName) {
 
   let title, sub;
   if (perfecto) {
-    title = '🎉 ¡Perfecto!';
+    title = '¡Perfecto!';
     sub = yaTeniaCheck ? '¡Otra vez perfecto! Sigues dominando este juego.' : '¡Respuestas perfectas! Ganaste el check ✓ de este juego.';
   } else if (pct >= .7) {
-    title = '🌟 ¡Muy bien!';
+    title = '¡Muy bien!';
     sub = yaTeniaCheck ? 'Casi perfecto, ¡sigue así!' : 'Casi perfecto, ¡sigue así! Para ganar el check ✓ de este juego debes responder todo sin ningún error.';
   } else if (pct >= .4) {
-    title = '👍 ¡Buen intento!';
+    title = '¡Buen intento!';
     sub = yaTeniaCheck ? 'Puedes mejorar. ¡Inténtalo de nuevo!' : 'Puedes mejorar. Para ganar el check ✓ de este juego debes responder todo sin ningún error.';
   } else {
-    title = '💪 ¡Sigue practicando!';
+    title = '¡Sigue practicando!';
     sub = yaTeniaCheck ? 'La práctica hace al maestro.' : 'La práctica hace al maestro. Para ganar el check ✓ de este juego debes responder todo sin ningún error.';
   }
 
   document.getElementById('results-title').textContent    = title;
+  if (!conPuntos) sub += ' Esta partida no sumó puntos: solo la primera cuenta.';
+  else if (nPartida === POINT_PLAYS) sub += ' Ojo: si vuelves a jugar este juego ya no sumará puntos.';
   document.getElementById('results-subtitle').textContent = sub;
-  document.getElementById('results-score-val').textContent = score;
+  document.getElementById('results-score-val').textContent = puntosGanados;
 
   // Badges
   const badgeContainer = document.getElementById('results-badges');
   badgeContainer.innerHTML = '';
   const badges = [];
-  if (score >= 50)         badges.push({ label:'⭐ Estrella',    color:'#f5a623' });
-  if (pct === 1)           badges.push({ label:'💯 Perfecto',    color:'#58cc02' });
-  if (def && def.engine === 'listen') badges.push({ label:'🔊 Oído fino', color:'#1cb0f6' });
-  if (def && def.timerSec && pct === 1) badges.push({ label:'⚡ Reflejos rápidos', color:'#ff9600' });
-  if (currentLevel === 'B1')          badges.push({ label:'🦅 Nivel B1', color:'#8549ba' });
-  if (currentLevel === 'B2')          badges.push({ label:'🦉 Nivel B2', color:'#e64980' });
+  if (score >= 50)         badges.push({ label:'Estrella',    color:'#f5a623' });
+  if (pct === 1)           badges.push({ label:'Perfecto',    color:'#58cc02' });
+  if (def && def.engine === 'listen') badges.push({ label:'Oído fino', color:'#1cb0f6' });
+  if (def && def.timerSec && pct === 1) badges.push({ label:'Reflejos rápidos', color:'#ff9600' });
+  if (currentLevel === 'B1')          badges.push({ label:'Nivel B1', color:'#8549ba' });
+  if (currentLevel === 'B2')          badges.push({ label:'Nivel B2', color:'#e64980' });
   badges.forEach(b => {
     const el = document.createElement('span');
     el.className = 'result-badge';
@@ -1286,21 +1346,21 @@ function showResults(gameName) {
   // desbloquear el siguiente: se lo avisamos al alumno.
   const unlockedIdxDespues = getUnlockedGamesLevelIdx();
   if (unlockedIdxDespues > unlockedIdxAntes) {
-    showLevelLockToast(`🎉 ¡Nivel ${LEVEL_ORDER[unlockedIdxDespues]} desbloqueado!`);
+    showLevelLockToast(`¡Nivel ${LEVEL_ORDER[unlockedIdxDespues]} desbloqueado!`);
   }
 
   // Sincroniza el progreso REAL (puntos y juegos ganados) con Firebase para
   // que el Perfil lo muestre. Solo cuenta lo ganado en esta partida.
-  // 🩹 Esta lógica de persistencia NO se modificó: sigue llamando a
+  //  Esta lógica de persistencia NO se modificó: sigue llamando a
   // registrarProgreso() exactamente igual, sin importar cuál de los 19
   // minijuegos (5 originales + 14 nuevos) haya sido jugado.
-  const gano = pct >= 0.5;
-  // 🩹 Guardamos la promesa en window para que la navbar (link "Perfil")
+  const gano = pct >= 0.5 && conPuntos;
+  //  Guardamos la promesa en window para que la navbar (link "Perfil")
   // pueda esperarla antes de navegar; si no se espera, perfil.html puede
   // leer Firestore ANTES de que esta escritura termine y mostrar 0.
   window._egglishProgresoPendiente = import('/Secciones/Js/egglish-progreso.js')
     .then(({ registrarProgreso }) => registrarProgreso({
-      exp: score,
+      exp: puntosGanados,
       campo: gano ? 'juegosGanados' : null,
       incremento: gano ? 1 : 0,
     }))
@@ -1340,18 +1400,163 @@ function showExplain(prefix, isCorrect, q, timedOut) {
   if (!box || !result || !text) return;
 
   if (isCorrect) {
-    result.textContent = '✅ ¡Correcto!';
+    result.textContent = '¡Correcto!';
     result.style.color = '#58cc02';
   } else if (timedOut) {
-    result.textContent = '⏰ ¡Se acabó el tiempo!';
+    result.textContent = '¡Se acabó el tiempo!';
     result.style.color = '#ff4b4b';
   } else {
-    result.textContent = '❌ Respuesta incorrecta.';
+    result.textContent = 'Respuesta incorrecta.';
     result.style.color = '#ff4b4b';
   }
   text.textContent = q && q.expl ? q.expl : '';
   box.classList.add('show');
 }
+
+
+// ══════════════════════════════════════════
+//  TARJETAS ARRASTRABLES (motores "fill" y "order")
+//  - Arrastra una palabra del banco a la fila de respuesta (en la posición que quieras).
+//  - Arrastra las palabras de la respuesta para cambiar su orden.
+//  - Arrastra una palabra de la respuesta de vuelta al banco para quitarla.
+//  - Un toque/clic sigue funcionando: agrega la palabra al final, o la quita.
+//  Usa Pointer Events, así funciona igual con mouse y con el dedo en móvil.
+//  El orden de la respuesta se lee del DOM, por eso las palabras repetidas
+//  (p. ej. "I" dos veces) ya no se confunden.
+// ══════════════════════════════════════════
+function initChipDnD(cfg) {
+  const bankEl = document.getElementById(cfg.bank);
+  const rowEl  = document.getElementById(cfg.row);
+  if (!bankEl || !rowEl) return;
+  const PAD = 12;
+
+  const inside = (el, x, y) => {
+    const r = el.getBoundingClientRect();
+    return x >= r.left - PAD && x <= r.right + PAD && y >= r.top - PAD && y <= r.bottom + PAD;
+  };
+  const notify = () => cfg.onChange([...rowEl.querySelectorAll('.answer-chip')].map(c => c.dataset.word));
+  const locked = () => !!(cfg.isLocked && cfg.isLocked());
+
+  function makeAnswer(bankChip) {
+    const ac = document.createElement('button');
+    ac.type = 'button';
+    ac.className = 'answer-chip';
+    ac.textContent = bankChip.dataset.word;
+    ac.dataset.word = bankChip.dataset.word;
+    ac._bank = bankChip;
+    return ac;
+  }
+
+  // Coloca la palabra arrastrada según la posición del puntero dentro de la fila
+  function placeAt(ac, x, y) {
+    const sibs = [...rowEl.querySelectorAll('.answer-chip')].filter(c => c !== ac);
+    let before = null;
+    for (const s of sibs) {
+      const r = s.getBoundingClientRect();
+      if (y < r.top || (y <= r.bottom && x < r.left + r.width / 2)) { before = s; break; }
+    }
+    if (before) { if (ac.nextSibling !== before || ac.parentNode !== rowEl) rowEl.insertBefore(ac, before); }
+    else if (ac.parentNode !== rowEl || rowEl.lastChild !== ac) rowEl.appendChild(ac);
+  }
+
+  function onDown(e) {
+    if (e.button > 0 || locked()) return;
+    const chip = e.target.closest('.word-chip, .answer-chip');
+    if (!chip || chip.classList.contains('used')) return;
+    const fromRow = chip.classList.contains('answer-chip');
+    const sx = e.clientX, sy = e.clientY;
+    const rect = chip.getBoundingClientRect();
+    let dragging = false, ghost = null, ac = fromRow ? chip : null;
+    try { chip.setPointerCapture(e.pointerId); } catch (_) {}
+
+    function start() {
+      dragging = true;
+      ghost = chip.cloneNode(true);
+      ghost.classList.add('chip-ghost');
+      ghost.style.width = rect.width + 'px';
+      ghost.style.height = rect.height + 'px';
+      document.body.appendChild(ghost);
+      if (fromRow) {
+        ac.classList.add('chip-placeholder');
+      } else {
+        chip.classList.add('used');
+        ac = makeAnswer(chip);
+        ac.classList.add('chip-placeholder');
+      }
+    }
+    function move(ev) {
+      if (ev.pointerId !== e.pointerId) return;
+      if (!dragging) {
+        if (Math.hypot(ev.clientX - sx, ev.clientY - sy) < 6) return;
+        start();
+      }
+      ev.preventDefault();
+      ghost.style.left = (ev.clientX - (sx - rect.left)) + 'px';
+      ghost.style.top  = (ev.clientY - (sy - rect.top)) + 'px';
+      if (inside(rowEl, ev.clientX, ev.clientY)) placeAt(ac, ev.clientX, ev.clientY);
+      else if (!fromRow && ac.parentNode) ac.remove();   // viene del banco y salió de la fila
+    }
+    function finish(ev) {
+      if (ev.pointerId !== e.pointerId) return;
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', finish);
+      window.removeEventListener('pointercancel', finish);
+      try { chip.releasePointerCapture(e.pointerId); } catch (_) {}
+      const cancelled = ev.type === 'pointercancel';
+
+      if (!dragging) {                       // fue un toque/clic simple
+        if (cancelled) return;
+        if (fromRow) { chip._bank.classList.remove('used'); chip.remove(); }
+        else { chip.classList.add('used'); rowEl.appendChild(makeAnswer(chip)); }
+        notify();
+        return;
+      }
+      ghost.remove();
+      ac.classList.remove('chip-placeholder');
+      const x = ev.clientX, y = ev.clientY;
+      if (fromRow) {
+        // Soltada sobre el banco (y no sobre la fila) => vuelve al banco
+        if (!cancelled && inside(bankEl, x, y) && !inside(rowEl, x, y)) {
+          ac._bank.classList.remove('used');
+          ac.remove();
+        }
+      } else if (cancelled || !ac.parentNode) {
+        ac.remove();
+        chip.classList.remove('used');      // soltada fuera de la fila: se cancela
+      }
+      notify();
+    }
+    window.addEventListener('pointermove', move, { passive: false });
+    window.addEventListener('pointerup', finish);
+    window.addEventListener('pointercancel', finish);
+  }
+
+  bankEl.addEventListener('pointerdown', onDown);
+  rowEl.addEventListener('pointerdown', onDown);
+
+  // Teclado (Enter/Espacio): mismo comportamiento que el toque simple
+  function onKeyClick(e) {
+    if (e.detail !== 0 || locked()) return;
+    const chip = e.target.closest('.word-chip, .answer-chip');
+    if (!chip || chip.classList.contains('used')) return;
+    if (chip.classList.contains('answer-chip')) { chip._bank.classList.remove('used'); chip.remove(); }
+    else { chip.classList.add('used'); rowEl.appendChild(makeAnswer(chip)); }
+    notify();
+  }
+  bankEl.addEventListener('click', onKeyClick);
+  rowEl.addEventListener('click', onKeyClick);
+}
+
+initChipDnD({
+  bank: 'fill-bank', row: 'fill-answer-row',
+  isLocked: () => document.getElementById('fill-check-btn').disabled,
+  onChange: a => { fillAnswers = a; },
+});
+initChipDnD({
+  bank: 'order-bank', row: 'order-answer-row',
+  isLocked: () => document.getElementById('order-check-btn').disabled,
+  onChange: a => { orderAnswers = a; },
+});
 
 // ══════════════════════════════════════════
 //  UTILITIES
