@@ -6,6 +6,625 @@
   <title>Egglish – Test de Nivel</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <script>
+    /* Aplica tema ANTES de pintar para evitar parpadeo */
+    if (localStorage.getItem('egglish-theme') === 'dark' ||
+        (!localStorage.getItem('egglish-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+  <style>
+    /* ═══════════════════════════════════════════
+       VARIABLES DE TEMA
+    ═══════════════════════════════════════════ */
+    :root {
+      --blue:        #1cb0f6;
+      --blue-d:      #0090d9;
+      --green:       #58cc02;
+      --green-d:     #46a302;
+
+      /* Fondo claro */
+      --bg-from:     #eaf6ff;
+      --bg-via1:     #bfe8ff;
+      --bg-via2:     #7ec8ff;
+      --bg-via3:     #1cb0f6;
+      --bg-via4:     #4c9cff;
+
+      /* Tarjeta — modo claro */
+      --card-bg:     rgba(255,255,255,0.55);
+      --card-border: rgba(255,255,255,0.75);
+      --card-shadow: 0 8px 40px rgba(0,144,217,0.15);
+
+      /* Textos — modo claro */
+      --text-main:   #1a1a2e;
+      --text-sub:    #5a6a85;
+      --text-muted:  #8a9ab5;
+
+      /* Opciones — modo claro */
+      --opt-bg:      rgba(255,255,255,0.65);
+      --opt-border:  rgba(180,210,240,0.7);
+      --opt-color:   #1a1a2e;
+      --opt-letter-bg:    rgba(28,176,246,0.1);
+      --opt-letter-color: #1cb0f6;
+
+      /* Barra de progreso — modo claro */
+      --prog-track:  rgba(0,0,0,0.08);
+      --prog-meta:   #5a6a85;
+
+      /* Divider — modo claro */
+      --divider-line: rgba(0,0,0,0.1);
+      --divider-text: #8a9ab5;
+
+      /* Instrucción de sección */
+      --sect-color:  #8a9ab5;
+    }
+
+    html.dark {
+      --bg-from:     #0b172a;
+      --bg-via1:     #172554;
+      --bg-via2:     #0c4a8f;
+      --bg-via3:     #0090d9;
+      --bg-via4:     #1cb0f6;
+
+      --card-bg:     rgba(15,23,42,0.55);
+      --card-border: rgba(148,163,184,0.2);
+      --card-shadow: 0 8px 40px rgba(0,0,0,0.4);
+
+      --text-main:   #f1f5f9;
+      --text-sub:    rgba(255,255,255,0.65);
+      --text-muted:  rgba(255,255,255,0.4);
+
+      --opt-bg:      rgba(255,255,255,0.06);
+      --opt-border:  rgba(255,255,255,0.15);
+      --opt-color:   #f1f5f9;
+      --opt-letter-bg:    rgba(28,176,246,0.15);
+      --opt-letter-color: #1cb0f6;
+
+      --prog-track:  rgba(255,255,255,0.1);
+      --prog-meta:   rgba(255,255,255,0.5);
+
+      --divider-line: rgba(255,255,255,0.12);
+      --divider-text: rgba(255,255,255,0.3);
+
+      --sect-color:  rgba(255,255,255,0.45);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET & BASE
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100vh;
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════
+       FONDO DEGRADADO ANIMADO — mismo que entrar.html
+    ═══════════════════════════════════════════ */
+    #page-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(120deg,
+        var(--bg-from), var(--bg-via1), var(--bg-via2),
+        var(--bg-via3), var(--bg-via4), var(--bg-via1), var(--bg-from));
+      background-size: 400% 400%;
+      animation: grad 18s ease infinite;
+    }
+    @keyframes grad {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @media (prefers-reduced-motion: reduce) { #page-bg { animation: none; } }
+
+    /* ═══════════════════════════════════════════
+       BEAM — borde plateado giratorio mejorado
+       (mismo @property que login-card en entrar.html)
+    ═══════════════════════════════════════════ */
+    @property --beam {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+    @keyframes beam-spin { to { --beam: 360deg; } }
+
+    /* ═══════════════════════════════════════════
+       WRAPPER
+    ═══════════════════════════════════════════ */
+    #app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px 48px;
+    }
+
+    /* ═══════════════════════════════════════════
+       BARRA DE PROGRESO
+    ═══════════════════════════════════════════ */
+    #progress-wrap {
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 22px;
+    }
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--prog-meta);
+      margin-bottom: 7px;
+    }
+    .progress-track {
+      height: 7px;
+      background: var(--prog-track);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ═══════════════════════════════════════════
+       TARJETA — glassmorphism con blur real + beam
+    ═══════════════════════════════════════════ */
+    .card {
+      width: 100%;
+      max-width: 680px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 28px;
+      padding: 36px 32px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: var(--card-shadow);
+
+      /* Beam plateado — isolation para el ::before */
+      position: relative;
+      isolation: isolate;
+    }
+    /* Borde beam giratorio plateado — mejorado vs versión anterior */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: conic-gradient(
+        from var(--beam),
+        transparent 0 65%,
+        rgba(248,250,252,0.7) 78%,
+        rgba(148,163,184,0.9) 88%,
+        rgba(248,250,252,0.7) 95%,
+        transparent 100%
+      );
+      filter: blur(1px);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: beam-spin 5s linear infinite;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 26px 18px; border-radius: 22px; }
+    }
+
+    /* ═══════════════════════════════════════════
+       TIPOGRAFÍA DE TARJETA
+    ═══════════════════════════════════════════ */
+    .welcome-chick {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .chick-bounce {
+      display: inline-block;
+      animation: bounce-chick 2s ease-in-out infinite;
+    }
+    @keyframes bounce-chick {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-10px); }
+    }
+    .chick-bounce img { width: 96px; height: 96px; object-fit: contain; }
+
+    .welcome-title {
+      font-size: clamp(24px, 5vw, 34px);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+    .welcome-sub {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-align: center;
+      margin-bottom: 30px;
+      line-height: 1.55;
+    }
+
+    .section-instruction {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sect-color);
+      text-align: center;
+      margin-bottom: 18px;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .question-num {
+      display: inline-block;
+      background: rgba(28,176,246,0.15);
+      border: 1.5px solid rgba(28,176,246,0.4);
+      border-radius: 8px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: clamp(16px, 3.2vw, 20px);
+      font-weight: 900;
+      line-height: 1.45;
+      margin-bottom: 22px;
+      color: var(--text-main);
+    }
+
+    /* ═══════════════════════════════════════════
+       OPCIONES — hover ripple igual a "Empezar a Jugar"
+    ═══════════════════════════════════════════ */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    /* Wrapper para el ripple (igual a .hover-circle-btn del index) */
+    .opt-btn {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--opt-bg);
+      border: 2px solid var(--opt-border);
+      border-radius: 14px;
+      color: var(--opt-color);
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      line-height: 1.3;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.1s;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+
+    /* Círculo hover que nace desde el cursor */
+    .opt-btn .opt-ripple {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      background: rgba(28,176,246,0.18);
+      transform: translate(-50%,-50%);
+      transition: width 0.45s ease-in-out, height 0.45s ease-in-out;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .opt-btn:hover .opt-ripple {
+      width: 280%;
+      height: 280%;
+    }
+    .opt-btn:hover {
+      border-color: rgba(28,176,246,0.55);
+    }
+
+    /* Efecto click ripple (igual a .click-effect del index) */
+    .opt-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: rgba(255,255,255,0.45);
+      transform: scale(0.001);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .opt-btn.is-clicked::after {
+      animation: click-ripple 0.6s ease-out forwards;
+    }
+    @keyframes click-ripple {
+      50%  { transform: scale(1.4); opacity: 0; }
+      100% { transform: scale(0.001); opacity: 0; }
+    }
+
+    /* Letra y texto por encima del ripple */
+    .opt-letter, .opt-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    .opt-letter {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      background: var(--opt-letter-bg);
+      border: 1.5px solid rgba(28,176,246,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 900;
+      color: var(--opt-letter-color);
+      flex-shrink: 0;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    /* Estado seleccionado */
+    .opt-btn.selected {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(28,176,246,0.2);
+      background: rgba(28,176,246,0.12);
+    }
+    .opt-btn.selected .opt-letter {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+    .opt-btn:active { transform: scale(0.985); }
+
+    /* ═══════════════════════════════════════════
+       BOTÓN SIGUIENTE — cambia a verde al seleccionar
+    ═══════════════════════════════════════════ */
+    .btn-next {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      margin-top: 22px;
+      letter-spacing: 0.4px;
+      transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s, opacity 0.2s;
+
+      /* Estado inicial: azul deshabilitado */
+      background: var(--blue);
+      box-shadow: 0 5px 0 var(--blue-d);
+      opacity: 0.42;
+      pointer-events: none;
+    }
+    .btn-next.ready {
+      opacity: 1;
+      pointer-events: auto;
+      background: var(--green);
+      box-shadow: 0 5px 0 var(--green-d);
+    }
+    /* Ripple en hover del botón siguiente */
+    .btn-next .btn-ripple {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transform: translate(-50%,-50%);
+      transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .btn-next:hover .btn-ripple { width: 300%; height: 300%; }
+    .btn-next .btn-label { position: relative; z-index: 1; }
+    .btn-next:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--green-d); }
+
+    /* ═══════════════════════════════════════════
+       BOTONES PRIMARIO / GREEN / GHOST (welcome + result)
+    ═══════════════════════════════════════════ */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      width: 100%;
+      padding: 16px;
+      background: var(--blue);
+      box-shadow: 0 5px 0 var(--blue-d);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 900;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      margin-top: 22px;
+      letter-spacing: 0.4px;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .btn-primary .btn-ripple {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 0; height: 0;
+      border-radius: 50%;
+      transform: translate(-50%,-50%);
+      transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .btn-primary:hover .btn-ripple { width: 300%; height: 300%; }
+    .btn-primary .btn-label { position: relative; z-index: 1; }
+    .btn-primary:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--blue-d); }
+
+    .btn-green {
+      background: var(--green);
+      box-shadow: 0 5px 0 var(--green-d);
+    }
+    .btn-green .btn-ripple { background: rgba(70,163,2,0.35); }
+    .btn-green:active { box-shadow: 0 1px 0 var(--green-d); }
+
+    .btn-ghost {
+      width: 100%;
+      padding: 14px;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      color: var(--text-sub);
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+    }
+    html:not(.dark) .btn-ghost {
+      background: rgba(0,0,0,0.04);
+      border-color: rgba(0,0,0,0.12);
+    }
+    .btn-ghost:hover {
+      background: rgba(28,176,246,0.1);
+      border-color: rgba(28,176,246,0.4);
+      color: var(--blue);
+    }
+
+    /* ═══════════════════════════════════════════
+       DIVIDER
+    ═══════════════════════════════════════════ */
+    .or-divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 18px 0 0;
+      color: var(--divider-text);
+      font-size: 13px; font-weight: 800;
+    }
+    .or-divider::before, .or-divider::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: var(--divider-line);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESULTADO
+    ═══════════════════════════════════════════ */
+    .result-label {
+      font-size: 13px; font-weight: 800;
+      text-align: center;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .result-level {
+      font-size: clamp(56px, 14vw, 92px);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1;
+      margin: 10px 0 6px;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .result-name {
+      font-size: clamp(17px, 4vw, 22px);
+      font-weight: 900;
+      text-align: center;
+      color: var(--text-main);
+      margin-bottom: 14px;
+    }
+    .level-strip {
+      display: flex; justify-content: center; gap: 6px;
+      margin-bottom: 22px; flex-wrap: wrap;
+    }
+    .level-pip {
+      padding: 5px 14px; border-radius: 99px;
+      font-size: 12px; font-weight: 900;
+      background: rgba(128,128,128,0.1);
+      border: 2px solid rgba(128,128,128,0.15);
+      color: var(--text-muted);
+      transition: all 0.3s;
+    }
+    .level-pip.active {
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 0 18px rgba(28,176,246,0.55);
+    }
+    .result-score-pill { display: flex; justify-content: center; margin-bottom: 18px; }
+    .score-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(28,176,246,0.1);
+      border: 2px solid rgba(28,176,246,0.25);
+      border-radius: 99px;
+      padding: 7px 18px;
+      font-size: 14px; font-weight: 900;
+      color: var(--text-sub);
+    }
+    .score-pill strong { color: var(--blue); }
+    .result-desc {
+      font-size: 14px; font-weight: 700;
+      text-align: center;
+      color: var(--text-sub);
+      line-height: 1.6;
+      max-width: 420px;
+      margin: 0 auto 26px;
+    }
+
+    /* ═══════════════════════════════════════════
+       ANIMACIÓN DE ENTRADA
+    ═══════════════════════════════════════════ */
+    .screen { animation: fadeUp 0.32s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 420px) {
+      .opt-btn  { font-size: 14px; padding: 11px 13px; }
+      .question-text { font-size: 15px; }
+      .btn-next, .btn-primary { font-size: 15px; }
+    }
+  </style>
+</head>
+
+
+<body>
+<div id="page-bg" aria-hidden="true"></div>
+
+<div id="app">
+
+  <!-- Barra de progreso -->
+  <div id="progress-wrap" style="display:none">
+    <div class="progress-meta">
+      <span id="prog-label">Pregunta 1 de 25</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Host de pantallas -->
+  <div id="screen-host"></div>
+</div>
+
+<script>
 /* ════════════════════════════════════════════════
    PREGUNTAS
 ════════════════════════════════════════════════ */
