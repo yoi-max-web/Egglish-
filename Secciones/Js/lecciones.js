@@ -418,8 +418,8 @@ const cachedUid = (() => {
   try { return JSON.parse(localStorage.getItem('egglish_session') || 'null')?.uid || 'anonimo'; }
   catch (e) { return 'anonimo'; }
 })();
-const STORAGE_KEY = `egglish_lecciones_v3_${cachedUid}`;
-const MID_LESSON_KEY = `egglish_mid_lesson_${cachedUid}`;
+let STORAGE_KEY = `egglish_lecciones_v3_${cachedUid}`;
+let MID_LESSON_KEY = `egglish_mid_lesson_${cachedUid}`;
 
 function loadProgress() {
   let p;
@@ -432,7 +432,143 @@ function loadProgress() {
 }
 function saveProgress() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (e) {}
+  scheduleCloudSave();   // ← además de este navegador, se guarda en Firestore
 }
+
+/* ----------------------------------------------------------------
+   SINCRONIZACIÓN CON FIRESTORE (progreso en la nube)
+   Antes el progreso vivía SOLO en localStorage, por eso en otro
+   dispositivo todo aparecía bloqueado. Ahora la fuente de verdad es
+   users/{uid} en Firestore:
+     - progresoLecciones: { done, xpAwarded, xp, streak, lastDay }
+     - nivelColocacion: nivel del placement test (A1/A2/B1/B2)
+   Al abrir la página se descarga, se FUSIONA con lo local (nunca se
+   pierde nada) y se vuelve a subir. Cada guardado sube a la nube.
+---------------------------------------------------------------- */
+let cloudApi = null;        // { auth, db, onAuthStateChanged, doc, getDoc, setDoc }
+let cloudUid = null;
+let cloudReady = false;     // true solo tras LEER bien la nube (evita pisarla con datos parciales)
+let cloudSaveTimer = null;
+
+async function loadCloudApi() {
+  if (cloudApi) return cloudApi;
+  const [cfg, authMod, fsMod] = await Promise.all([
+    import('/Secciones/Js/firebase-config.js'),
+    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'),
+    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'),
+  ]);
+  cloudApi = {
+    auth: cfg.auth, db: cfg.db,
+    onAuthStateChanged: authMod.onAuthStateChanged,
+    doc: fsMod.doc, getDoc: fsMod.getDoc, setDoc: fsMod.setDoc,
+  };
+  return cloudApi;
+}
+
+function scheduleCloudSave() {
+  if (!cloudReady || !cloudUid) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(flushCloudSave, 400);
+}
+
+async function flushCloudSave() {
+  clearTimeout(cloudSaveTimer);
+  if (!cloudReady || !cloudUid || !cloudApi) return;
+  try {
+    await cloudApi.setDoc(cloudApi.doc(cloudApi.db, 'users', cloudUid), {
+      progresoLecciones: {
+        done: progress.done,
+        xpAwarded: progress.xpAwarded,
+        xp: progress.xp || 0,
+        streak: progress.streak || 0,
+        lastDay: progress.lastDay || null,
+      },
+      nivelColocacion: currentLevel.toUpperCase(),
+    }, { merge: true });
+  } catch (e) { console.warn('No se pudo guardar el progreso de Lecciones en Firebase:', e); }
+}
+
+// Une el progreso de la nube con el local (modifica `progress` en su lugar).
+function mergeLessonsProgress(remote) {
+  if (!remote || typeof remote !== 'object') return;
+  ['done', 'xpAwarded'].forEach(k => {
+    Object.keys(remote[k] || {}).forEach(key => {
+      if (remote[k][key]) progress[k][key] = true;
+    });
+  });
+  progress.xp = Math.max(Number(progress.xp) || 0, Number(remote.xp) || 0);
+  // Racha del día: nos quedamos con la del último día de actividad más reciente
+  const tLocal = progress.lastDay ? Date.parse(progress.lastDay) : NaN;
+  const tRemote = remote.lastDay ? Date.parse(remote.lastDay) : NaN;
+  if (!isNaN(tRemote) && (isNaN(tLocal) || tRemote > tLocal)) {
+    progress.lastDay = remote.lastDay;
+    progress.streak = Number(remote.streak) || 0;
+  }
+}
+
+function normLevelLc(v) {
+  const l = String(v || '').toLowerCase();
+  return LEVEL_ORDER.includes(l) ? l : '';
+}
+
+async function initCloudSync() {
+  let api;
+  try { api = await loadCloudApi(); }
+  catch (e) { console.warn('Firebase no disponible, el progreso queda solo en este navegador:', e); return; }
+
+  api.onAuthStateChanged(api.auth, async (user) => {
+    if (!user) { cloudReady = false; cloudUid = null; return; }
+
+    // Leer la nube. Si falla, NO escribimos (para no pisar datos que no pudimos ver).
+    let data = {};
+    try {
+      const snap = await api.getDoc(api.doc(api.db, 'users', user.uid));
+      if (snap.exists()) data = snap.data();
+    } catch (e) { console.warn('No se pudo leer el progreso de Lecciones desde Firebase:', e); return; }
+
+    cloudUid = user.uid;
+    STORAGE_KEY = `egglish_lecciones_v3_${user.uid}`;
+    MID_LESSON_KEY = `egglish_mid_lesson_${user.uid}`;
+
+    // 1) Fusionar: lo guardado en este navegador para este usuario + lo de la nube
+    mergeLessonsProgress(loadProgress());
+    mergeLessonsProgress(data.progresoLecciones);
+
+    // 2) Nivel del placement test: nunca se baja de nivel (se toma el mayor)
+    const localLvl = normLevelLc(localStorage.getItem('egglish-level'));
+    const cloudLvl = normLevelLc(data.nivelColocacion);
+    let best = localLvl || cloudLvl;
+    if (localLvl && cloudLvl) best = LEVEL_ORDER.indexOf(localLvl) >= LEVEL_ORDER.indexOf(cloudLvl) ? localLvl : cloudLvl;
+    if (best) { try { localStorage.setItem('egglish-level', best.toUpperCase()); } catch (e) {} }
+    const levelChanged = (best && LEVELS[best] ? best : 'a1') !== currentLevel;
+    currentLevel = best && LEVELS[best] ? best : 'a1';
+    currentLevelIdx = LEVEL_ORDER.indexOf(currentLevel);
+
+    cloudReady = true;
+    markLowerLevelsAsDone();   // marca niveles inferiores al del examen
+    saveProgress();            // guarda local + sube la versión fusionada
+
+    // 3) Refrescar la pantalla (si no hay una lección abierta)
+    if (!lessonModal.classList.contains('open')) {
+      const activeLvl = document.querySelector('.level-tab.active')?.dataset.level;
+      const showLvl = levelChanged || !activeLvl ? currentLevel : activeLvl;
+      buildPath();
+      document.querySelectorAll('.level-tab').forEach(t => {
+        const on = t.dataset.level === showLvl;
+        t.classList.toggle('active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.querySelectorAll('.level-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById(`panel-${showLvl}`)?.classList.add('active');
+    }
+    refreshLevelTabsLockUI();
+  });
+}
+
+// Última oportunidad de subir cambios pendientes al salir de la página
+window.addEventListener('pagehide', () => { flushCloudSave(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushCloudSave(); });
+
 const progress = loadProgress();
 
 /** ¿Es la primera vez que esta lección da puntos?
@@ -497,8 +633,8 @@ function getUserLevel() {
   const stored = (localStorage.getItem('egglish-level') || '').toLowerCase();
   return LEVELS[stored] ? stored : 'a1';
 }
-const currentLevel = getUserLevel();
-const currentLevelIdx = LEVEL_ORDER.indexOf(currentLevel);
+let currentLevel = getUserLevel();
+let currentLevelIdx = LEVEL_ORDER.indexOf(currentLevel);
 
 /** Los niveles POR DEBAJO del nivel del test se dan por superados:
  *  se marcan como completados (aparecen con el check/corona) para que
@@ -1431,7 +1567,7 @@ document.getElementById('completion-continue').addEventListener('click', () => {
   // Firebase para que el Perfil los muestre. Solo cuenta lo ganado en esta
   // lección. "leccionesCompletadas" solo sube cuando quedó perfecta, para
   // que coincida con lo que muestra el check en el mapa.
-  window._egglishProgresoPendiente = import('/Secciones/Js/egglish-progreso.js')
+  const _progresoFirebase = import('/Secciones/Js/egglish-progreso.js')
     .then(({ registrarProgreso }) => registrarProgreso({
       exp: xpGanado,
       // "leccionesCompletadas" solo sube la primera vez que queda perfecta
@@ -1439,16 +1575,28 @@ document.getElementById('completion-continue').addEventListener('click', () => {
       incremento: (perfecta && !yaTeniaCheck) ? 1 : 0,
     }))
     .catch((e) => console.warn('No se pudo sincronizar el progreso con Firebase:', e));
+  window._egglishProgresoPendiente = Promise.all([_progresoFirebase, flushCloudSave()]);
 });
 
+// Audio anti-atasco: si se pulsa muy rápido, cancel()+speak() casi a la vez
+// deja mudo el motor de voz. Solo suena la ÚLTIMA pulsación (debounce), tras
+// una pausa corta, y se guarda una referencia a la frase mientras suena.
+let speakTimer = null;
+let currentUtterance = null;
 audioBtnEl.addEventListener('click', () => {
   const text = phraseEl.textContent;
   if (!text || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'en-US';
-  utt.rate = 0.9;
-  window.speechSynthesis.speak(utt);
+  const synth = window.speechSynthesis;
+  clearTimeout(speakTimer);
+  synth.cancel();
+  speakTimer = setTimeout(() => {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'en-US';
+    utt.rate = 0.9;
+    currentUtterance = utt;
+    try { synth.resume(); } catch (_) {}
+    synth.speak(utt);
+  }, 150);
 });
 
 btnCheck.addEventListener('click', () => {
@@ -1483,3 +1631,4 @@ function floatXP(xp) {
 ================================================================ */
 setupLevelTabs();
 buildPath();
+initCloudSync();

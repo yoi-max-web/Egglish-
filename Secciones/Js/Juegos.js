@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 //  EGGLISH – JUEGOS  |  juegos.js
 //  Parte 3: 7 minijuegos nuevos en B1 + nuevo
 //  nivel B2 con sus 7 minijuegos avanzados.
@@ -458,12 +458,12 @@ const LEVEL_ORDER = ['A1', 'A2', 'B1', 'B2'];
 // motivo no existe o viene en un formato inesperado (usuario viejo,
 // localStorage borrado, minúsculas, etc.) caemos a A1 como valor por
 // defecto seguro. (Misma protección que ya usa lecciones.js).
-const userLevel = (() => {
+let userLevel = (() => {
   const stored = (localStorage.getItem('egglish-level') || '').toUpperCase();
   return LEVEL_ORDER.includes(stored) ? stored : 'A1';
 })();
 let currentLevel = userLevel;
-const userLevelIdx = LEVEL_ORDER.indexOf(userLevel);
+let userLevelIdx = LEVEL_ORDER.indexOf(userLevel);
 let currentGame  = null;
 let currentQ     = 0;
 let score        = 0;
@@ -483,7 +483,7 @@ const cachedUid = (() => {
   try { return JSON.parse(localStorage.getItem('egglish_session') || 'null')?.uid || 'anonimo'; }
   catch (e) { return 'anonimo'; }
 })();
-const GAMES_STORAGE_KEY = `egglish_juegos_v1_${cachedUid}`;
+let GAMES_STORAGE_KEY = `egglish_juegos_v1_${cachedUid}`;
 
 function loadGamesProgress() {
   try {
@@ -495,7 +495,132 @@ function loadGamesProgress() {
 }
 function saveGamesProgress() {
   try { localStorage.setItem(GAMES_STORAGE_KEY, JSON.stringify(gamesProgress)); } catch (e) {}
+  scheduleCloudSave();   // ← además de este navegador, se guarda en Firestore
 }
+
+// ══════════════════════════════════════════
+//  SINCRONIZACIÓN CON FIRESTORE (progreso en la nube)
+//  Antes el progreso vivía SOLO en localStorage, por eso en otro
+//  dispositivo todo aparecía bloqueado. Ahora la fuente de verdad es
+//  users/{uid} en Firestore:
+//    - progresoJuegos: { done, intentado, plays }
+//    - nivelColocacion: nivel del placement test (A1/A2/B1/B2)
+//  Al abrir la página se descarga, se FUSIONA con lo local (nunca se
+//  pierde nada: se une lo hecho en ambos lados) y se vuelve a subir.
+//  Cada vez que se guarda progreso se sube automáticamente.
+// ══════════════════════════════════════════
+let cloudApi = null;        // { auth, db, onAuthStateChanged, doc, getDoc, setDoc }
+let cloudUid = null;
+let cloudReady = false;     // true solo después de LEER bien la nube (evita pisarla con datos parciales)
+let cloudSaveTimer = null;
+
+async function loadCloudApi() {
+  if (cloudApi) return cloudApi;
+  const [cfg, authMod, fsMod] = await Promise.all([
+    import('/Secciones/Js/firebase-config.js'),
+    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'),
+    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'),
+  ]);
+  cloudApi = {
+    auth: cfg.auth, db: cfg.db,
+    onAuthStateChanged: authMod.onAuthStateChanged,
+    doc: fsMod.doc, getDoc: fsMod.getDoc, setDoc: fsMod.setDoc,
+  };
+  return cloudApi;
+}
+
+function scheduleCloudSave() {
+  if (!cloudReady || !cloudUid) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(flushCloudSave, 400);
+}
+
+async function flushCloudSave() {
+  clearTimeout(cloudSaveTimer);
+  if (!cloudReady || !cloudUid || !cloudApi) return;
+  try {
+    await cloudApi.setDoc(cloudApi.doc(cloudApi.db, 'users', cloudUid), {
+      progresoJuegos: {
+        done: gamesProgress.done,
+        intentado: gamesProgress.intentado,
+        plays: gamesProgress.plays,
+      },
+      nivelColocacion: userLevel,
+    }, { merge: true });
+  } catch (e) { console.warn('No se pudo guardar el progreso de Juegos en Firebase:', e); }
+}
+
+// Une el progreso de la nube con el local (modifica gamesProgress en su lugar).
+function mergeGamesProgress(remote) {
+  if (!remote || typeof remote !== 'object') return;
+  ['done', 'intentado'].forEach(k => {
+    Object.keys(remote[k] || {}).forEach(key => {
+      if (remote[k][key]) gamesProgress[k][key] = true;
+    });
+  });
+  Object.keys(remote.plays || {}).forEach(key => {
+    const r = Number(remote.plays[key]) || 0;
+    if (r > (gamesProgress.plays[key] || 0)) gamesProgress.plays[key] = r;
+  });
+  // Si ya tiene el check, el aviso de "intentado" ya no aplica
+  Object.keys(gamesProgress.done).forEach(key => { delete gamesProgress.intentado[key]; });
+}
+
+function normLevel(v) {
+  const l = String(v || '').toUpperCase();
+  return LEVEL_ORDER.includes(l) ? l : '';
+}
+
+async function initCloudSync() {
+  let api;
+  try { api = await loadCloudApi(); }
+  catch (e) { console.warn('Firebase no disponible, el progreso queda solo en este navegador:', e); return; }
+
+  api.onAuthStateChanged(api.auth, async (user) => {
+    if (!user) { cloudReady = false; cloudUid = null; return; }
+
+    // Leer la nube. Si falla, NO escribimos (para no pisar datos que no pudimos ver).
+    let data = {};
+    try {
+      const snap = await api.getDoc(api.doc(api.db, 'users', user.uid));
+      if (snap.exists()) data = snap.data();
+    } catch (e) { console.warn('No se pudo leer el progreso de Juegos desde Firebase:', e); return; }
+
+    cloudUid = user.uid;
+    GAMES_STORAGE_KEY = `egglish_juegos_v1_${user.uid}`;
+
+    // 1) Fusionar: lo guardado en este navegador para este usuario + lo de la nube
+    mergeGamesProgress(loadGamesProgress());
+    mergeGamesProgress(data.progresoJuegos);
+
+    // 2) Nivel del placement test: nunca se baja de nivel (se toma el mayor)
+    const localLvl = normLevel(localStorage.getItem('egglish-level'));
+    const cloudLvl = normLevel(data.nivelColocacion);
+    let best = localLvl || cloudLvl;
+    if (localLvl && cloudLvl) best = LEVEL_ORDER.indexOf(localLvl) >= LEVEL_ORDER.indexOf(cloudLvl) ? localLvl : cloudLvl;
+    if (best) { try { localStorage.setItem('egglish-level', best); } catch (e) {} }
+    userLevel = best || 'A1';
+    userLevelIdx = LEVEL_ORDER.indexOf(userLevel);
+
+    cloudReady = true;
+    markLowerGamesLevelsAsDone();   // marca niveles inferiores al del examen
+    saveGamesProgress();            // guarda local + sube la versión fusionada
+
+    // 3) Refrescar la pantalla si el alumno aún no está dentro de un juego
+    const enMenu = document.getElementById('screen-levels')?.classList.contains('active');
+    if (enMenu && !currentGame) {
+      currentLevel = userLevel;
+      document.querySelectorAll('.level-tab').forEach(t => t.classList.toggle('active', t.dataset.level === currentLevel));
+    }
+    buildGrid(currentLevel);
+    refreshGamesLevelTabsLockUI();
+  });
+}
+
+// Última oportunidad de subir cambios pendientes al salir de la página
+window.addEventListener('pagehide', () => { flushCloudSave(); });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushCloudSave(); });
+
 const gamesProgress = loadGamesProgress();
 
 // ══════════════════════════════════════════
@@ -540,6 +665,7 @@ function markLowerGamesLevelsAsDone() {
   if (changed) saveGamesProgress();
 }
 markLowerGamesLevelsAsDone();
+initCloudSync();
 
 /** Un mismo id de juego ("mc", "fill"...) existe en varios niveles con
  *  preguntas distintas, así que el progreso se guarda por combinación
@@ -615,6 +741,7 @@ function showScreen(id) {
 
 function goBack() {
   clearInterval(mcTimerInterval);
+  stopSpeaking();
   buildGrid(currentLevel);
   showScreen('screen-levels');
 }
@@ -1131,16 +1258,53 @@ function renderListen() {
   });
 }
 
+// ── Audio del juego de escucha ─────────────────────────────────────────
+// BUG ANTERIOR: al pulsar el botón varias veces seguidas se llamaba a
+// speechSynthesis.cancel() y speak() casi al mismo tiempo. En Chrome/Edge/
+// Android esto deja el motor de voz atascado y deja de sonar. Ahora:
+//  - Se hace "debounce": solo suena la ÚLTIMA pulsación, con una pausa
+//    corta después de cancel() para que el motor se limpie bien.
+//  - Se guarda una referencia a la frase (si no, el navegador la puede
+//    recolectar y nunca dispara onend).
+//  - onerror también quita el estado "playing" y se llama a resume() por
+//    si el motor quedó pausado.
+let speakTimer = null;
+let speakSeq = 0;
+let currentUtterance = null;
+
+function stopSpeaking() {
+  clearTimeout(speakTimer);
+  speakSeq++;
+  currentUtterance = null;
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  const b = document.getElementById('btn-speak');
+  if (b) b.classList.remove('playing');
+}
+
 function speakWord() {
   if (!('speechSynthesis' in window)) return;
   const q = listenSession[currentQ];
-  const utt = new SpeechSynthesisUtterance(q.word);
-  utt.lang = 'en-US'; utt.rate = 0.85;
+  if (!q) return;
+  const synth = window.speechSynthesis;
   const speakBtn = document.getElementById('btn-speak');
-  speakBtn.classList.add('playing');
-  utt.onend = () => speakBtn.classList.remove('playing');
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utt);
+
+  clearTimeout(speakTimer);
+  const seq = ++speakSeq;
+  synth.cancel();
+  if (speakBtn) speakBtn.classList.add('playing');
+
+  speakTimer = setTimeout(() => {
+    if (seq !== speakSeq) return;          // hubo una pulsación más reciente
+    const utt = new SpeechSynthesisUtterance(q.word);
+    utt.lang = 'en-US';
+    utt.rate = 0.85;
+    const finish = () => { if (seq === speakSeq && speakBtn) speakBtn.classList.remove('playing'); };
+    utt.onend = finish;
+    utt.onerror = finish;
+    currentUtterance = utt;                // evita que se recolecte antes de terminar
+    try { synth.resume(); } catch (_) {}
+    synth.speak(utt);
+  }, 150);
 }
 
 function handleListen(btn, chosen, correct, grid) {
@@ -1353,13 +1517,14 @@ function showResults(gameName) {
   //  Guardamos la promesa en window para que la navbar (link "Perfil")
   // pueda esperarla antes de navegar; si no se espera, perfil.html puede
   // leer Firestore ANTES de que esta escritura termine y mostrar 0.
-  window._egglishProgresoPendiente = import('/Secciones/Js/egglish-progreso.js')
+  const _progresoFirebase = import('/Secciones/Js/egglish-progreso.js')
     .then(({ registrarProgreso }) => registrarProgreso({
       exp: puntosGanados,
       campo: gano ? 'juegosGanados' : null,
       incremento: gano ? 1 : 0,
     }))
     .catch((e) => console.warn('No se pudo sincronizar el progreso con Firebase:', e));
+  window._egglishProgresoPendiente = Promise.all([_progresoFirebase, flushCloudSave()]);
 }
 
 function spawnConfetti() {

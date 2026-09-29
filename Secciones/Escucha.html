@@ -1698,8 +1698,8 @@
         const stored = (localStorage.getItem('egglish-level') || '').toUpperCase();
         return LESSON_DATA[stored] ? stored : 'A1';
     }
-    const userLevel = getUserLevel();
-    const userLevelIdx = LEVEL_ORDER.indexOf(userLevel);
+    let userLevel = getUserLevel();
+    let userLevelIdx = LEVEL_ORDER.indexOf(userLevel);
     STATE.level = userLevel;
 
     // ── PROGRESO POR USUARIO (persistencia local) ──────────────
@@ -1711,7 +1711,7 @@
         try { return JSON.parse(localStorage.getItem('egglish_session') || 'null')?.uid || 'anonimo'; }
         catch (e) { return 'anonimo'; }
     })();
-    const ESCUCHA_STORAGE_KEY = `egglish_escucha_v1_${cachedUid}`;
+    let ESCUCHA_STORAGE_KEY = `egglish_escucha_v1_${cachedUid}`;
 
     function loadEscuchaProgress() {
         try {
@@ -1723,7 +1723,130 @@
     }
     function saveEscuchaProgress() {
         try { localStorage.setItem(ESCUCHA_STORAGE_KEY, JSON.stringify(escuchaProgress)); } catch (e) {}
+        scheduleCloudSave();   // ← además de este navegador, se guarda en Firestore
     }
+
+    // ══════════════════════════════════════════
+    //  SINCRONIZACIÓN CON FIRESTORE (progreso en la nube)
+    //  Antes el progreso vivía SOLO en localStorage, por eso en otro
+    //  dispositivo todo aparecía bloqueado. Ahora la fuente de verdad es
+    //  users/{uid} en Firestore:
+    //    - progresoEscucha: { done, intentado, plays }
+    //    - nivelColocacion: nivel del placement test (A1/A2/B1/B2)
+    //  Al abrir la página se descarga, se FUSIONA con lo local (nunca se
+    //  pierde nada) y se vuelve a subir. Cada guardado sube a la nube.
+    // ══════════════════════════════════════════
+    let cloudApi = null;        // { auth, db, onAuthStateChanged, doc, getDoc, setDoc }
+    let cloudUid = null;
+    let cloudReady = false;     // true solo tras LEER bien la nube (evita pisarla con datos parciales)
+    let cloudSaveTimer = null;
+
+    async function loadCloudApi() {
+        if (cloudApi) return cloudApi;
+        const [cfg, authMod, fsMod] = await Promise.all([
+            import('/Secciones/Js/firebase-config.js'),
+            import('https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js'),
+            import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'),
+        ]);
+        cloudApi = {
+            auth: cfg.auth, db: cfg.db,
+            onAuthStateChanged: authMod.onAuthStateChanged,
+            doc: fsMod.doc, getDoc: fsMod.getDoc, setDoc: fsMod.setDoc,
+        };
+        return cloudApi;
+    }
+
+    function scheduleCloudSave() {
+        if (!cloudReady || !cloudUid) return;
+        clearTimeout(cloudSaveTimer);
+        cloudSaveTimer = setTimeout(flushCloudSave, 400);
+    }
+
+    async function flushCloudSave() {
+        clearTimeout(cloudSaveTimer);
+        if (!cloudReady || !cloudUid || !cloudApi) return;
+        try {
+            await cloudApi.setDoc(cloudApi.doc(cloudApi.db, 'users', cloudUid), {
+                progresoEscucha: {
+                    done: escuchaProgress.done,
+                    intentado: escuchaProgress.intentado,
+                    plays: escuchaProgress.plays,
+                },
+                nivelColocacion: userLevel,
+            }, { merge: true });
+        } catch (e) { console.warn('No se pudo guardar el progreso de Escucha en Firebase:', e); }
+    }
+
+    // Une el progreso de la nube con el local (modifica escuchaProgress en su lugar).
+    function mergeEscuchaProgress(remote) {
+        if (!remote || typeof remote !== 'object') return;
+        ['done', 'intentado'].forEach(k => {
+            Object.keys(remote[k] || {}).forEach(key => {
+                if (remote[k][key]) escuchaProgress[k][key] = true;
+            });
+        });
+        Object.keys(remote.plays || {}).forEach(key => {
+            const r = Number(remote.plays[key]) || 0;
+            if (r > (escuchaProgress.plays[key] || 0)) escuchaProgress.plays[key] = r;
+        });
+        // Si ya tiene el check, el aviso de "intentado" ya no aplica
+        Object.keys(escuchaProgress.done).forEach(key => { delete escuchaProgress.intentado[key]; });
+    }
+
+    function normLevel(v) {
+        const l = String(v || '').toUpperCase();
+        return LEVEL_ORDER.includes(l) ? l : '';
+    }
+
+    async function initCloudSync() {
+        let api;
+        try { api = await loadCloudApi(); }
+        catch (e) { console.warn('Firebase no disponible, el progreso queda solo en este navegador:', e); return; }
+
+        api.onAuthStateChanged(api.auth, async (user) => {
+            if (!user) { cloudReady = false; cloudUid = null; return; }
+
+            // Leer la nube. Si falla, NO escribimos (para no pisar datos que no pudimos ver).
+            let data = {};
+            try {
+                const snap = await api.getDoc(api.doc(api.db, 'users', user.uid));
+                if (snap.exists()) data = snap.data();
+            } catch (e) { console.warn('No se pudo leer el progreso de Escucha desde Firebase:', e); return; }
+
+            cloudUid = user.uid;
+            ESCUCHA_STORAGE_KEY = `egglish_escucha_v1_${user.uid}`;
+
+            // 1) Fusionar: lo guardado en este navegador para este usuario + lo de la nube
+            mergeEscuchaProgress(loadEscuchaProgress());
+            mergeEscuchaProgress(data.progresoEscucha);
+
+            // 2) Nivel del placement test: nunca se baja de nivel (se toma el mayor)
+            const localLvl = normLevel(localStorage.getItem('egglish-level'));
+            const cloudLvl = normLevel(data.nivelColocacion);
+            let best = localLvl || cloudLvl;
+            if (localLvl && cloudLvl) best = LEVEL_ORDER.indexOf(localLvl) >= LEVEL_ORDER.indexOf(cloudLvl) ? localLvl : cloudLvl;
+            if (best) { try { localStorage.setItem('egglish-level', best); } catch (e) {} }
+            userLevel = best && LESSON_DATA[best] ? best : 'A1';
+            userLevelIdx = LEVEL_ORDER.indexOf(userLevel);
+
+            cloudReady = true;
+            markLowerEscuchaLevelsAsDone();   // marca niveles inferiores al del examen
+            saveEscuchaProgress();            // guarda local + sube la versión fusionada
+
+            // 3) Refrescar la pantalla si el alumno aún no está dentro de un audio
+            if (screenLibrary.classList.contains('active')) {
+                libraryLevel = userLevel;
+                Array.from(levelTabs.children).forEach(t => t.classList.toggle('active', t.dataset.level === libraryLevel));
+                renderLibrary();
+            }
+            refreshEscuchaLevelTabsLockUI();
+        });
+    }
+
+    // Última oportunidad de subir cambios pendientes al salir de la página
+    window.addEventListener('pagehide', () => { flushCloudSave(); });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushCloudSave(); });
+
     const escuchaProgress = loadEscuchaProgress();
 
     function escuchaCardKey(level, cardIndex) { return `${level}::${cardIndex}`; }
@@ -2730,13 +2853,14 @@
         // Sincroniza el progreso REAL (puntos y ejercicios de escucha completados)
         // con Firebase para que el Perfil lo muestre. Solo cuenta lo ganado en esta
         // tarjeta: 10 XP por cada respuesta correcta + el bono de finalización.
-        window._egglishProgresoPendiente = import('/Secciones/Js/egglish-progreso.js')
+        const _progresoFirebase = import('/Secciones/Js/egglish-progreso.js')
             .then(({ registrarProgreso }) => registrarProgreso({
                 exp: expGanado,
                 campo: STATE.conPuntos ? 'escuchaCompletados' : null,
                 incremento: STATE.conPuntos ? 1 : 0,
             }))
             .catch((e) => console.warn('No se pudo sincronizar el progreso con Firebase:', e));
+        window._egglishProgresoPendiente = Promise.all([_progresoFirebase, flushCloudSave()]);
     }
 
     // ─────────────────────────────────────────────────────────
@@ -2808,6 +2932,10 @@
     libraryLevel = 'A1';
     renderLibrary();
     showScreen('library');
+
+    // Sincroniza el progreso con Firestore (se arranca al final, cuando ya
+    // existen la biblioteca y las pestañas que hay que repintar).
+    initCloudSync();
 </script>
 <!-- EGGLISH AUTH -->
 <script type="module">

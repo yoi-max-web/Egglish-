@@ -24,7 +24,7 @@
 */
 import { auth, db } from '/Secciones/Js/firebase-config.js';
 import { onAuthStateChanged, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const SESSION_KEY = 'egglish_session';
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -544,10 +544,15 @@ async function guardarEdicionPerfil() {
     if (nuevoNombre !== currentSession.name && auth.currentUser) {
       await updateProfile(auth.currentUser, { displayName: nuevoNombre });
     }
-    await updateDoc(doc(db, 'users', currentSession.uid), {
+    // Guardamos TAMBIÉN el nombre en Firestore (antes solo iba a Auth y por
+    // eso al volver a iniciar sesión reaparecía el nombre viejo guardado ahí).
+    // setDoc + merge crea el documento si no existiera y no borra otros campos.
+    await setDoc(doc(db, 'users', currentSession.uid), {
+      name: nuevoNombre,
+      nombre: nuevoNombre,
       bio: nuevaBio,
       age: nuevaEdad,
-    });
+    }, { merge: true });
 
     currentSession.name = nuevoNombre;
     currentSession.bio = nuevaBio;
@@ -725,9 +730,11 @@ onAuthStateChanged(auth, async (user) => {
 
   let session = {
     uid: user.uid,
-    name: user.displayName || user.email?.split('@')[0] || 'Usuario',
     email: user.email,
     ...userData,
+    // El nombre va DESPUÉS del spread: antes `...userData` traía el campo
+    // `name` viejo de Firestore y pisaba el nombre actualizado de Auth.
+    name: user.displayName || userData.name || userData.nombre || user.email?.split('@')[0] || 'Usuario',
     // Fecha real de creación de la cuenta (Firebase Auth es la fuente de verdad;
     // va después del spread para que nunca la pise un campo viejo de Firestore).
     fechaRegistro: user.metadata?.creationTime ? new Date(user.metadata.creationTime).toISOString() : new Date().toISOString(),
