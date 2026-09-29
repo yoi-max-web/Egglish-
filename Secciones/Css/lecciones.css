@@ -1,4 +1,4 @@
-¿*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --green:      #58cc02;
@@ -76,43 +76,6 @@
     }
     .nav-menu.active { left: 0; }
 
-    /* ── LEVEL TABS ── */
-    .level-tabs-wrapper {
-      background: var(--white);
-      border-bottom: 2px solid var(--border);
-      display: flex; justify-content: center;
-      width: 100%;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-    .level-tab {
-      display: flex; align-items: center; gap: 8px;
-      padding: 14px 28px;
-      font-family: var(--font); font-size: 0.88rem; font-weight: 800;
-      color: var(--text-mid); background: none; border: none;
-      border-bottom: 3px solid transparent;
-      cursor: pointer; white-space: nowrap; letter-spacing: 0.5px; text-transform: uppercase;
-      transition: color .2s, border-color .2s;
-    }
-    .level-tab:hover { color: var(--text); }
-    .level-tab.active { color: var(--green); border-bottom-color: var(--green); }
-    .tab-badge {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 20px;
-      font-size: 0.7rem; font-weight: 800; padding: 2px 8px; color: var(--text-mid);
-    }
-    .level-tab.active .tab-badge { background: var(--green); color: var(--white); border-color: var(--green); }
-
-    /* ── STATS BAR ── */
-    .path-stats-bar {
-      display: flex; justify-content: center; gap: 28px;
-      background: var(--bg2); padding: 10px 16px; border-bottom: 2px solid var(--border);
-    }
-    .path-stat {
-      display: flex; align-items: center; gap: 6px;
-      font-weight: 900; font-size: 0.95rem; color: var(--text);
-    }
-    .path-stat-icon { font-size: 1.1rem; }
-    .path-stat-sub { color: var(--text-dim); font-weight: 700; font-size: 0.85rem; }
-
     /* ── PATH ── */
     .path-main {
       flex: 1; display: flex; flex-direction: column; align-items: center;
@@ -126,7 +89,7 @@
       width: 100%; border-radius: 18px;
       padding: 18px 22px; margin-bottom: 6px;
       display: flex; align-items: center; justify-content: space-between;
-      position: relative; overflow: hidden;
+      position: relative; z-index: 3; overflow: hidden;
       box-shadow: 0 4px 14px rgba(0,0,0,0.08);
     }
     .unit-header-left { display: flex; flex-direction: column; gap: 2px; }
@@ -137,12 +100,15 @@
     }
     .unit-title { font-size: 1.1rem; font-weight: 900; color: #fff; }
     .unit-header-btn {
+      position: relative; z-index: 1; isolation: isolate; overflow: hidden;
       background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.45);
       color: #fff; font-family: var(--font); font-weight: 800;
       font-size: 0.78rem; padding: 9px 16px; border-radius: 10px;
       cursor: pointer; transition: background .15s, transform .15s; letter-spacing: 0.3px;
     }
     .unit-header-btn:hover { background: rgba(255,255,255,0.32); transform: translateY(-1px); }
+    .unit-header-btn .hover-circle { z-index: 0; }
+    .unit-header-btn .btn-label { position: relative; z-index: 1; }
 
     /* ── PATH TRACK (recorrido tipo serpiente) ── */
     .path-track {
@@ -180,30 +146,30 @@
       color: var(--text-mid); text-align: center; line-height: 1.2;
       max-width: 76px; word-break: break-word;
     }
-    .lesson-node:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+    .lesson-node:hover { transform: translateX(var(--tx, 0px)) translateY(-3px) scale(1.04); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
     .lesson-node.done { border-color: var(--green); background: #d7ffb8; border-bottom-color: var(--green-d); }
     .lesson-node.done .node-icon { animation: nodeComplete .4s ease-out; }
     .lesson-node.done .node-label-inner { color: var(--green-d); }
     @keyframes nodeComplete { 0%{transform:scale(1);} 50%{transform:scale(1.15);} 100%{transform:scale(1);} }
-    .lesson-node:active { transform: scale(0.95); }
+    .lesson-node:active { transform: translateX(var(--tx, 0px)) scale(0.95); }
 
     /* posiciones tipo zig-zag para el "camino" (ajustadas para cards) */
-    .node-slot[data-pos="0"] .lesson-node { transform: translateX(0); }
-    .node-slot[data-pos="1"] .lesson-node { transform: translateX(52px); }
-    .node-slot[data-pos="2"] .lesson-node { transform: translateX(70px); }
-    .node-slot[data-pos="3"] .lesson-node { transform: translateX(52px); }
-    .node-slot[data-pos="4"] .lesson-node { transform: translateX(0); }
-    .node-slot[data-pos="5"] .lesson-node { transform: translateX(-52px); }
-    .node-slot[data-pos="6"] .lesson-node { transform: translateX(-70px); }
-    .node-slot[data-pos="7"] .lesson-node { transform: translateX(-52px); }
+    .node-slot[data-pos="0"] .lesson-node { --tx: 0; }
+    .node-slot[data-pos="1"] .lesson-node { --tx: 52px; }
+    .node-slot[data-pos="2"] .lesson-node { --tx: 70px; }
+    .node-slot[data-pos="3"] .lesson-node { --tx: 52px; }
+    .node-slot[data-pos="4"] .lesson-node { --tx: 0; }
+    .node-slot[data-pos="5"] .lesson-node { --tx: -52px; }
+    .node-slot[data-pos="6"] .lesson-node { --tx: -70px; }
+    .node-slot[data-pos="7"] .lesson-node { --tx: -52px; }
 
     /* ── ESTADOS DEL NODO (hecho / actual / bloqueado) ── */
     .lesson-node.state-done { border-color: var(--green); border-bottom-color: var(--green-d); background: var(--green-bg); cursor: pointer; }
     .lesson-node.state-done .node-icon { animation: nodeComplete .4s ease-out; }
     .lesson-node.state-done .node-label-inner { color: var(--green-d); }
     .lesson-node.state-locked { border-color: var(--locked); border-bottom-color: var(--locked-d); background: var(--locked); cursor: not-allowed; opacity: 0.78; }
-    .lesson-node.state-locked:hover { transform: none; box-shadow: none; }
-    .lesson-node.state-locked:active { transform: none; }
+    .lesson-node.state-locked:hover { transform: translateX(var(--tx, 0px)); box-shadow: none; }
+    .lesson-node.state-locked:active { transform: translateX(var(--tx, 0px)); }
     .lesson-node.state-locked .node-icon { filter: grayscale(1); opacity: 0.6; }
     .lesson-node.state-locked .node-label-inner { color: var(--locked-txt); }
     .lesson-node.state-current {
@@ -566,19 +532,17 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .navbar-links { display: none; }
-      .level-tab { padding: 12px 16px; font-size: 0.8rem; }
-      .tab-badge { display: none; }
       .lesson-instruction { font-size: 1.2rem; }
       .lesson-char-avatar { font-size: 2.8rem; }
       .completion-stats { grid-template-columns: 1fr 1fr; }
       .node-slot[data-pos="0"] .lesson-node,
-      .node-slot[data-pos="4"] .lesson-node { transform: translateX(0); }
+      .node-slot[data-pos="4"] .lesson-node { --tx: 0; }
       .node-slot[data-pos="1"] .lesson-node,
-      .node-slot[data-pos="3"] .lesson-node { transform: translateX(36px); }
-      .node-slot[data-pos="2"] .lesson-node { transform: translateX(48px); }
+      .node-slot[data-pos="3"] .lesson-node { --tx: 36px; }
+      .node-slot[data-pos="2"] .lesson-node { --tx: 48px; }
       .node-slot[data-pos="5"] .lesson-node,
-      .node-slot[data-pos="7"] .lesson-node { transform: translateX(-36px); }
-      .node-slot[data-pos="6"] .lesson-node { transform: translateX(-48px); }
+      .node-slot[data-pos="7"] .lesson-node { --tx: -36px; }
+      .node-slot[data-pos="6"] .lesson-node { --tx: -48px; }
       .lesson-node { width: 78px; min-height: 70px; }
     }
 
@@ -603,8 +567,6 @@
       .nav-menu .navbar-auth { flex-direction: column; margin-top: 40px; border-top: 1px solid var(--border); padding-top: 24px; gap: 16px; width: 100%; }
       .nav-menu .btn-entrar { text-align: center; width: 100%; font-size: 1.1rem; }
       .nav-menu .btn-registrarse { text-align: center; width: 100%; padding: 14px 22px; border-radius: 16px; font-size: 1.1rem; }
-      .level-tab { padding: 12px 16px; font-size: 0.8rem; }
-      .tab-badge { display: none; }
       .lesson-instruction { font-size: 1.2rem; }
       .lesson-char-avatar { font-size: 2.8rem; }
     }
@@ -648,7 +610,7 @@
     .dark .blank-slot.filled { color: #7dd3fc !important; }
 
     /* ── MODO OSCURO: guía de la lección (texto legible sobre fondo oscuro) ── */
-    .dark .guide-card { background: #1f2937 !important; box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important; }
+    .dark .guide-card { box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important; }
     .dark .guide-close { color: #9ca3af !important; }
     .dark .guide-close:hover { color: #f1f5f9 !important; }
     .dark .guide-tab-btn { border-color: #374151 !important; color: #cbd5e1 !important; }
@@ -661,3 +623,243 @@
     .dark .guide-list.examples li { color: #86efac !important; }
     .dark .guide-list.mistakes li { color: #fca5a5 !important; }
     .dark .guide-list.tips li { color: #cbd5e1 !important; }
+
+/* ============================================================
+   ESTILO JUEGOS  (fondo animado + vidrio + beam plateado + hovers)
+   Copiado de Juegos.css / juegos.html
+   ============================================================ */
+html { overflow-x: hidden; }
+body { overflow-x: hidden; overflow-x: clip; }
+a { text-decoration: none; color: inherit; }
+
+:root {
+  --card-bg: rgba(255,255,255,.16);
+  --card-border: rgba(255,255,255,.35);
+  --card-bg-soft: rgba(255,255,255,.32);
+  --modal-bg: rgba(255,255,255,.82);
+  --egg-shadow: 0 4px 24px rgba(0,0,0,.10);
+  --lesson-veil: rgba(234,246,255,.55);
+}
+html.dark {
+  --card-bg: rgba(15,23,42,.22);
+  --card-border: rgba(148,163,184,.25);
+  --card-bg-soft: rgba(15,23,42,.35);
+  --modal-bg: rgba(15,23,42,.82);
+  --egg-shadow: 0 4px 24px rgba(0,0,0,.45);
+  --lesson-veil: rgba(11,23,42,.6);
+  /* Paleta oscura: todo lo que usa estas variables cambia con el tema */
+  --blue: #0e86c9; --blue-d: #0a6ba3;
+  --bg: #0f172a; --bg2: #1e293b; --bg3: #1e293b;
+  --border: #334155; --border2: #475569;
+  --text: #f1f5f9; --text-mid: #cbd5e1; --text-dim: #94a3b8;
+  --locked: #334155; --locked-d: #475569; --locked-txt: #94a3b8;
+}
+
+/* Fondo animado */
+#page-bg {
+  position: fixed; inset: 0; z-index: 400; overflow: hidden;
+  background: linear-gradient(120deg,#eaf6ff,#bfe8ff,#7ec8ff,#1cb0f6,#4c9cff,#bfe8ff,#eaf6ff);
+  background-size: 400% 400%; animation: gradient-move 18s ease infinite;
+}
+html.dark #page-bg {
+  background: linear-gradient(120deg,#0b172a,#172554,#0c4a8f,#0090d9,#1cb0f6,#172554,#0b172a);
+  background-size: 400% 400%;
+}
+@keyframes gradient-move { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+header { position: relative; z-index: 500; }
+.level-tabs-wrapper, .path-main, #main-footer { position: relative; z-index: 401; }
+
+.site-navbar {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 2px solid var(--card-border);
+}
+.site-offcanvas {
+  background: var(--card-bg-soft);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-right: 2px solid var(--card-border);
+}
+.nav-icon { width: 22px; height: 22px; object-fit: contain; flex-shrink: 0; }
+
+/* Imágenes (en vez de emojis) */
+.egg-img-slot { display: inline-block; font-style: normal; flex-shrink: 0; vertical-align: middle; width: 96px; height: 96px; }
+.egg-img-slot--sm { width: 34px; height: 34px; }
+
+/* Beam plateado que rodea las tarjetas */
+@property --beam { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes beam-spin { to { --beam: 360deg; } }
+.lesson-node, .guide-card, .completion-card, .lose-card, .level-lock-dialog { position: relative; isolation: isolate; }
+.lesson-node::before, .completion-card::before, .lose-card::before, .level-lock-dialog::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 2px;
+  background: conic-gradient(from var(--beam), transparent 0 70%, #f8fafc 85%, #94a3b8 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: beam-spin 4s linear infinite; pointer-events: none; z-index: -1;
+}
+@media (prefers-reduced-motion: reduce) {
+  #page-bg, .lesson-node::before, .completion-card::before, .lose-card::before, .level-lock-dialog::before { animation: none; }
+}
+
+/* Tarjetas de vidrio (modales) */
+.guide-card, .completion-card, .lose-card {
+  background: var(--modal-bg) !important;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 2px solid var(--card-border);
+  box-shadow: var(--egg-shadow);
+}
+
+/* Hover "círculo que nace donde entra el cursor" */
+.hover-circle-btn { position: relative; overflow: hidden; isolation: isolate; }
+.hover-circle-btn .btn-label { position: relative; z-index: 2; }
+.hover-circle-btn .hover-circle {
+  position: absolute; top: 50%; left: 50%; display: block; width: 0; height: 0;
+  border-radius: 50%; transform: translate(-50%,-50%);
+  transition: width .4s ease-in-out, height .4s ease-in-out;
+  pointer-events: none; z-index: 1; background: rgba(0,0,0,.18);
+}
+.hover-circle-btn:hover:not(:disabled) .hover-circle { width: 250%; height: 250%; }
+/* El botón COMPROBAR gris (sin respuesta) no debe reaccionar */
+.btn-check:not(.ready):not(.correct-continue):not(.wrong) .hover-circle { display: none; }
+.btn-check:not(.ready):not(.correct-continue):not(.wrong) { transform: none; }
+
+/* Pestañas de nivel (mismas que Juegos, con imágenes) */
+.level-tabs-wrapper {
+  display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+  width: 100%; max-width: 760px; margin: 0 auto; padding: 28px 20px 0;
+}
+.level-tab {
+  display: flex; flex-direction: column; align-items: flex-start;
+  padding: 12px 24px; border-radius: 14px; border: 2.5px solid var(--card-border);
+  background: var(--card-bg-soft);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  font-family: var(--font); font-size: 1rem; font-weight: 900; color: var(--text-mid);
+  cursor: pointer; transition: all .2s;
+}
+.level-tab span { font-size: .75rem; font-weight: 600; color: var(--text-dim); margin-top: 2px; }
+.level-tab:hover { border-color: var(--blue); color: var(--blue); }
+.level-tab.active { background: var(--blue); border-color: var(--blue); color: var(--white); box-shadow: 0 4px 0 var(--blue-d); }
+.level-tab.active span { color: rgba(255,255,255,.8); }
+
+/* Aviso de nivel bloqueado / desbloqueado */
+.level-lock-modal[hidden] { display: none !important; }
+.level-lock-modal {
+  position: fixed; inset: 0; z-index: 100000;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  background: rgba(15,23,42,.48);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+}
+.level-lock-dialog {
+  position: relative; width: min(100%, 400px);
+  padding: 34px 28px 30px; border: 2px solid var(--card-border);
+  border-radius: 24px; background: var(--modal-bg); color: var(--text);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 24px 70px rgba(0,0,0,.3); text-align: center;
+  animation: level-modal-enter .2s ease-out both;
+}
+.level-lock-close {
+  position: absolute; top: 10px; right: 12px; width: 40px; height: 40px;
+  border: 0; border-radius: 50%; background: transparent; color: var(--text-mid);
+  font: 700 30px/1 var(--font); cursor: pointer; touch-action: manipulation;
+}
+.level-lock-close:hover { background: var(--bg); color: var(--text); }
+.level-lock-close:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+.level-lock-icon { display: flex; justify-content: center; margin-bottom: 8px; color: var(--blue); }
+.level-lock-icon svg { width: 58px; height: 58px; }
+.level-lock-icon.is-unlocked { color: var(--green); }
+.level-lock-dialog h2 { margin: 0 32px 8px; font-size: 1.35rem; font-weight: 900; }
+.level-lock-dialog p { margin: 0; color: var(--text-mid); font-size: 1rem; font-weight: 700; line-height: 1.55; }
+body.level-lock-modal-open { overflow: hidden; }
+@keyframes level-modal-enter { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* Mini footer (@egglish 2026) */
+.egg-mini-footer {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border-top: 2px solid var(--card-border); margin-top: 40px; padding: 20px 16px;
+  color: var(--text);
+}
+
+/* ── Capas: los modales de lección quedan por encima del fondo (400) y del navbar (500) ── */
+.guide-modal-backdrop  { z-index: 5000; }
+.lesson-modal-backdrop { z-index: 5000; }
+.completion-modal      { z-index: 5200; }
+.lose-modal            { z-index: 5210; }
+.toast                 { z-index: 5300; }
+.xp-float              { z-index: 5400; }
+
+/* Pantalla de la lección con vidrio sobre el fondo animado */
+.lesson-modal-backdrop {
+  background: var(--lesson-veil);
+  -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+}
+.lesson-topbar, .lesson-bottom { background: var(--card-bg-soft); border-color: var(--card-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.lesson-body { background: transparent; }
+
+/* Imágenes: iconos de lección, corazones, pollito, estrella */
+.node-icon { display: flex; align-items: center; justify-content: center; }
+.node-icon-img { width: 40px; height: 40px; object-fit: contain; display: block; }
+.node-lock { width: 32px; height: 32px; color: var(--locked-txt); }
+.guide-tab-btn { display: inline-flex; align-items: center; gap: 6px; }
+.guide-tab-img { width: 22px; height: 22px; object-fit: contain; }
+.guide-topic-title { display: flex; align-items: center; gap: 10px; }
+.guide-title-img { width: 34px; height: 34px; object-fit: contain; }
+
+.lesson-hearts { align-items: center; }
+.heart { display: inline-flex; }
+.heart-emoji { display: block; font-size: 26px; line-height: 1; transition: opacity .2s, transform .2s; }
+.heart-emoji.is-lost { opacity: .55; transform: scale(.9); }
+#stat-hearts { display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 1.6rem; }
+#stat-hearts .heart-emoji { font-size: 22px; }
+
+.lesson-char-avatar img { width: 5rem; height: 5rem; object-fit: contain; display: block; }
+.lose-chick img { width: 4.5rem; height: 4.5rem; object-fit: contain; display: block; margin: 0 auto; filter: grayscale(.4); }
+.completion-chick img { width: 5rem; height: 5rem; object-fit: contain; display: block; margin: 0 auto; }
+.feedback-icon { display: flex; align-items: center; }
+.feedback-icon svg { width: 38px; height: 38px; }
+.lesson-feedback.correct .feedback-icon { color: var(--green-d); }
+.lesson-feedback.wrong .feedback-icon { color: var(--red-d); }
+.xp-float { display: flex; align-items: center; gap: 8px; }
+.xp-float-img { width: 22px; height: 22px; object-fit: contain; }
+
+/* Modo oscuro: piezas que usaban blanco fijo */
+.dark .btn-skip { background: transparent; color: #cbd5e1; border-color: #475569; }
+.dark .toast { background: #1f2937; color: #fff; }
+.dark .completion-sub, .dark .lose-sub { color: #cbd5e1; }
+.dark .stat-box { background: rgba(255,255,255,.06); border-color: #334155; }
+.dark .stat-label { color: #cbd5e1; }
+.dark .lose-btn-secondary { color: #94a3b8; }
+.dark .level-tab { color: #cbd5e1; }
+.dark .level-tab.active { color: #fff; }
+
+/* Responsive (igual que Juegos) */
+@media (max-width: 700px) {
+  .level-tabs-wrapper { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 20px 16px 0; }
+  .level-tab { padding: 8px 12px; border-radius: 12px; }
+  .level-tab .egg-img-slot { width: 28px; height: 28px; }
+  .node-icon-img { width: 34px; height: 34px; }
+}
+
+.guide-close, .lesson-close-btn { display: flex; align-items: center; justify-content: center; }
+
+/* Posición zig-zag del nodo: siempre parte de --tx, así hover/active/bloqueado no lo desplazan */
+.lesson-node { --tx: 0px; transform: translateX(var(--tx)); }
+.node-slot .lesson-node { transition: transform .2s, box-shadow .2s, border-color .2s; }
+.node-slot .lesson-node:hover { transform: translateX(var(--tx)) translateY(-3px) scale(1.04); }
+.node-slot .lesson-node:active { transform: translateX(var(--tx)) scale(0.95); }
+.node-slot .lesson-node.state-locked:hover,
+.node-slot .lesson-node.state-locked:active { transform: translateX(var(--tx)); }
+
+/* Avisos de lección repetida (no suma puntos) */
+.lesson-repeat-note[hidden], .completion-note[hidden] { display: none !important; }
+.lesson-repeat-note {
+  margin: 0 auto 14px; max-width: 560px; padding: 10px 14px; border-radius: 12px;
+  border: 2px solid #f59e0b; background: rgba(245,158,11,.14); color: #854d0e;
+  font-size: .88rem; font-weight: 800; line-height: 1.4; text-align: center;
+}
+.completion-note {
+  margin: -10px 0 18px; padding: 10px 12px; border-radius: 12px;
+  border: 2px solid #f59e0b; background: rgba(245,158,11,.14); color: #854d0e;
+  font-size: .88rem; font-weight: 800; line-height: 1.4;
+}
+.dark .lesson-repeat-note, .dark .completion-note { color: #fcd34d; background: rgba(245,158,11,.12); }

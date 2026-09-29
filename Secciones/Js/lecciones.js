@@ -62,7 +62,7 @@ const LEVELS = {
 const THEMES = {
 
   saludos: {
-    label: 'Saludos', icon: '👋', xp: 40,
+    label: 'Saludos', xp: 40,
     guide: {
       summary: 'Aprende a saludar, despedirte y presentarte de forma cortés en inglés.',
       rules: ['"Good morning" se usa en la mañana, "Good afternoon" después del mediodía y "Good evening" al anochecer.'],
@@ -85,7 +85,7 @@ const THEMES = {
   },
 
   colores: {
-    label: 'Colores', icon: '🎨', xp: 40,
+    label: 'Colores', xp: 40,
     guide: {
       summary: 'Vocabulario esencial de colores para describir objetos y ropa en inglés.',
       rules: ['En inglés, los colores van ANTES del sustantivo: "red car", no "car red".'],
@@ -108,7 +108,7 @@ const THEMES = {
   },
 
   numeros: {
-    label: 'Números', icon: '🔢', xp: 45,
+    label: 'Números', xp: 45,
     guide: {
       summary: 'Cuenta del 1 al 100 y aprende a hablar de edades y cantidades.',
       rules: ['Para la edad usamos el verbo "to be" (ser/estar): "I am twenty", NO "I have twenty".'],
@@ -131,7 +131,7 @@ const THEMES = {
   },
 
   animales: {
-    label: 'Animales', icon: '🐾', xp: 45,
+    label: 'Animales', xp: 45,
     guide: {
       summary: 'Nombra animales comunes de granja, mascotas y fauna silvestre.',
       rules: ['En inglés los animales suelen tratarse como objetos a menos que sean tus mascotas.'],
@@ -154,7 +154,7 @@ const THEMES = {
   },
 
   familia: {
-    label: 'Familia', icon: '👨‍👩‍👧', xp: 45,
+    label: 'Familia', xp: 45,
     guide: {
       summary: 'Habla sobre tu familia: padres, hermanos, abuelos y parientes.',
       rules: ['"Parents" significa padres (mamá y papá juntos), no parientes.'],
@@ -177,7 +177,7 @@ const THEMES = {
   },
 
   comida: {
-    label: 'Comida', icon: '🍽️', xp: 45,
+    label: 'Comida', xp: 45,
     guide: {
       summary: 'Frases útiles para pedir comida y bebida.',
       rules: ['"I would like" es la forma cortés de pedir algo, mejor que "I want".'],
@@ -200,7 +200,7 @@ const THEMES = {
   },
 
   pronombres: {
-    label: 'Pronombres', icon: '🙋', xp: 50,
+    label: 'Pronombres', xp: 50,
     guide: {
       summary: 'Los pronombres personales reemplazan al sujeto.',
       rules: ['"You" sirve para tú, usted y ustedes.', 'En inglés nunca se omite el pronombre.'],
@@ -223,7 +223,7 @@ const THEMES = {
   },
 
   serestar: {
-    label: 'Verb To Be', icon: '🧩', xp: 50,
+    label: 'Verb To Be', xp: 50,
     guide: {
       summary: 'El verbo "To be" significa ser o estar.',
       rules: ['Formas en presente: am, is, are.', 'Se usa para la edad.'],
@@ -246,7 +246,7 @@ const THEMES = {
   },
 
   presente: {
-    label: 'Simple Present', icon: '🔁', xp: 50,
+    label: 'Simple Present', xp: 50,
     guide: {
       summary: 'Describe hábitos y rutinas.',
       rules: ['Con he, she o it se agrega "s" al final del verbo.'],
@@ -269,7 +269,7 @@ const THEMES = {
   },
 
   rutina: {
-    label: 'Rutina Diaria', icon: '⏰', xp: 50,
+    label: 'Rutina Diaria', xp: 50,
     guide: {
       summary: 'Actividades diarias desde despertar hasta dormir.',
       rules: ['Usa "at" para las horas.'],
@@ -292,7 +292,7 @@ const THEMES = {
   },
 
   lugares: {
-    label: 'Lugares', icon: '📍', xp: 55,
+    label: 'Lugares', xp: 55,
     guide: {
       summary: 'Lugares en la ciudad y direcciones.',
       rules: ['Usa "go to" para indicar desplazamiento a un lugar.'],
@@ -315,7 +315,7 @@ const THEMES = {
   },
 
   trabajos: {
-    label: 'Trabajos', icon: '💼', xp: 55,
+    label: 'Trabajos', xp: 55,
     guide: {
       summary: 'Nombra profesiones y ocupaciones.',
       rules: ['Es obligatorio usar "a" o "an" antes de la profesión: "I am a doctor".'],
@@ -338,7 +338,7 @@ const THEMES = {
   },
 
   condicionales: {
-    label: 'Condicionales', icon: '🔀', xp: 70,
+    label: 'Condicionales', xp: 70,
     guide: {
       summary: 'Aprende a formar el primer condicional para hablar de situaciones futuras posibles.',
       rules: ['El primer condicional se forma con "If + presente simple, will + verbo base".', 'Se usa para hablar de situaciones reales o probables en el futuro.'],
@@ -361,7 +361,7 @@ const THEMES = {
   },
 
   vozpasiva: {
-    label: 'Voz pasiva', icon: '🔄', xp: 70,
+    label: 'Voz pasiva', xp: 70,
     guide: {
       summary: 'Aprende a construir oraciones en voz pasiva para enfocar la acción en vez del sujeto.',
       rules: ['La voz pasiva se forma con "to be" + participio pasado.', 'Se usa cuando quien realiza la acción no es importante o se desconoce.'],
@@ -386,6 +386,32 @@ const THEMES = {
 };
 
 /* ================================================================
+   IMÁGENES (sin emojis)
+   - Iconos de lección: /imgs/lecciones/<tema>.png (si no existe, cae al pollito)
+   - Corazones: /imgs/cor.png
+   - Símbolos funcionales (candado, check, cruz, omitir) van como SVG en línea.
+================================================================ */
+const IMG_CHICK = '/imgs/eggy.png';
+const IMG_STAR  = '/imgs/estrella.png';
+
+function themeIcon(themeKey, cls = 'node-icon-img') {
+  return `<img src="/imgs/lecciones/${themeKey}.png" class="${cls}" alt="" onerror="this.onerror=null;this.src='${IMG_CHICK}'"/>`;
+}
+function heartImg(lost = false) {
+  return `<span class="heart-emoji${lost ? ' is-lost' : ''}" aria-hidden="true">${lost ? '🖤' : '❤️'}</span>`;
+}
+function heartsHTML(alive, max) {
+  return Array.from({ length: max }, (_, i) => heartImg(i >= alive)).join('');
+}
+
+const SVG_LOCK = '<svg class="node-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
+const FEEDBACK_SVG = {
+  correct: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M7.5 12.5l3 3 6-7"></path></svg>',
+  wrong:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"></path></svg>',
+  skip:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 8l5 4-5 4M15.5 8v8"></path></svg>',
+};
+
+/* ================================================================
    PROGRESO (persistencia local)
 ================================================================ */
 const cachedUid = (() => {
@@ -396,17 +422,30 @@ const STORAGE_KEY = `egglish_lecciones_v3_${cachedUid}`;
 const MID_LESSON_KEY = `egglish_mid_lesson_${cachedUid}`;
 
 function loadProgress() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { done: {}, xp: 0, streak: 0, lastDay: null }; }
-  catch (e) { return { done: {}, xp: 0, streak: 0, lastDay: null }; }
+  let p;
+  try { p = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) { p = null; }
+  p = p || { done: {}, xp: 0, streak: 0, lastDay: null };
+  if (!p.done) p.done = {};
+  // xpAwarded: lecciones por las que YA se pagaron puntos (solo se pagan la primera vez)
+  if (!p.xpAwarded) p.xpAwarded = {};
+  return p;
 }
 function saveProgress() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (e) {}
 }
 const progress = loadProgress();
 
+/** ¿Es la primera vez que esta lección da puntos?
+ *  Una lección con check verde (done) o con puntos ya pagados NO vuelve a sumar. */
+function isFirstTimeLesson(themeKey) {
+  return !progress.done[themeKey] && !progress.xpAwarded[themeKey];
+}
+
 /** Guarda exactamente dónde quedó el usuario dentro de una lección activa */
 function saveMidLesson() {
   if (!lessonState.themeKey) return;
+  // Sin corazones la lección está perdida: NO se guarda para reanudar.
+  if (lessonState.hearts <= 0) { clearMidLesson(); return; }
   const snapshot = {
     themeKey: lessonState.themeKey,
     questions: lessonState.questions,
@@ -428,7 +467,12 @@ function clearMidLesson() {
 function loadMidLesson(themeKey) {
   try {
     const snap = JSON.parse(localStorage.getItem(MID_LESSON_KEY));
-    if (snap && snap.themeKey === themeKey && snap.qIndex > 0) return snap;
+    if (snap && snap.themeKey === themeKey && snap.qIndex > 0) {
+      // Un guardado sin corazones es una lección perdida: se descarta para
+      // que al reintentar empiece de cero con los 3 corazones.
+      if (snap.hearts <= 0) { clearMidLesson(); return null; }
+      return snap;
+    }
   } catch (e) {}
   return null;
 }
@@ -564,11 +608,30 @@ const MAX_HEARTS = 3;
 /* ================================================================
    ESTADÍSTICAS / PESTAÑAS DE NIVEL
 ================================================================ */
-function updateStatsBar() {
-  const order = flatThemeOrder();
-  document.getElementById('stat-streak').textContent = progress.streak || 0;
-  document.getElementById('stat-total-xp').textContent = progress.xp || 0;
-  document.getElementById('stat-lessons-done').textContent = order.filter(t => progress.done[t]).length;
+/** Modal de aviso para niveles bloqueados y niveles recién desbloqueados (igual que Juegos). */
+function showLevelNoticeModal(msg) {
+  const modal = document.getElementById('level-lock-modal');
+  const message = document.getElementById('level-lock-message');
+  const closeButton = document.getElementById('level-lock-close');
+  const icon = document.getElementById('level-lock-icon');
+  if (!modal || !message || !closeButton || !icon) return;
+
+  const unlocked = msg.toLowerCase().includes('desbloqueado');
+  icon.classList.toggle('is-unlocked', unlocked);
+  icon.innerHTML = unlocked
+    ? '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="8" y="21" width="32" height="23" rx="5" stroke="currentColor" stroke-width="3.5"/><path d="M15 21v-7a9 9 0 0 1 17.7-2" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="31" r="2.5" fill="currentColor"/><path d="M24 33.5V37" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>'
+    : '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="8" y="21" width="32" height="23" rx="5" stroke="currentColor" stroke-width="3.5"/><path d="M15 21v-7a9 9 0 0 1 18 0v7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="31" r="2.5" fill="currentColor"/><path d="M24 33.5V37" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+  message.textContent = msg;
+  modal.hidden = false;
+  document.body.classList.add('level-lock-modal-open');
+  closeButton.focus();
+}
+
+function closeLevelLockModal() {
+  const modal = document.getElementById('level-lock-modal');
+  if (!modal || modal.hidden) return;
+  modal.hidden = true;
+  document.body.classList.remove('level-lock-modal-open');
 }
 
 function setupLevelTabs() {
@@ -584,7 +647,7 @@ function setupLevelTabs() {
       if (idx > getUnlockedLevelIdx()) {
         e.preventDefault();
         if (window.SoundManager) window.SoundManager.playWrong();
-        showToast('🔒 Completa todas las actividades del nivel actual para desbloquear este.');
+        showLevelNoticeModal('Completa todas las lecciones del nivel actual para desbloquear este.');
         return;
       }
       if (window.SoundManager) window.SoundManager.playClick();
@@ -597,6 +660,15 @@ function setupLevelTabs() {
 
     tab.classList.toggle('active', lvl === currentLevel);
     tab.setAttribute('aria-selected', lvl === currentLevel ? 'true' : 'false');
+  });
+
+  const lockModal = document.getElementById('level-lock-modal');
+  document.getElementById('level-lock-close')?.addEventListener('click', closeLevelLockModal);
+  lockModal?.addEventListener('click', event => {
+    if (event.target === lockModal) closeLevelLockModal();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeLevelLockModal();
   });
 
   refreshLevelTabsLockUI();
@@ -639,7 +711,7 @@ function buildPath() {
           <div class="unit-label">Sección ${unitIdx + 1}</div>
           <div class="unit-title">${unit.title}</div>
         </div>
-        <button type="button" class="unit-header-btn" data-unit-themes="${unit.themes.join(',')}">📖 GUÍA</button>
+        <button type="button" class="unit-header-btn hover-circle-btn" data-unit-themes="${unit.themes.join(',')}"><span class="hover-circle"></span><span class="btn-label">GUÍA</span></button>
       `;
       panel.appendChild(header);
 
@@ -672,20 +744,19 @@ function buildPath() {
           btn.classList.add('state-done');
           btn.style.position = 'relative';
           btn.innerHTML = `
-            <span class="node-icon">${theme.icon}</span>
+            <span class="node-icon">${themeIcon(themeKey)}</span>
             <span class="node-label-inner">${theme.label}</span>
-            <span class="node-crown">👑</span>
-            <span class="node-check-badge" title="Ya completaste esta lección" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.25);line-height:1;">✓</span>`;
+            <span class="node-check-badge" title="Ya completaste esta lección" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;box-shadow:0 2px 4px rgba(0,0,0,.25);line-height:1;"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>`;
         } else if (prevDone) {
           btn.classList.add('state-current');
           btn.innerHTML = `
             <span class="node-empezar">EMPEZAR</span>
-            <span class="node-icon">${theme.icon}</span>
+            <span class="node-icon">${themeIcon(themeKey)}</span>
             <span class="node-label-inner">${theme.label}</span>`;
         } else {
           btn.classList.add('state-locked');
           btn.innerHTML = `
-            <span class="node-icon">🔒</span>
+            <span class="node-icon">${SVG_LOCK}</span>
             <span class="node-label-inner">${theme.label}</span>`;
         }
 
@@ -703,7 +774,7 @@ function buildPath() {
     btn.addEventListener('click', () => {
       if (btn.classList.contains('state-locked')) {
         if (window.SoundManager) window.SoundManager.playWrong();
-        showToast('🔒 Completa la lección anterior primero.');
+        showToast('Completa la lección anterior primero.');
         return;
       }
       if (window.SoundManager) window.SoundManager.playClick();
@@ -715,7 +786,6 @@ function buildPath() {
     btn.addEventListener('click', () => openGuide(btn.dataset.unitThemes.split(',')));
   });
 
-  updateStatsBar();
 }
 
 /* ================================================================
@@ -725,15 +795,15 @@ function renderGuideContent(themeKey) {
   const theme = THEMES[themeKey];
   const g = theme.guide;
   guideContentEl.innerHTML = `
-    <div class="guide-topic-title">${theme.icon} ${theme.label}</div>
+    <div class="guide-topic-title">${themeIcon(themeKey, 'guide-title-img')}<span>${theme.label}</span></div>
     <div class="guide-summary">${g.summary}</div>
-    <div class="guide-section-title">📌 Reglas principales</div>
+    <div class="guide-section-title">Reglas principales</div>
     <ul class="guide-list">${g.rules.map(r => `<li>${r}</li>`).join('')}</ul>
-    <div class="guide-section-title">✅ Ejemplos</div>
+    <div class="guide-section-title">Ejemplos</div>
     <ul class="guide-list examples">${g.examples.map(r => `<li>${r}</li>`).join('')}</ul>
-    <div class="guide-section-title">⚠️ Errores comunes</div>
+    <div class="guide-section-title">Errores comunes</div>
     <ul class="guide-list mistakes">${g.mistakes.map(r => `<li>${r}</li>`).join('')}</ul>
-    <div class="guide-section-title">💡 Consejos rápidos</div>
+    <div class="guide-section-title">Consejos rápidos</div>
     <ul class="guide-list tips">${g.tips.map(r => `<li>${r}</li>`).join('')}</ul>
   `;
 }
@@ -745,7 +815,7 @@ function openGuide(themeKeys) {
     const tab = document.createElement('button');
     tab.type = 'button';
     tab.className = 'guide-tab-btn' + (i === 0 ? ' active' : '');
-    tab.textContent = `${t.icon} ${t.label}`;
+    tab.innerHTML = `${themeIcon(key, 'guide-tab-img')}<span>${t.label}</span>`;
     tab.addEventListener('click', () => {
       guideTabsEl.querySelectorAll('.guide-tab-btn').forEach(b => b.classList.remove('active'));
       tab.classList.add('active');
@@ -778,14 +848,14 @@ const lessonState = {
   startTime: 0,
 };
 
-function openLesson(themeKey) {
+function openLesson(themeKey, forceRestart = false) {
   const theme = THEMES[themeKey];
-  if (!theme) { showToast('⚠️ Lección no disponible aún.'); return; }
+  if (!theme) { showToast('Lección no disponible aún.'); return; }
 
   // Inicializar SoundManager en el primer gesto del usuario
   if (window.SoundManager) window.SoundManager.unlock();
 
-  const mid = loadMidLesson(themeKey);
+  const mid = forceRestart ? null : loadMidLesson(themeKey);
   if (mid) {
     // Reanudar desde donde se quedó
     lessonState.themeKey = mid.themeKey;
@@ -796,7 +866,7 @@ function openLesson(themeKey) {
     lessonState.correctCount = mid.correctCount;
     lessonState.totalXp = mid.totalXp;
     lessonState.startTime = mid.startTime;
-    showToast(`📍 Retomando desde la pregunta ${mid.qIndex + 1}`, 'success', 2200);
+    showToast(`Retomando desde la pregunta ${mid.qIndex + 1}`, 'success', 2200);
   } else {
     lessonState.themeKey = themeKey;
     lessonState.questions = shuffleArray(theme.questions).slice(0, 10);
@@ -809,6 +879,15 @@ function openLesson(themeKey) {
   }
 
   updateHeartsUI();
+
+  // Aviso: si la lección ya se hizo antes, repetirla no suma puntos.
+  const repeatNote = document.getElementById('lesson-repeat-note');
+  const repetida = !isFirstTimeLesson(themeKey);
+  if (repeatNote) repeatNote.hidden = !repetida;
+  if (repetida) {
+    showToast('Ya completaste esta lección: puedes repetirla, pero no sumará puntos.', '', 4800);
+  }
+
   lessonModal.classList.add('open');
   document.body.style.overflow = 'hidden';
   renderQuestion();
@@ -816,8 +895,11 @@ function openLesson(themeKey) {
 
 function updateHeartsUI() {
   heartsWrap.querySelectorAll('.heart').forEach((h, i) => {
-    h.classList.toggle('lost', i >= lessonState.hearts);
-    h.textContent = i < lessonState.hearts ? '❤️' : '🤍';
+    const lost = i >= lessonState.hearts;
+    h.classList.toggle('lost', lost);
+    // Recrear la misma imagen en cada actualización evita que el filtro
+    // gris de una vida perdida quede pegado después de reiniciar.
+    h.innerHTML = heartImg(lost);
   });
 }
 
@@ -879,7 +961,7 @@ function renderOrderExercise(q) {
 
   exerciseArea.innerHTML = `
     <div class="lesson-answer-zone" id="answer-zone"></div>
-    <div class="drag-hint">✋ Toca o arrastra las palabras para ordenarlas</div>
+    <div class="drag-hint">Toca o arrastra las palabras para ordenarlas</div>
     <div class="lesson-wordbank" id="wordbank"></div>
   `;
   renderOrderZones();
@@ -1122,9 +1204,9 @@ function renderBooleanExercise(q) {
   const btnWrap = document.createElement('div');
   btnWrap.className = 'boolean-buttons';
   const trueBtn = document.createElement('button');
-  trueBtn.type = 'button'; trueBtn.className = 'boolean-btn'; trueBtn.textContent = '✅ Verdadero';
+  trueBtn.type = 'button'; trueBtn.className = 'boolean-btn'; trueBtn.textContent = 'Verdadero';
   const falseBtn = document.createElement('button');
-  falseBtn.type = 'button'; falseBtn.className = 'boolean-btn'; falseBtn.textContent = '❌ Falso';
+  falseBtn.type = 'button'; falseBtn.className = 'boolean-btn'; falseBtn.textContent = 'Falso';
 
   [[trueBtn, true], [falseBtn, false]].forEach(([btn, val]) => {
     btn.addEventListener('click', () => {
@@ -1154,17 +1236,19 @@ function hasAnswerReady() {
   return false;
 }
 
+function setCheckBtn(stateClass, label) {
+  btnCheck.className = 'btn-check hover-circle-btn' + (stateClass ? ' ' + stateClass : '');
+  const l = btnCheck.querySelector('.btn-label');
+  if (l) l.textContent = label;
+}
+
 function updateCheckBtn() {
   if (lessonState.phase === 'correct') {
-    btnCheck.className = 'btn-check correct-continue';
-    btnCheck.textContent = 'CONTINUAR';
+    setCheckBtn('correct-continue', 'CONTINUAR');
   } else if (lessonState.phase === 'wrong') {
-    btnCheck.className = 'btn-check wrong';
-    btnCheck.textContent = 'CONTINUAR';
+    setCheckBtn('wrong', 'CONTINUAR');
   } else {
-    const ready = hasAnswerReady();
-    btnCheck.className = ready ? 'btn-check ready' : 'btn-check';
-    btnCheck.textContent = 'COMPROBAR';
+    setCheckBtn(hasAnswerReady() ? 'ready' : '', 'COMPROBAR');
   }
 }
 
@@ -1201,7 +1285,7 @@ function checkAnswer() {
     lessonState.phase = 'correct';
     lessonState.correctCount++;
     lessonState.totalXp += xpPerQ;
-    feedbackIcon.textContent = '🎉';
+    feedbackIcon.innerHTML = FEEDBACK_SVG.correct;
     feedbackTitle.className = 'feedback-title correct';
     feedbackTitle.textContent = '¡Correcto!';
     feedbackAns.textContent = correctAnswerText(q);
@@ -1211,7 +1295,7 @@ function checkAnswer() {
     lessonState.hearts = Math.max(0, lessonState.hearts - 1);
     lessonState.phase = 'wrong';
     updateHeartsUI();
-    feedbackIcon.textContent = '💔';
+    feedbackIcon.innerHTML = FEEDBACK_SVG.wrong;
     feedbackTitle.className = 'feedback-title wrong';
     feedbackTitle.textContent = '¡Incorrecto!';
     feedbackAns.textContent = 'Respuesta correcta: ' + correctAnswerText(q);
@@ -1228,6 +1312,8 @@ function checkAnswer() {
 }
 
 function advanceQuestion() {
+  // Sin corazones: solo queda el aviso de "Sin vidas", no se puede seguir.
+  if (lessonState.hearts <= 0) return;
   lessonState.qIndex++;
   if (lessonState.qIndex >= lessonState.questions.length) {
     finishLesson();
@@ -1242,7 +1328,7 @@ function skipQuestion() {
   lessonState.hearts = Math.max(0, lessonState.hearts - 1);
   updateHeartsUI();
   lessonState.phase = 'wrong';
-  feedbackIcon.textContent = '🙈';
+  feedbackIcon.innerHTML = FEEDBACK_SVG.skip;
   feedbackTitle.className = 'feedback-title wrong';
   feedbackTitle.textContent = 'Omitido';
   feedbackAns.textContent = 'Respuesta: ' + correctAnswerText(q);
@@ -1256,12 +1342,17 @@ function skipQuestion() {
 function finishLesson() {
   clearMidLesson(); // lección terminada, borrar guardado parcial
   closeLesson(false);
+  // Solo la PRIMERA vez que se completa una lección suma puntos.
+  lessonState.firstTime = isFirstTimeLesson(lessonState.themeKey);
+  if (!lessonState.firstTime) lessonState.totalXp = 0;
+  const noteEl = document.getElementById('completion-note');
+  if (noteEl) noteEl.hidden = lessonState.firstTime;
   const elapsedSec = Math.round((Date.now() - lessonState.startTime) / 1000);
   const mm = Math.floor(elapsedSec / 60), ss = elapsedSec % 60;
   document.getElementById('stat-xp').textContent = '+' + lessonState.totalXp;
   document.getElementById('stat-correct').textContent = `${lessonState.correctCount}/${lessonState.questions.length}`;
   document.getElementById('stat-time').textContent = `${mm}:${ss.toString().padStart(2, '0')}`;
-  document.getElementById('stat-hearts').textContent = '❤️'.repeat(lessonState.hearts) + '🤍'.repeat(MAX_HEARTS - lessonState.hearts);
+  document.getElementById('stat-hearts').innerHTML = heartsHTML(lessonState.hearts, MAX_HEARTS);
   const pct = Math.round((lessonState.correctCount / lessonState.questions.length) * 100);
   document.getElementById('completion-sub').textContent = `Dominaste el ${pct}% de esta lección. ¡Increíble trabajo!`;
   if (window.SoundManager) window.SoundManager.playVictory();
@@ -1285,11 +1376,15 @@ function showLoseModal() {
    EVENTOS DE LA LECCIÓN (un único listener por control, sin duplicados)
 ================================================================ */
 document.getElementById('lose-retry').addEventListener('click', () => {
+  const themeKey = lessonState.themeKey;
   clearMidLesson();
   loseModal.classList.remove('open');
-  openLesson(lessonState.themeKey);
+  lessonState.hearts = MAX_HEARTS;
+  openLesson(themeKey, true);
 });
 document.getElementById('lose-exit').addEventListener('click', () => {
+  clearMidLesson(); // lección perdida: al volver a entrar empieza de cero con 3 corazones
+  lessonState.hearts = MAX_HEARTS;
   loseModal.classList.remove('open');
 });
 
@@ -1305,13 +1400,18 @@ document.getElementById('completion-continue').addEventListener('click', () => {
   // mapa. Una vez ganado el check, nunca se le vuelve a quitar por un
   // intento posterior con peor resultado.
   const perfecta = lessonState.correctCount === lessonState.questions.length && lessonState.hearts > 0;
+  const primeraVez = lessonState.firstTime !== false;      // calculado en finishLesson
+  const yaTeniaCheck = !!progress.done[lessonState.themeKey];
   if (perfecta) {
     progress.done[lessonState.themeKey] = true;
   }
-  progress.xp = (progress.xp || 0) + lessonState.totalXp;
+  // Puntos: solo la primera vez que se completa la lección.
+  const xpGanado = primeraVez ? lessonState.totalXp : 0;
+  if (primeraVez) progress.xpAwarded[lessonState.themeKey] = true;
+  progress.xp = (progress.xp || 0) + xpGanado;
   registerDayStreak();
   saveProgress();
-  floatXP(lessonState.totalXp);
+  if (xpGanado > 0) floatXP(xpGanado);
   buildPath();
   refreshLevelTabsLockUI();
 
@@ -1320,9 +1420,11 @@ document.getElementById('completion-continue').addEventListener('click', () => {
   const unlockedIdxDespues = getUnlockedLevelIdx();
   if (unlockedIdxDespues > unlockedIdxAntes) {
     const nuevoNivel = LEVELS[LEVEL_ORDER[unlockedIdxDespues]].label;
-    showToast(`🎉 ¡Nivel ${nuevoNivel} desbloqueado!`, 'success', 3200);
+    showLevelNoticeModal(`¡Nivel ${nuevoNivel} desbloqueado!`);
+  } else if (!primeraVez) {
+    showToast('Lección repetida: no suma puntos.', '', 2600);
   } else if (perfecta) {
-    showToast('✅ ¡Lección completada al 100%!', 'success', 2400);
+    showToast('¡Lección completada al 100%!', 'success', 2400);
   }
 
   // Sincroniza el progreso REAL (puntos, racha y lecciones completadas) con
@@ -1331,9 +1433,10 @@ document.getElementById('completion-continue').addEventListener('click', () => {
   // que coincida con lo que muestra el check en el mapa.
   window._egglishProgresoPendiente = import('/Secciones/Js/egglish-progreso.js')
     .then(({ registrarProgreso }) => registrarProgreso({
-      exp: lessonState.totalXp,
-      campo: perfecta ? 'leccionesCompletadas' : null,
-      incremento: perfecta ? 1 : 0,
+      exp: xpGanado,
+      // "leccionesCompletadas" solo sube la primera vez que queda perfecta
+      campo: (perfecta && !yaTeniaCheck) ? 'leccionesCompletadas' : null,
+      incremento: (perfecta && !yaTeniaCheck) ? 1 : 0,
     }))
     .catch((e) => console.warn('No se pudo sincronizar el progreso con Firebase:', e));
 });
@@ -1370,7 +1473,7 @@ function showToast(msg, type = '', ms = 2400) {
 function floatXP(xp) {
   const el = document.createElement('div');
   el.className = 'xp-float';
-  el.textContent = `+${xp} XP 🌟`;
+  el.innerHTML = `+${xp} XP <img src="${IMG_STAR}" alt="" class="xp-float-img" onerror="this.style.display='none'"/>`;
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 1000);
 }

@@ -347,7 +347,7 @@
 
         html.dark .lock-hint { background: #3a1f24; border-color: #7f2b32; color: #fca5a5; }
 
-        html.dark .biblioteca-section { background: #0f172a; }
+        html.dark .biblioteca-section { background: transparent; }
         html.dark .level-tab:hover { border-color: var(--blue); color: var(--blue); }
         html.dark .level-tab.active,
         html.dark .level-tab.active span { color: #ffffff; }
@@ -427,9 +427,18 @@
         }
 
         @media (max-width: 640px) {
-            .listening-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 14px; }
+            .listening-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-items: stretch;
+                gap: 20px 14px;
+            }
             .biblioteca-title { font-size: 1.5rem; }
             .listening-card-art { top: 3%; height: 49%; }
+            .listening-card { min-width: 0; width: 100%; height: auto; min-height: 0; aspect-ratio: 4 / 5; overflow: hidden; }
+            .listening-card-content { min-width: 0; width: 100%; overflow-wrap: anywhere; }
+            .listening-card-title,
+            .listening-card-progress,
+            .listening-card-note { min-width: 0; overflow-wrap: anywhere; }
         }
 
         .listening-card {
@@ -1186,10 +1195,10 @@
       <button id="egg-menu-btn" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="egg-offcanvas" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
-      <a href="/index.html" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
+      <div class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
         <img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
         <span class="text-base sm:text-xl font-black text-black dark:text-white whitespace-nowrap truncate">Egglish</span>
-      </a>
+      </div>
     </div>
     <ul class="hidden md:flex items-center gap-1 list-none m-0 p-0">
       <li><a href="/Secciones/lecciones.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/book-removebg-preview.png" alt="" class="nav-icon"/>Lecciones</a></li>
