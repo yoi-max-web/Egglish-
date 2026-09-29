@@ -242,7 +242,7 @@
       </div>
       <div class="stars-row">
         <span id="mc-timer" class="timer-badge" style="display:none;">8</span>
-        <img src="/imgs/star-removebg-preview.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="mc-score">0</span>
+        <span class="score-counter"><img src="/imgs/star-removebg-preview.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="mc-score">0</span></span>
       </div>
     </div>
 
@@ -255,7 +255,7 @@
 
       <div class="question-area">
         <div class="question-mascot">
-          <img src="/imgs/mascota-pregunta.png" class="q-mascot-img" id="mc-mascot-img" alt="" onerror="this.style.visibility='hidden'"/>
+          <img src="/imgs/pregunta-mascota.png" class="q-mascot-img" id="mc-mascot-img" alt="" onerror="this.style.visibility='hidden'"/>
           <span class="question-emoji" id="mc-emoji" style="display:none;"></span>
         </div>
         <p class="question-text" id="mc-question">¿Cómo se dice 'Huevo' en inglés?</p>
@@ -283,7 +283,7 @@
         <span class="game-tag" id="match-level-tag">A1</span>
         <span class="game-name" id="match-game-name">Conecta Palabras</span>
       </div>
-      <div class="stars-row"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="match-score">0</span></div>
+      <div class="stars-row"><span class="score-counter"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="match-score">0</span></span></div>
     </div>
 
     <div class="game-card">
@@ -306,7 +306,7 @@
         <span class="game-tag" id="fill-level-tag">A2</span>
         <span class="game-name" id="fill-game-name">Completa la Frase</span>
       </div>
-      <div class="stars-row"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="fill-score">0</span></div>
+      <div class="stars-row"><span class="score-counter"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="fill-score">0</span></span></div>
     </div>
 
     <div class="game-card">
@@ -339,7 +339,7 @@
         <span class="game-tag" id="listen-level-tag">B1</span>
         <span class="game-name" id="listen-game-name">Escucha y Elige</span>
       </div>
-      <div class="stars-row"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="listen-score">0</span></div>
+      <div class="stars-row"><span class="score-counter"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="listen-score">0</span></span></div>
     </div>
 
     <div class="game-card">
@@ -374,7 +374,7 @@
         <span class="game-tag" id="order-level-tag">B1</span>
         <span class="game-name" id="order-game-name">Traduce la Frase</span>
       </div>
-      <div class="stars-row"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="order-score">0</span></div>
+      <div class="stars-row"><span class="score-counter"><img src="/imgs/estrella.png" class="star-icon egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/><span id="order-score">0</span></span></div>
     </div>
 
     <div class="game-card">
@@ -385,6 +385,7 @@
       </div>
       <p class="translate-label" id="order-label">Traduce al inglés:</p>
       <p class="question-text" id="order-sentence"></p>
+      <p id="order-case-note" class="order-case-note" aria-live="polite" hidden></p>
       <div class="word-bank" id="order-bank"></div>
       <div class="fill-answer-row" id="order-answer-row"></div>
       <button class="btn-check hover-circle-btn" id="order-check-btn" onclick="checkOrder()"><span class="hover-circle"></span><span class="btn-label">Verificar</span></button>
@@ -423,6 +424,15 @@
 </div>
 
 <!-- ══════════════ FOOTER (extraído tal cual de index.html) ══════════════ -->
+<div id="level-lock-modal" class="level-lock-modal" role="dialog" aria-modal="true" aria-labelledby="level-lock-title" aria-describedby="level-lock-message" hidden>
+  <div class="level-lock-dialog">
+    <button id="level-lock-close" class="level-lock-close" type="button" aria-label="Cerrar aviso">×</button>
+    <div id="level-lock-icon" class="level-lock-icon" aria-hidden="true"></div>
+    <h2 id="level-lock-title">Aviso</h2>
+    <p id="level-lock-message"></p>
+  </div>
+</div>
+
 <footer id="main-footer" class="egg-mini-footer">
   <img src="/imgs/eggy.png" alt="" class="w-6 h-6 object-contain" aria-hidden="true"/>
   <span style="font-size:.85rem;font-weight:800;">@egglish 2026</span>

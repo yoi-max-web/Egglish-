@@ -371,7 +371,7 @@ const GAMES = [
   // ── 7 minijuegos NUEVOS Nivel A1 ──
   { id:"order-basic",  engine:"order", levels:["A1"], icon:"", title:"Ordena la Frase",         desc:"Arrastra las palabras en el orden correcto para formar una oración básica.", screen:"screen-order", label:"Ordena la frase:" },
   { id:"vocab-match",  engine:"match", levels:["A1"], icon:"", title:"Emparejar Vocabulario",   desc:"Relaciona cada imagen con la palabra correcta en inglés.",                   screen:"screen-match", instruction:"Toca un emoji y luego su palabra en inglés" },
-  { id:"opposites",    engine:"mc",    levels:["A1"], icon:"", title:"Opuestos Rápidos",        desc:"Elige el opuesto correcto antes de que se acabe el tiempo.",                 screen:"screen-mc", timerSec:8 },
+  { id:"opposites",    engine:"mc",    levels:["A1"], icon:"", title:"Opuestos Rápidos",        desc:"Elige el opuesto correcto.",                                               screen:"screen-mc" },
   { id:"fill-basic",   engine:"fill",  levels:["A1"], icon:"", title:"Completa el Espacio",     desc:"Elige la palabra correcta para llenar el espacio en blanco.",                screen:"screen-fill" },
   { id:"image-id",     engine:"mc",    levels:["A1"], icon:"", title:"Identifica el Concepto",  desc:"Observa la imagen y elige qué palabra en inglés lo representa.",              screen:"screen-mc" },
   { id:"listen-basic", engine:"listen",levels:["A1"], icon:"", title:"Escucha Activa",          desc:"Escucha la palabra y elige su significado en español.",                      screen:"screen-listen" },
@@ -510,27 +510,6 @@ const POINT_PLAYS = 1;
 function playsOf(level, id) { return gamesProgress.plays[gameDoneKey(level, id)] || 0; }
 // Puntos por respuesta correcta = puntos del nivel / preguntas (mantiene el  en vivo coherente)
 function pointsPerQ() { return Math.max(1, Math.round((LEVEL_POINTS[currentLevel] || 20) / (totalQ || 5))); }
-
-function confirmarSinPuntos() {
-  return new Promise(res => {
-    const dark = document.documentElement.classList.contains('dark');
-    const o = document.createElement('div');
-    o.style.cssText = 'position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px)';
-    const btn = 'flex:1;border-radius:999px;padding:12px;font-weight:800;cursor:pointer;font-family:inherit;';
-    o.innerHTML = `<div style="max-width:360px;width:100%;text-align:center;padding:24px;border-radius:24px;font-family:inherit;background:${dark ? '#0f172a' : '#fff'};color:${dark ? '#f1f5f9' : '#1a1a2e'};border:2px solid ${dark ? '#1e293b' : '#e5e7eb'}">
-      <h3 style="font-weight:900;font-size:1.2rem;margin-bottom:8px">Esta partida no sumará puntos</h3>
-      <p style="font-weight:700;font-size:.9rem;margin-bottom:18px">Solo la primera partida de cada juego da puntos. Puedes jugarlo las veces que quieras, pero ya no se sumarán a tu perfil.</p>
-      <div style="display:flex;gap:10px">
-        <button data-r="0" class="hover-circle-btn" style="${btn}background:transparent;color:inherit;border:2px solid #94a3b8"><span class="hover-circle"></span><span class="btn-label">Cancelar</span></button>
-        <button data-r="1" class="hover-circle-btn" style="${btn}background:#1cb0f6;color:#fff;border:none"><span class="hover-circle"></span><span class="btn-label">Jugar igual</span></button>
-      </div></div>`;
-    o.addEventListener('click', e => {
-      const b = e.target.closest('button[data-r]'); if (!b && e.target !== o) return;
-      o.remove(); res(!!b && b.dataset.r === '1');
-    });
-    document.body.appendChild(o);
-  });
-}
 
 /** Los niveles POR DEBAJO del nivel obtenido en el placement test se dan
  *  por superados: se marcan TODOS sus minijuegos como completados (check ✓)
@@ -693,32 +672,30 @@ function buildGrid(level) {
   });
 }
 
-/** Pequeño aviso flotante para cuando el alumno toca un nivel que aún
- *  no desbloqueó (no había un sistema de toasts en esta página). */
-function showLevelLockToast(msg) {
-  let toast = document.getElementById('level-lock-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'level-lock-toast';
-    toast.style.cssText = `
-      position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(12px);
-      background:#1f2937; color:#fff; padding:12px 20px; border-radius:999px;
-      font-weight:700; font-size:0.92rem; z-index:99999; box-shadow:0 8px 20px rgba(0,0,0,.3);
-      opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none;
-      white-space:nowrap;
-    `;
-    document.body.appendChild(toast);
-  }
-  toast.textContent = msg;
-  requestAnimationFrame(() => {
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateX(-50%) translateY(0)';
-  });
-  clearTimeout(toast._hideTimer);
-  toast._hideTimer = setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(-50%) translateY(12px)';
-  }, 2200);
+/** Modal de aviso para niveles bloqueados y niveles recién desbloqueados. */
+function showLevelNoticeModal(msg) {
+  const modal = document.getElementById('level-lock-modal');
+  const message = document.getElementById('level-lock-message');
+  const closeButton = document.getElementById('level-lock-close');
+  const icon = document.getElementById('level-lock-icon');
+  if (!modal || !message || !closeButton || !icon) return;
+
+  const unlocked = msg.toLowerCase().includes('desbloqueado');
+  icon.classList.toggle('is-unlocked', unlocked);
+  icon.innerHTML = unlocked
+    ? '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="8" y="21" width="32" height="23" rx="5" stroke="currentColor" stroke-width="3.5"/><path d="M15 21v-7a9 9 0 0 1 17.7-2" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="31" r="2.5" fill="currentColor"/><path d="M24 33.5V37" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>'
+    : '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="8" y="21" width="32" height="23" rx="5" stroke="currentColor" stroke-width="3.5"/><path d="M15 21v-7a9 9 0 0 1 18 0v7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="31" r="2.5" fill="currentColor"/><path d="M24 33.5V37" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+  message.textContent = msg;
+  modal.hidden = false;
+  document.body.classList.add('level-lock-modal-open');
+  closeButton.focus();
+}
+
+function closeLevelLockModal() {
+  const modal = document.getElementById('level-lock-modal');
+  if (!modal || modal.hidden) return;
+  modal.hidden = true;
+  document.body.classList.remove('level-lock-modal-open');
 }
 
 function initGameSelector() {
@@ -738,7 +715,7 @@ function initGameSelector() {
     btn.addEventListener('click', () => {
       if (idx > getUnlockedGamesLevelIdx()) {
         if (window.SoundManager) SoundManager.playWrong();
-        showLevelLockToast('Completa todos los minijuegos del nivel actual para desbloquear este.');
+        showLevelNoticeModal('Completa todos los minijuegos del nivel actual para desbloquear este.');
         return;
       }
       currentLevel = btn.dataset.level;
@@ -746,6 +723,15 @@ function initGameSelector() {
       btn.classList.add('active');
       buildGrid(currentLevel);
     });
+  });
+
+  const lockModal = document.getElementById('level-lock-modal');
+  document.getElementById('level-lock-close')?.addEventListener('click', closeLevelLockModal);
+  lockModal?.addEventListener('click', event => {
+    if (event.target === lockModal) closeLevelLockModal();
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeLevelLockModal();
   });
 
   refreshGamesLevelTabsLockUI();
@@ -789,8 +775,6 @@ if (document.readyState === 'loading') {
 // ══════════════════════════════════════════
 
 function startGame(gameId, level) {
-  const n = playsOf(level, gameId);
-  if (n >= POINT_PLAYS) { confirmarSinPuntos().then(ok => { if (ok) launchGame(gameId, level); }); return; }
   launchGame(gameId, level);
 }
 
@@ -805,6 +789,7 @@ function launchGame(gameId, level) {
   score        = 0;
   // La partida cuenta al empezar (así no se puede abandonar para repetir con puntos)
   gamesProgress.plays[gameDoneKey(level, gameId)] = playsOf(level, gameId) + 1;
+  document.body.classList.toggle('game-no-points', playsOf(level, gameId) > POINT_PLAYS);
   saveGamesProgress();
 
   switch (def.engine) {
@@ -969,7 +954,7 @@ function makeMatchBtn(word, lang) {
   const btn = document.createElement('button');
   btn.className = 'match-btn';
   const m = /^\[IMG: (.+)\]$/.exec(word);
-  if (m) btn.innerHTML = `<img src="/imgs/vocab-${m[1].toLowerCase()}.png" alt="${m[1]}" style="height:96px;object-fit:contain" onerror="this.style.visibility='hidden'"/>`; else btn.textContent = word;
+  if (m) btn.innerHTML = `<img src="/imgs/vocab-${m[1].toLowerCase()}.png" alt="${m[1]}" style="height:72px;object-fit:contain" onerror="this.style.visibility='hidden'"/>`; else btn.textContent = word;
   btn.dataset.lang = lang;
   btn.dataset.word = word;
   btn.onclick = () => handleMatch(btn);
@@ -1218,6 +1203,19 @@ function renderOrder() {
   document.getElementById('order-sentence').textContent = q.es;
   document.getElementById('order-score').textContent = score;
 
+  const pronouns = new Set(['i', 'you', 'he', 'she', 'it', 'we', 'they']);
+  const pronounCounts = new Map();
+  q.ans.forEach(word => {
+    const normalized = word.toLowerCase().replace(/[.,!?;:]$/, '');
+    if (pronouns.has(normalized)) pronounCounts.set(normalized, (pronounCounts.get(normalized) || 0) + 1);
+  });
+  const repeatsPronoun = [...pronounCounts.values()].some(count => count > 1);
+  const caseNote = document.getElementById('order-case-note');
+  caseNote.hidden = !repeatsPronoun;
+  caseNote.textContent = repeatsPronoun
+    ? 'OJO: En inglés, por lo general la primera palabra de una oración empieza con mayúscula. Si un pronombre se repite (por ejemplo, “She” y “she”), puedes usar cualquiera de esas fichas al ordenar: aquí las mayúsculas no cuentan como error.'
+    : '';
+
   const bank = document.getElementById('order-bank');
   bank.innerHTML = '';
   shuffle([...q.bank]).forEach(w => {
@@ -1234,7 +1232,7 @@ function renderOrder() {
 
 function checkOrder() {
   const q = orderSession[orderCurrent];
-  const correct = orderAnswers.join(' ') === q.ans.join(' ');
+  const correct = orderAnswers.map(word => word.toLowerCase()).join(' ') === q.ans.map(word => word.toLowerCase()).join(' ');
   const row = document.getElementById('order-answer-row');
 
   if (correct) {
@@ -1301,10 +1299,11 @@ function showResults(gameName) {
   }
 
   document.getElementById('results-title').textContent    = title;
-  if (!conPuntos) sub += ' Esta partida no sumó puntos: solo la primera cuenta.';
-  else if (nPartida === POINT_PLAYS) sub += ' Ojo: si vuelves a jugar este juego ya no sumará puntos.';
+  if (conPuntos && nPartida === POINT_PLAYS) sub += ' Ojo: si vuelves a jugar este juego ya no sumará puntos.';
   document.getElementById('results-subtitle').textContent = sub;
   document.getElementById('results-score-val').textContent = puntosGanados;
+  const resultsScoreBox = document.querySelector('.results-score-box');
+  if (resultsScoreBox) resultsScoreBox.hidden = !conPuntos;
 
   // Badges
   const badgeContainer = document.getElementById('results-badges');
@@ -1346,7 +1345,7 @@ function showResults(gameName) {
   // desbloquear el siguiente: se lo avisamos al alumno.
   const unlockedIdxDespues = getUnlockedGamesLevelIdx();
   if (unlockedIdxDespues > unlockedIdxAntes) {
-    showLevelLockToast(`¡Nivel ${LEVEL_ORDER[unlockedIdxDespues]} desbloqueado!`);
+    showLevelNoticeModal(`¡Nivel ${LEVEL_ORDER[unlockedIdxDespues]} desbloqueado!`);
   }
 
   // Sincroniza el progreso REAL (puntos y juegos ganados) con Firebase para
