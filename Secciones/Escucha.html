@@ -22,7 +22,7 @@
     </script>
     <style>
       #session-locked-screen { display: none; }
-      html.egg-locked body > *:not(#session-locked-screen) { display: none !important; }
+      html.egg-locked body > *:not(#session-locked-screen):not(#page-bg) { display: none !important; }
       html.egg-locked #session-locked-screen { display: flex; }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -94,7 +94,7 @@
 
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: var(--bg-body);
+            background-color: transparent;
             color: var(--text-dark);
             display: flex;
             flex-direction: column;
@@ -290,7 +290,7 @@
            MODO OSCURO — se activa cuando <html> tiene la clase "dark"
            (mismo interruptor Tailwind que juegos.html / index.html)
         ====================================================================== */
-        html.dark body { background-color: #0f172a; color: #f1f5f9; }
+        html.dark body { background-color: transparent; color: #f1f5f9; }
 
         /* Tarjetas y superficies principales */
         html.dark .lesson-card,
@@ -318,7 +318,6 @@
         html.dark .fill-sentence,
         html.dark .feedback-explain,
         html.dark .level-tab span,
-        html.dark .listening-card-badge,
         html.dark .listening-card-progress,
         html.dark .completion-sub,
         html.dark .audio-status,
@@ -347,7 +346,6 @@
         html.dark .btn-action { background: #334155; color: #94a3b8; }
 
         html.dark .lock-hint { background: #3a1f24; border-color: #7f2b32; color: #fca5a5; }
-        html.dark .listening-card-badge { background: #1e293b; border-color: #334155; }
 
         html.dark .biblioteca-section { background: #0f172a; }
         html.dark .level-tab:hover { border-color: var(--blue); color: var(--blue); }
@@ -431,76 +429,130 @@
         @media (max-width: 640px) {
             .listening-grid { grid-template-columns: repeat(2, 1fr); gap: 20px 14px; }
             .biblioteca-title { font-size: 1.5rem; }
+            .listening-card-art { top: 3%; height: 49%; }
         }
 
         .listening-card {
-            background: none;
-            border: none;
-            cursor: pointer;
+            position: relative;
+            isolation: isolate;
+            width: 100%;
+            aspect-ratio: 4 / 5;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Nunito', sans-serif;
+            justify-content: flex-end;
+            align-items: stretch;
             padding: 0;
-        }
-
-        .listening-card-icon {
-            width: 100%;
-            aspect-ratio: 1 / 1;
+            /* Vidrio esmerilado: mismos valores que .game-card-sel de Juegos */
+            background-color: var(--card-bg);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--card-border);
+            box-shadow: var(--egg-shadow);
             border-radius: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.6rem;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
-            transition: transform .15s ease, box-shadow .15s ease;
-            position: relative;
-        }
-        .listening-card-icon .card-img {
-            width: 52%;
-            height: 52%;
-            object-fit: contain;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
-        }
-        .listening-card-icon .emoji-fallback { font-size: 2.6rem; line-height: 1; }
-        .listening-card-badge .badge-img { width: 16px; height: 16px; object-fit: contain; vertical-align: middle; }
-        .listening-card:hover .listening-card-icon { transform: translateY(-3px); box-shadow: 0 7px 0 rgba(0,0,0,0.15); }
-        .listening-card:active .listening-card-icon { transform: translateY(1px); box-shadow: 0 2px 0 rgba(0,0,0,0.15); }
-
-        .listening-card-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: white;
-            border: 2px solid var(--border-light);
-            border-radius: 999px;
-            font-size: 0.65rem;
-            font-weight: 900;
-            padding: 2px 7px;
-            color: var(--text-dark);
-        }
-
-        .listening-card-title {
-            font-size: 0.92rem;
-            font-weight: 800;
-            color: var(--text-dark);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            font-family: 'Nunito', sans-serif;
             text-align: center;
-            line-height: 1.25;
+            transition: transform .15s ease, box-shadow .15s ease;
         }
+        /* Línea plateada que gira alrededor de la tarjeta (mismo efecto "beam" de Juegos) */
+        .listening-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 2px;
+            background: conic-gradient(from var(--beam), transparent 0 70%, #f8fafc 85%, #94a3b8 100%);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: beam-spin 4s linear infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+        @property --beam { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+        @keyframes beam-spin { to { --beam: 360deg; } }
+        @media (prefers-reduced-motion: reduce) { .listening-card::before { animation: none; } }
+        .listening-card:hover  { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,.20); }
+        .listening-card:active { transform: translateY(1px);  box-shadow: var(--egg-shadow); }
 
+        /* Texto sobre la imagen: degradado oscuro abajo para que siempre se lea */
+        .listening-card-art {
+            position: absolute;
+            top: 4%;
+            left: 8%;
+            z-index: 1;
+            width: 84%;
+            height: 58%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+        .listening-card-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 48px 14px 18px;
+            border-radius: 0 0 20px 20px;
+        }
+        .listening-card.has-bg .listening-card-content {
+            background: linear-gradient(to top, rgba(0,0,0,.80) 0%, rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 100%);
+        }
+        .listening-card-title {
+            font-size: 1.35rem;
+            font-weight: 900;
+            color: #0b172a;
+            text-align: center;
+            line-height: 1.2;
+        }
+        html.dark .listening-card-title { color: #ffffff; }
+        .listening-card.has-bg .listening-card-title { color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
         .listening-card-progress {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: var(--green);
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #0b172a;
+        }
+        html.dark .listening-card-progress { color: #e2e8f0; }
+        .listening-card.has-bg .listening-card-progress { color: #ffffff; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+        .listening-card-note {
+            margin-top: 8px;
+            padding: 7px 9px;
+            border-radius: 10px;
+            font-size: .8rem;
+            font-weight: 800;
+            line-height: 1.3;
+            text-align: center;
+            text-shadow: none;
+        }
+        .listening-card-note.retry    { background: #ffe8c2; color: #9a5b00; }
+        .listening-card-note.nopoints { background: #ffffff; color: #dc2626; }
+
+        /* Estados (mismos colores que Juegos): completado verde, reintento naranja, sin puntos rojo */
+        .listening-card.listening-card-done  { border: 2px solid #2ecc71; }
+        .listening-card.listening-card-retry { border: 2px solid #ff9600; }
+        .listening-card.listening-card-nopoints { border: 2px solid #ef4444 !important; }
+        .listening-card.listening-card-nopoints::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: rgba(239,68,68,.30);
+            pointer-events: none;
+            z-index: 1;
         }
 
-        .lc-blue   { background: var(--blue); }
-        .lc-green  { background: var(--green); }
-        .lc-yellow { background: var(--yellow); }
-        .lc-red    { background: var(--red); }
-        .lc-purple { background: #8549ba; }
-        .lc-teal   { background: #00c5a1; }
+        @media (max-width: 640px) {
+            .listening-card-content { padding: 36px 10px 14px; }
+            .listening-card-title { font-size: 1.08rem; }
+            .listening-card-progress { font-size: .88rem; }
+            .listening-card-note { font-size: .7rem; padding: 6px 7px; }
+        }
+        .listening-card-art--compact { top: 5%; left: 20%; width: 60%; height: 42%; }
+
 
         .biblioteca-stats {
             width: 100%;
@@ -1017,95 +1069,151 @@
             .completion-metrics { gap: 12px; }
         }
 
+
+        /* ======================================================================
+           FASE 2A — FONDO ANIMADO + MENÚ + FOOTER (extraídos de juegos.html)
+        ====================================================================== */
+        :root{--card-bg:rgba(255,255,255,.16);--card-border:rgba(255,255,255,.35);--card-bg-soft:rgba(255,255,255,.32);--egg-shadow:0 4px 24px rgba(0,0,0,.10)}
+        html.dark{--card-bg:rgba(15,23,42,.22);--card-border:rgba(148,163,184,.25);--card-bg-soft:rgba(15,23,42,.35);--egg-shadow:0 4px 24px rgba(0,0,0,.45)}
+        #page-bg{position:fixed;inset:0;z-index:400;overflow:hidden;background:linear-gradient(120deg,#eaf6ff,#bfe8ff,#7ec8ff,#1cb0f6,#4c9cff,#bfe8ff,#eaf6ff);background-size:400% 400%;animation:gradient-move 18s ease infinite}
+        html.dark #page-bg{background:linear-gradient(120deg,#0b172a,#172554,#0c4a8f,#0090d9,#1cb0f6,#172554,#0b172a);background-size:400% 400%}
+        @keyframes gradient-move{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+        header{position:relative;z-index:500}
+        main,#main-footer{position:relative;z-index:401}
+        .site-navbar{background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:2px solid var(--card-border)}
+        .site-offcanvas{background:var(--card-bg-soft);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:2px solid var(--card-border)}
+        .nav-icon{width:22px;height:22px;object-fit:contain;flex-shrink:0}
+        @media (prefers-reduced-motion:reduce){#page-bg{animation:none}}
+        .egg-mini-footer{display:flex;align-items:center;justify-content:center;gap:8px;border-top:2px solid var(--card-border);margin-top:40px;padding:20px 16px}
+
+        /* Espacios de imagen (mismas clases que juegos.html) */
+        .egg-img-slot{display:inline-block;font-style:normal;flex-shrink:0;vertical-align:middle;width:96px;height:96px}
+        .egg-img-slot--sm{width:34px;height:34px}
+        .biblioteca-title{display:flex;align-items:center;justify-content:center;gap:10px}
+        .biblioteca-title .egg-img-slot--sm{width:44px;height:44px}
+        .level-tab .egg-img-slot--sm{width:34px;height:34px;margin-bottom:2px}
+        .btn-audio img{width:56px;height:56px;object-fit:contain}
+        .completion-stars{display:flex;justify-content:center;align-items:center;gap:6px;letter-spacing:0;min-height:44px}
+        .completion-stars img{width:40px;height:40px;object-fit:contain}
+        .completion-stars img.star-off{opacity:.3;filter:grayscale(1)}
+        .feedback-icon svg{width:28px;height:28px;display:block}
+        .confetti-piece{width:24px;height:24px;object-fit:contain;margin:-12px 0 0 -12px}
+        .completion-overlay{z-index:100000}
+
+        /* ======================================================================
+           FASE 2B — MODAL DE NIVEL BLOQUEADO (copiado de Juegos.css)
+        ====================================================================== */
+        /* Variables que el modal de Juegos toma de :root de Juegos.css (aquí acotadas al modal para no chocar con Escucha) */
+        .level-lock-modal{--card:#ffffff;--border:#e5e7eb;--text:#1a1a2e;--mid:#4b5563;--bg:#f0f4f8;--blue:#1cb0f6;--green:#58cc02;--font:'Nunito',sans-serif}
+        html.dark .level-lock-modal{--card:#1e293b;--border:#334155;--text:#f1f5f9;--mid:#cbd5e1;--bg:#0f172a;--blue:#0e86c9}
+
+        /* Modal para los avisos de niveles bloqueados/desbloqueados */
+        .level-lock-modal[hidden] { display: none !important; }
+        .level-lock-modal {
+          position: fixed; inset: 0; z-index: 100000;
+          display: flex; align-items: center; justify-content: center;
+          padding: 24px;
+          background: rgba(15, 23, 42, .48);
+          -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+        }
+        .level-lock-dialog {
+          position: relative; width: min(100%, 400px);
+          padding: 34px 28px 30px; border: 2px solid var(--border);
+          border-radius: 24px; background: var(--card); color: var(--text);
+          box-shadow: 0 24px 70px rgba(0,0,0,.3); text-align: center;
+          animation: level-modal-enter .2s ease-out both;
+        }
+        .level-lock-close {
+          position: absolute; top: 10px; right: 12px;
+          width: 40px; height: 40px; border: 0; border-radius: 50%;
+          background: transparent; color: var(--mid); font: 700 30px/1 var(--font);
+          cursor: pointer; touch-action: manipulation;
+        }
+        .level-lock-close:hover { background: var(--bg); color: var(--text); }
+        .level-lock-close:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+        .level-lock-icon { display: flex; justify-content: center; margin-bottom: 8px; color: var(--blue); }
+        .level-lock-icon svg { width: 58px; height: 58px; }
+        .level-lock-icon.is-unlocked { color: var(--green); }
+        .level-lock-dialog h2 { margin: 0 32px 8px; font-size: 1.35rem; font-weight: 900; }
+        .level-lock-dialog p { margin: 0; color: var(--mid); font-size: 1rem; font-weight: 700; line-height: 1.55; }
+        body.level-lock-modal-open { overflow: hidden; }
+        @keyframes level-modal-enter { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        /* ======================================================================
+           FASE 3 — HOVER "círculo + presión" (copiado de juegos.html / Juegos.css)
+        ====================================================================== */
+        .hover-circle-btn{position:relative;overflow:hidden;isolation:isolate}
+        .hover-circle-btn .btn-label{position:relative;z-index:2}
+        .hover-circle-btn .hover-circle{position:absolute;top:50%;left:50%;display:block;width:0;height:0;border-radius:50%;transform:translate(-50%,-50%);transition:width .4s ease-in-out,height .4s ease-in-out;pointer-events:none;z-index:1;background:rgba(0,0,0,.18)}
+        .hover-circle-btn:hover:not(:disabled) .hover-circle{width:250%;height:250%}
+        /* presión al pasar el cursor (igual que .btn-check / .btn-next de Juegos) */
+        .btn-action.active:hover:not(:active){transform:translateY(1px);box-shadow:0 3px 0 var(--green-shadow)}
+        .btn-action.active.continue:hover:not(:active){box-shadow:0 3px 0 var(--blue-shadow)}
+        .completion-btn-retry:hover:not(:active){transform:translateY(1px);box-shadow:0 3px 0 var(--blue-shadow)}
+        @media (prefers-reduced-motion:reduce){.hover-circle-btn .hover-circle{transition:none}}
     </style>
 </head>
 <body>
+
+<!-- Fondo animado (copiado de juegos.html) -->
+<div id="page-bg" aria-hidden="true"></div>
 
 <!-- ── Pantalla de bloqueo de sesión ─────────────────────────────────────
      Se muestra (vía la clase html.egg-locked) cuando no hay sesión válida:
      al recargar sin login, al volver con el botón "Atrás" tras cerrar
      sesión (bfcache), o si Firebase confirma que no hay usuario. Nunca
      deja ver el contenido real del ejercicio. -->
-<div id="session-locked-screen" class="fixed inset-0 z-[500] flex-col items-center justify-center gap-5 bg-white dark:bg-gray-900 px-6 text-center">
-  <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="Egglish" class="w-16 h-16 object-contain"/>
-  <div class="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-950 flex items-center justify-center text-3xl">🔒</div>
-  <h1 class="text-xl sm:text-2xl font-black text-[#1a1a2e] dark:text-white">Tu sesión ha finalizado</h1>
-  <p class="text-sm sm:text-base font-semibold text-gray-500 dark:text-gray-400 max-w-sm">
-    Debes iniciar sesión de nuevo para continuar practicando.
-  </p>
-  <div class="flex flex-col sm:flex-row gap-3 mt-2 w-full max-w-xs sm:max-w-none justify-center">
-    <a href="/entrar.html" class="text-sm font-black text-white bg-egg-blue hover:bg-egg-blue-d px-6 py-3 rounded-full shadow-hard-soft no-underline">Iniciar sesión</a>
-    <a href="/index.html" class="text-sm font-black text-[#1a1a2e] dark:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-6 py-3 rounded-full no-underline">Ir al inicio</a>
+<div id="session-locked-screen" class="fixed inset-0 flex-col items-center justify-center px-6 text-center" style="z-index:450;background:transparent;">
+  <div class="flex flex-col items-center gap-5 rounded-3xl px-8 py-10 max-w-sm w-full" style="background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:2px solid var(--card-border);box-shadow:0 8px 32px rgba(0,0,0,.18);">
+    <img src="/imgs/eggy.png" alt="Egglish" class="w-28 h-28 object-contain drop-shadow-md"/>
+    <div class="w-14 h-14 rounded-full flex items-center justify-center" style="background:rgba(28,176,246,.15);color:#1cb0f6;">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+    </div>
+    <div>
+      <h1 class="text-xl sm:text-2xl font-black text-black dark:text-white">Tu sesión ha finalizado</h1>
+      <p class="text-sm sm:text-base font-semibold mt-2 text-slate-800 dark:text-gray-300">Debes iniciar sesión de nuevo para continuar practicando.</p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3 w-full justify-center">
+      <a href="/index.html" class="text-sm font-black text-white bg-egg-blue hover:bg-egg-blue-d px-6 py-3 rounded-full shadow-hard-soft no-underline">Ir a inicio</a>
+    </div>
   </div>
 </div>
 
 <header>
- <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
-
-    <!-- Botón hamburguesa (solo móvil) + Logo -->
+ <nav class="site-navbar fixed top-0 left-0 w-full z-[500] flex items-center justify-between px-4 md:px-8 h-[68px]" style="position:fixed !important;top:0 !important;left:0 !important;width:100% !important;z-index:9999 !important;">
     <div class="flex items-center gap-1 sm:gap-2 min-w-0">
-      <button
-        id="egg-menu-btn"
-        type="button"
-        aria-label="Abrir menú de navegación"
-        aria-expanded="false"
-        aria-controls="egg-offcanvas"
-        class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
+      <button id="egg-menu-btn" type="button" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="egg-offcanvas" class="md:hidden w-9 h-9 flex items-center justify-center rounded-full text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
-
-      <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
-      <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
+      <a href="/index.html" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
+        <img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+        <span class="text-base sm:text-xl font-black text-black dark:text-white whitespace-nowrap truncate">Egglish</span>
+      </a>
     </div>
-
-    <!-- Links de navegación (escritorio) -->
     <ul class="hidden md:flex items-center gap-1 list-none m-0 p-0">
-      <li><a href="/Secciones/lecciones.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">📖 Lecciones</a></li>
-      <li><a href="/Secciones/Escucha.html" class="px-3 py-2 rounded-full text-sm font-bold text-egg-blue dark:text-egg-blue no-underline">🎯 Escucha</a></li>
-      <li><a href="/Secciones/juegos.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎮 Juegos</a></li>
-      <li><a href="/Secciones/perfil.html" class="px-3 py-2 rounded-full text-sm font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">👤 Perfil</a></li>
+      <li><a href="/Secciones/lecciones.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/book-removebg-preview.png" alt="" class="nav-icon"/>Lecciones</a></li>
+      <li><a href="/Secciones/Escucha.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-egg-blue-d dark:text-sky-300 no-underline"><img src="/imgs/audifonos-removebg-preview.png" alt="" class="nav-icon"/>Escucha</a></li>
+      <li><a href="/Secciones/juegos.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/ChatGPT_Image_27_sept_2026__02_43_52_p.m.-removebg-preview.png" alt="" class="nav-icon"/>Juegos</a></li>
+      <li><a href="/Secciones/perfil.html" class="flex items-center gap-2 px-3 py-2 rounded-full text-sm font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/sssss-removebg-preview.png" alt="" class="nav-icon"/>Perfil</a></li>
     </ul>
-
     <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-      <button id="btn-cerrar-sesion" type="button" class="hidden md:inline-block text-sm font-bold text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-full shadow-hard-soft no-underline transition-colors">Cerrar sesión</button>
-
-      <!-- Botón de cambiar tema -->
-      <button
-        id="dark-mode-toggle"
-        type="button"
-        aria-label="Cambiar modo oscuro"
-        aria-pressed="false"
-        class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
-      >
-        <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
-          <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-          <g id="icon-sun" class="hidden">
-            <circle cx="12" cy="12" r="4"></circle>
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-          </g>
-        </svg>
-      </button>
+      <div id="navbar-auth-zone" class="hidden md:flex items-center gap-2 sm:gap-3"></div>
     </div>
   </nav>
 </header>
-<div class="h-[68px]"></div>
-
+<div style="height:68px;" aria-hidden="true"></div>
 <!-- ── MENÚ HAMBURGUESA OFF-CANVAS ── -->
 <div id="egg-offcanvas-wrap" class="md:hidden">
   <div
     id="egg-backdrop"
-    class="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[220] opacity-0 pointer-events-none transition-opacity duration-300 ease-out"
+    class="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-[10020] opacity-0 pointer-events-none transition-opacity duration-300 ease-out"
     aria-hidden="true"
   ></div>
 
   <aside
     id="egg-offcanvas"
-    class="fixed top-0 left-0 h-full w-[78%] max-w-[320px] bg-white dark:bg-gray-900 z-[230] -translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col"
+    class="fixed top-0 left-0 h-full w-[78%] max-w-[320px] site-offcanvas z-[10021] -translate-x-full transition-transform duration-300 ease-out shadow-2xl flex flex-col"
     role="dialog"
     aria-modal="true"
     aria-label="Menú de navegación"
@@ -1113,7 +1221,7 @@
   >
     <div class="flex items-center justify-between px-5 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 shrink-0">
       <div class="flex items-center gap-2.5">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 object-contain"/>
+        <img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 object-contain"/>
         <span class="text-lg font-black text-[#1a1a2e] dark:text-white">Egglish</span>
       </div>
       <button
@@ -1131,16 +1239,12 @@
 
     <nav class="flex-1 overflow-y-auto px-3 py-4">
       <ul class="flex flex-col gap-1 list-none m-0 p-0">
-        <li><a href="/Secciones/lecciones.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">📖 Lecciones</a></li>
-        <li><a href="/Secciones/Escucha.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-egg-blue bg-blue-50 dark:bg-blue-950 no-underline">🎯 Escucha</a></li>
-        <li><a href="/Secciones/juegos.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">🎮 Juegos</a></li>
-        <li><a href="/Secciones/perfil.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline">👤 Perfil</a></li>
+        <li><a href="/Secciones/lecciones.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/book-removebg-preview.png" alt="" class="nav-icon"/><span>Lecciones</span></a></li>
+        <li><a href="/Secciones/Escucha.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-egg-blue-d dark:text-sky-300 bg-blue-50 dark:bg-blue-950 no-underline"><img src="/imgs/audifonos-removebg-preview.png" alt="" class="nav-icon"/><span>Escucha</span></a></li>
+        <li><a href="/Secciones/juegos.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/ChatGPT_Image_27_sept_2026__02_43_52_p.m.-removebg-preview.png" alt="" class="nav-icon"/><span>Juegos</span></a></li>
+        <li><a href="/Secciones/perfil.html" class="egg-offcanvas-link flex items-center gap-3 px-4 py-3 rounded-2xl text-base font-bold text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 no-underline"><img src="/imgs/sssss-removebg-preview.png" alt="" class="nav-icon"/><span>Perfil</span></a></li>
       </ul>
     </nav>
-
-    <div class="px-4 py-5 border-t-2 border-gray-200 dark:border-gray-800 flex flex-col gap-3 shrink-0">
-      <button id="btn-cerrar-sesion-mobile" type="button" class="egg-offcanvas-link w-full text-center rounded-full px-6 py-3 font-bold text-white bg-red-500 hover:bg-red-600 shadow-hard-soft no-underline transition-colors">Cerrar sesión</button>
-    </div>
   </aside>
 </div>
 
@@ -1150,21 +1254,13 @@
         <div id="screen-library" class="screen active">
             <div class="biblioteca-section">
 
-                <div class="biblioteca-stats">
-                    <div class="stats-bar" aria-live="polite">
-                        <span class="stat-pill xp" id="xpPill">⭐ <span id="xpValue">0</span> XP</span>
-                        <span class="stat-pill streak" id="streakPill">🔥 <span id="streakValue">0</span> racha</span>
-                        <span class="stat-pill accuracy" id="accuracyPill">🎯 <span id="accuracyValue">0%</span></span>
-                    </div>
-                </div>
-
-                <h1 class="biblioteca-title">📚 Biblioteca</h1>
+                <h1 class="biblioteca-title"><img src="/imgs/biblio-removebg-preview.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> Biblioteca</h1>
 
                 <div class="biblioteca-level-tabs" id="levelTabs">
-                    <button class="level-tab active" data-level="A1">🐣 A1 <span>Principiante</span></button>
-                    <button class="level-tab" data-level="A2">🐥 A2 <span>Básico</span></button>
-                    <button class="level-tab" data-level="B1">🦅 B1 <span>Intermedio</span></button>
-                    <button class="level-tab" data-level="B2">🎓 B2 <span>Avanzado</span></button>
+                    <button class="level-tab active" data-level="A1"><img src="/imgs/egg.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> A1 <span>Principiante</span></button>
+                    <button class="level-tab" data-level="A2"><img src="/imgs/eggy.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> A2 <span>Básico</span></button>
+                    <button class="level-tab" data-level="B1"><img src="/imgs/Bigger-removebg-preview.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> B1 <span>Intermedio</span></button>
+                    <button class="level-tab" data-level="B2"><img src="/imgs/e-removebg-preview.png" class="egg-img-slot egg-img-slot--sm" alt="" onerror="this.style.visibility='hidden'"/> B2 <span>Avanzado</span></button>
                 </div>
 
                 <div class="listening-grid" id="listeningGrid">
@@ -1177,13 +1273,8 @@
         <div id="screen-lesson" class="screen">
             <div class="listening-shell">
 
-                <button class="btn-back-lib" id="btnBackLibrary" type="button">← Biblioteca</button>
+                <button class="btn-back-lib hover-circle-btn" id="btnBackLibrary" type="button"><span class="hover-circle"></span><span class="btn-label">Biblioteca</span></button>
 
-                <div class="stats-bar" aria-live="polite">
-                    <span class="stat-pill xp" id="xpPill2">⭐ <span id="xpValue2">0</span> XP</span>
-                    <span class="stat-pill streak" id="streakPill2">🔥 <span id="streakValue2">0</span> racha</span>
-                    <span class="stat-pill accuracy" id="accuracyPill2">🎯 <span id="accuracyValue2">0%</span></span>
-                </div>
 
                 <div class="lesson-card" id="lessonCard" style="position:relative;">
                     <div class="progress-container">
@@ -1196,7 +1287,8 @@
                     <div class="audio-panel">
                         <div class="audio-wrapper" id="audioWrapper">
                             <button class="btn-audio" id="audioBtn" aria-label="Reproducir audio">
-                                <svg viewBox="0 0 24 24">
+                                <img src="/imgs/altavoz.png" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"/>
+                                <svg viewBox="0 0 24 24" style="display:none;">
                                     <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
                                 </svg>
                             </button>
@@ -1212,7 +1304,7 @@
                     <div id="exerciseArea"></div>
 
                     <div class="feedback-banner" id="feedbackBanner" role="status" aria-live="polite">
-                        <span class="feedback-icon" id="feedbackIcon">✅</span>
+                        <span class="feedback-icon" id="feedbackIcon"></span>
                         <div class="feedback-text">
                             <p class="feedback-title" id="feedbackTitle">¡Correcto!</p>
                             <p class="feedback-explain" id="feedbackExplain"></p>
@@ -1220,17 +1312,19 @@
                     </div>
 
                     <div class="bottom-section">
-                        <button class="btn-action" id="actionBtn" disabled>Comprobar</button>
-                        <button class="btn-go-library" id="btnGoLibrary" type="button" style="display:none;">🏠 Ver biblioteca</button>
+                        <button class="btn-action hover-circle-btn" id="actionBtn" disabled><span class="hover-circle"></span><span class="btn-label">Comprobar</span></button>
+                        <button class="btn-go-library hover-circle-btn" id="btnGoLibrary" type="button" style="display:none;"><span class="hover-circle"></span><span class="btn-label">Ver biblioteca</span></button>
                     </div>
                 </div>
             </div>
         </div>
 
+    </main>
+
         <!-- ══════════ MODAL: FINALIZACIÓN DE LA PRUEBA DE ESCUCHA ══════════ -->
         <div id="completionOverlay" class="completion-overlay" aria-hidden="true">
             <div class="completion-modal" role="dialog" aria-modal="true" aria-labelledby="completionTitle">
-                <div class="completion-stars" id="completionStars">⭐⭐⭐</div>
+                <div class="completion-stars" id="completionStars"></div>
                 <h3 class="completion-title" id="completionTitle">¡Excelente comprensión auditiva!</h3>
                 <p class="completion-message" id="completionMessage">Entendiste casi todo el audio a la perfección.</p>
 
@@ -1251,63 +1345,32 @@
                 </div>
 
                 <div class="completion-actions">
-                    <button class="completion-btn completion-btn-retry" id="completionRetryBtn" type="button">🔄 Reintentar</button>
-                    <button class="completion-btn completion-btn-library" id="completionLibraryBtn" type="button">🏠 Volver a la biblioteca</button>
+                    <button class="completion-btn completion-btn-retry hover-circle-btn" id="completionRetryBtn" type="button"><span class="hover-circle"></span><span class="btn-label">Reintentar</span></button>
+                    <button class="completion-btn completion-btn-library hover-circle-btn" id="completionLibraryBtn" type="button"><span class="hover-circle"></span><span class="btn-label">Volver a la biblioteca</span></button>
                 </div>
             </div>
         </div>
 
-    </main>
-
-<!-- ══════════════ FOOTER (extraído tal cual de juegos.html) ══════════════ -->
-<footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
-  <div class="max-w-screen-xl mx-auto">
-
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10 mb-14 text-left">
-      <div>
-        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Sobre nosotros</h4>
-        <ul class="flex flex-col gap-2.5">
-          <li><a href="../soporte.html#mision" class="text-sm font-bold text-white/90 hover:text-white no-underline">Misión</a></li>
-          <li><a href="../soporte.html#metodo" class="text-sm font-bold text-white/90 hover:text-white no-underline">Método de enseñanza</a></li>
-          <li><a href="../soporte.html#creadores" class="text-sm font-bold text-white/90 hover:text-white no-underline">Creadores</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Ayuda y soporte</h4>
-        <ul class="flex flex-col gap-2.5">
-          <li><a href="../soporte.html#ayuda" class="text-sm font-bold text-white/90 hover:text-white no-underline">Centro de ayuda</a></li>
-          <li><a href="../soporte.html#contacto" class="text-sm font-bold text-white/90 hover:text-white no-underline">Contáctanos</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Términos y privacidad</h4>
-        <ul class="flex flex-col gap-2.5 mb-6">
-          <li><a href="../soporte.html#terminos" class="text-sm font-bold text-white/90 hover:text-white no-underline">Términos</a></li>
-          <li><a href="../soporte.html#terminos" class="text-sm font-bold text-white/90 hover:text-white no-underline">Privacidad</a></li>
-        </ul>
-        <h4 class="font-black text-sm uppercase tracking-wide mb-4 text-white">Social</h4>
-        <ul class="flex flex-col gap-2.5">
-          <li><a href="https://www.instagram.com/egglish.oficial/" class="text-sm font-bold text-white/90 hover:text-white no-underline">Instagram</a></li>
-          <li><a href="https://www.tiktok.com/@egglish.oficial" class="text-sm font-bold text-white/90 hover:text-white no-underline">TikTok</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-      <div class="flex items-center gap-2.5">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/>
-        <span class="font-black text-lg text-white">Egglish</span>
-      </div>
-      <p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p>
-    </div>
+<!-- Modal de niveles bloqueados / desbloqueados (mismo HTML que juegos.html) -->
+<div id="level-lock-modal" class="level-lock-modal" role="dialog" aria-modal="true" aria-labelledby="level-lock-title" aria-describedby="level-lock-message" hidden>
+  <div class="level-lock-dialog">
+    <button id="level-lock-close" class="level-lock-close" type="button" aria-label="Cerrar aviso">×</button>
+    <div id="level-lock-icon" class="level-lock-icon" aria-hidden="true"></div>
+    <h2 id="level-lock-title">Aviso</h2>
+    <p id="level-lock-message"></p>
   </div>
+</div>
+
+
+<!-- ══════════════ FOOTER (exacto de juegos.html) ══════════════ -->
+<footer id="main-footer" class="egg-mini-footer">
+  <img src="/imgs/eggy.png" alt="" class="w-6 h-6 object-contain" aria-hidden="true"/>
+  <span style="font-size:.85rem;font-weight:800;">@egglish 2026</span>
 </footer>
 
 <script>
     // ============================================================
-    //  EGGLISH – Escucha.html  ✅ REDISEÑO COMPLETO (gamificado)
+    //  EGGLISH – Escucha.html  REDISEÑO COMPLETO (gamificado)
     //  - Bloqueo REAL de respuestas hasta terminar el audio
     //    (atributo disabled real + validación en cada función,
     //     no solo CSS, para evitar bypass fácil por DOM/consola)
@@ -1327,7 +1390,7 @@
         // ── A1 (Principiante): 5 tarjetas, 1 audio temático + 5 preguntas cada una ──
         A1: [
             {
-                topic: "Presentaciones personales", icon: "👋", color: "lc-blue", rate: 0.8,
+                topic: "Presentaciones personales", art: "/imgs/presenta-removebg-preview.png", color: "lc-blue", rate: 0.8,
                 audio: "Hi! My name is Laura. I am eleven years old and I am from Medellín, Colombia. I have one brother and one sister. My favorite color is purple and I love drawing animals.",
                 questions: [
                     { type:"mc", prompt:"¿Cómo se llama la persona?", options:["Laura","Sara","Ana"], correct:0 },
@@ -1338,7 +1401,7 @@
                 ]
             },
             {
-                topic: "Mi familia", icon: "👨‍👩‍👧", color: "lc-purple", rate: 0.8,
+                topic: "Mi familia", art: "/imgs/familia-removebg-preview.png", color: "lc-purple", rate: 0.8,
                 audio: "This is my family. My father is a teacher and my mother is a doctor. I have one sister; her name is Emma and she is six years old. We have a small dog called Max.",
                 questions: [
                     { type:"mc", prompt:"¿A qué se dedica el padre?", options:["Doctor","Maestro","Chef"], correct:1 },
@@ -1349,7 +1412,7 @@
                 ]
             },
             {
-                topic: "La hora y los horarios", icon: "🕘", color: "lc-green", rate: 0.8,
+                topic: "La hora y los horarios", art: "/imgs/reloj-removebg-preview.png", color: "lc-green", rate: 0.8,
                 audio: "It is three o'clock in the afternoon. My English class starts at three thirty and finishes at four fifteen. After class, I go home and I have dinner at seven o'clock.",
                 questions: [
                     { type:"mc", prompt:"¿Qué hora es al inicio del audio?", options:["Las tres","Las tres y media","Las cuatro"], correct:0 },
@@ -1360,7 +1423,7 @@
                 ]
             },
             {
-                topic: "Rutinas diarias", icon: "⏰", color: "lc-yellow", rate: 0.8,
+                topic: "Rutinas diarias", art: "/imgs/habitos-removebg-preview.png", color: "lc-yellow", rate: 0.8,
                 audio: "Every day, I wake up at seven in the morning. I take a shower, and then I have breakfast with my family. After breakfast, I walk to school. In the afternoon, I do my homework and play with my dog.",
                 questions: [
                     { type:"mc", prompt:"¿A qué hora se despierta?", options:["A las seis","A las siete","A las ocho"], correct:1 },
@@ -1371,7 +1434,7 @@
                 ]
             },
             {
-                topic: "Los animales", icon: "🐶", color: "lc-red", rate: 0.8,
+                topic: "Los animales", art: "/imgs/animal-removebg-preview.png", color: "lc-red", rate: 0.8,
                 audio: "I have a small dog. His name is Rocky and he is brown and white. He likes to run in the park and he sleeps on my bed every night.",
                 questions: [
                     { type:"mc", prompt:"¿Cómo se llama el perro?", options:["Rocky","Buddy","Charlie"], correct:0 },
@@ -1385,7 +1448,7 @@
         // ── A2 (Básico): 5 tarjetas, 1 audio temático + 5 preguntas cada una ──
         A2: [
             {
-                topic: "Pedir comida en un restaurante", icon: "🍽️", color: "lc-yellow", rate: 0.9,
+                topic: "Pedir comida en un restaurante", art: "/imgs/animal-removebg-preview.png", color: "lc-yellow", rate: 0.9,
                 audio: "Good evening! Welcome to our restaurant. Would you like to see the menu? Yes, please. I would like a chicken salad and a glass of orange juice. And for dessert, I would like some chocolate cake.",
                 questions: [
                     { type:"mc", prompt:"¿Qué pide de plato principal?", options:["Sopa","Ensalada de pollo","Pizza"], correct:1 },
@@ -1396,7 +1459,7 @@
                 ]
             },
             {
-                topic: "En el aeropuerto", icon: "✈️", color: "lc-blue", rate: 0.9,
+                topic: "En el aeropuerto", art: "/imgs/reloj-removebg-preview.png", color: "lc-blue", rate: 0.9,
                 audio: "Excuse me, where is gate seven? Your flight to New York is boarding in fifteen minutes, so please hurry. You need to show your passport and boarding pass at the gate.",
                 questions: [
                     { type:"mc", prompt:"¿Qué está buscando la persona?", options:["La puerta siete","La sala de espera","El baño"], correct:0 },
@@ -1407,7 +1470,7 @@
                 ]
             },
             {
-                topic: "De compras", icon: "🛍️", color: "lc-red", rate: 0.9,
+                topic: "De compras", art: "/imgs/familia-removebg-preview.png", color: "lc-red", rate: 0.9,
                 audio: "I went shopping yesterday. I bought a blue jacket and a pair of black shoes, but I didn't buy a hat because it was too expensive. The shoes were on sale, so I paid less money.",
                 questions: [
                     { type:"mc", prompt:"¿Cuándo fue de compras?", options:["Hoy","Ayer","La semana pasada"], correct:1 },
@@ -1418,7 +1481,7 @@
                 ]
             },
             {
-                topic: "Planeando unas vacaciones", icon: "🏔️", color: "lc-teal", rate: 0.9,
+                topic: "Planeando unas vacaciones", art: "/imgs/presenta-removebg-preview.png", color: "lc-teal", rate: 0.9,
                 audio: "This winter, my family and I are going to the mountains. We are going to ski every day and drink hot chocolate at night. We will stay in a small cabin near a lake for one week.",
                 questions: [
                     { type:"mc", prompt:"¿A dónde van de vacaciones?", options:["A la playa","A la montaña","A la ciudad"], correct:1 },
@@ -1429,7 +1492,7 @@
                 ]
             },
             {
-                topic: "En el consultorio médico", icon: "🩺", color: "lc-purple", rate: 0.9,
+                topic: "En el consultorio médico", art: "/imgs/habitos-removebg-preview.png", color: "lc-purple", rate: 0.9,
                 audio: "I don't feel very well today. I have a headache and a little fever. The doctor says I should rest at home, drink a lot of water, and take some medicine twice a day.",
                 questions: [
                     { type:"mc", prompt:"¿Cómo se siente la persona?", options:["Muy bien","No muy bien","Feliz"], correct:1 },
@@ -1443,7 +1506,7 @@
         // ── B1 (Intermedio): 5 tarjetas, 1 audio temático + 5 preguntas cada una ──
         B1: [
             {
-                topic: "Entrevista de trabajo", icon: "🎙️", color: "lc-blue", rate: 1.0,
+                topic: "Entrevista de trabajo", art: "/imgs/familia-removebg-preview.png", color: "lc-blue", rate: 1.0,
                 audio: "Good morning. Please, have a seat. So, tell me a little about yourself and why you are interested in this position. Well, I have been working in marketing for three years. I enjoy creating campaigns and analyzing results. I applied for this job because your company has an excellent reputation and I would like to grow professionally here. That sounds great. Do you have experience working in a team? Yes, in my last job I worked with a team of five people and we achieved all our quarterly goals.",
                 questions: [
                     { type:"mc", prompt:"¿Cuántos años de experiencia en marketing tiene el candidato?", options:["Dos años","Tres años","Cinco años"], correct:1 },
@@ -1454,7 +1517,7 @@
                 ]
             },
             {
-                topic: "Planes de viaje", icon: "🧳", color: "lc-green", rate: 1.0,
+                topic: "Planes de viaje", art: "/imgs/animal-removebg-preview.png", color: "lc-green", rate: 1.0,
                 audio: "Hey, have you decided where you are going for your holidays yet? Yes! I am planning to visit Portugal. I have always wanted to go there. I am going to spend a week in Lisbon and then take a train to Porto. I have already booked the hotel and the flights. I am so excited! That sounds amazing. Are you going alone or with someone? I am going with my cousin. She speaks a little Portuguese, so that will be very helpful.",
                 questions: [
                     { type:"mc", prompt:"¿A qué país va de vacaciones?", options:["España","Italia","Portugal"], correct:2 },
@@ -1465,7 +1528,7 @@
                 ]
             },
             {
-                topic: "Anécdota del pasado", icon: "📖", color: "lc-red", rate: 1.0,
+                topic: "Anécdota del pasado", art: "/imgs/habitos-removebg-preview.png", color: "lc-red", rate: 1.0,
                 audio: "Something funny happened to me last weekend. I was walking to the supermarket when I saw my old school teacher. I hadn't seen her in almost ten years! She recognized me immediately and we stopped to chat. She told me that she retired last year and that she was really enjoying her free time. She was taking painting classes and learning how to cook Italian food. It was a really nice surprise.",
                 questions: [
                     { type:"mc", prompt:"¿Cuándo ocurrió la anécdota?", options:["El fin de semana pasado","Hace un mes","El año pasado"], correct:0 },
@@ -1476,7 +1539,7 @@
                 ]
             },
             {
-                topic: "Tecnología en la educación", icon: "🎧", color: "lc-yellow", rate: 1.0,
+                topic: "Tecnología en la educación", art: "/imgs/reloj-removebg-preview.png", color: "lc-yellow", rate: 1.0,
                 audio: "Today on our podcast we are discussing how technology is changing the way students learn. More and more schools are using tablets and interactive whiteboards instead of traditional textbooks. Online platforms also allow students to access lessons from anywhere in the world. However, some teachers are concerned because students can get easily distracted by social media during class. Experts suggest that the key is to find a balance between technology and traditional teaching methods.",
                 questions: [
                     { type:"mc", prompt:"¿De qué trata el podcast?", options:["Cómo la tecnología cambia el aprendizaje","Los mejores videojuegos educativos","Cómo estudiar sin internet"], correct:0 },
@@ -1487,7 +1550,7 @@
                 ]
             },
             {
-                topic: "Noticias locales", icon: "📰", color: "lc-purple", rate: 1.0,
+                topic: "Noticias locales", art: "/imgs/presenta-removebg-preview.png", color: "lc-purple", rate: 1.0,
                 audio: "In local news today, the city council announced a major project to improve public transportation. Starting next January, three new bus routes will be added to connect the suburbs with the city center. The new routes will run every fifteen minutes during peak hours. The mayor explained that the goal is to reduce traffic and encourage more people to leave their cars at home. The project will cost approximately two million dollars and is expected to be completed by the end of next year.",
                 questions: [
                     { type:"mc", prompt:"¿Qué anunció el ayuntamiento?", options:["Un nuevo parque público","Mejoras en el transporte público","La construcción de una nueva carretera"], correct:1 },
@@ -1501,7 +1564,7 @@
         // ── B2 (Avanzado): 5 tarjetas, 1 audio temático + 5 preguntas cada una ──
         B2: [
             {
-                topic: "Debate sobre tecnología", icon: "💻", color: "lc-blue", rate: 1.0,
+                topic: "Debate sobre tecnología", art: "/imgs/reloj-removebg-preview.png", color: "lc-blue", rate: 1.0,
                 audio: "Welcome to today's panel discussion on artificial intelligence and the future of work. Our first speaker argues that AI will inevitably replace millions of jobs in manufacturing, logistics, and even administrative roles, leading to widespread unemployment unless governments implement policies like universal basic income. However, the second speaker contends that throughout history, technological revolutions have always created more jobs than they destroyed. She points out that AI will likely generate entirely new industries we cannot yet imagine, much like the internet did in the 1990s. The debate remains unresolved, but both agree that retraining programs for displaced workers are urgently needed.",
                 questions: [
                     { type:"mc", prompt:"¿Cuál es el argumento principal del primer ponente?", options:["La IA creará millones de empleos nuevos","La IA reemplazará millones de trabajos y causará desempleo masivo","La IA solo afectará a los trabajos creativos"], correct:1 },
@@ -1512,7 +1575,7 @@
                 ]
             },
             {
-                topic: "Opiniones sobre medio ambiente", icon: "🌿", color: "lc-green", rate: 1.0,
+                topic: "Opiniones sobre medio ambiente", art: "/imgs/presenta-removebg-preview.png", color: "lc-green", rate: 1.0,
                 audio: "Good evening. Tonight we look at the growing debate over plastic pollution in our oceans. Environmental groups are pushing for an immediate global ban on single-use plastics, arguing that marine ecosystems are collapsing at an alarming rate. Over eight million tonnes of plastic enter the ocean every year, devastating fish populations and entering the human food chain through seafood. Industry representatives, however, warn that an abrupt ban would severely disrupt supply chains and cost hundreds of thousands of jobs without adequate alternatives in place. Scientists propose a middle ground: a phased elimination of the most harmful plastics over ten years, combined with investment in biodegradable materials and improved waste management infrastructure in developing nations.",
                 questions: [
                     { type:"mc", prompt:"¿Qué están exigiendo los grupos medioambientalistas?", options:["Una reducción gradual del plástico durante veinte años","Una prohibición global e inmediata de los plásticos de un solo uso","Mayor inversión en reciclaje de plástico"], correct:1 },
@@ -1523,7 +1586,7 @@
                 ]
             },
             {
-                topic: "Noticias de actualidad", icon: "📡", color: "lc-yellow", rate: 1.0,
+                topic: "Noticias de actualidad", art: "/imgs/animal-removebg-preview.png", color: "lc-yellow", rate: 1.0,
                 audio: "In international news, world leaders gathered this week in Geneva for an emergency summit on global food security. The United Nations warned that approximately 690 million people currently face hunger, a number that has risen sharply due to supply chain disruptions, climate-related droughts, and ongoing regional conflicts. The summit produced a landmark agreement in which forty-two countries pledged to redirect agricultural subsidies toward sustainable farming practices and to cut food waste in half by 2030. Critics, however, expressed skepticism, noting that similar pledges made at previous summits largely went unfulfilled. The UN Secretary-General called the agreement a historic step but acknowledged that implementation would require unprecedented international cooperation.",
                 questions: [
                     { type:"mc", prompt:"¿Dónde tuvo lugar la cumbre de emergencia sobre seguridad alimentaria?", options:["Bruselas","Ginebra","Nueva York"], correct:1 },
@@ -1534,7 +1597,7 @@
                 ]
             },
             {
-                topic: "Psicología y comportamiento", icon: "🧠", color: "lc-red", rate: 1.0,
+                topic: "Psicología y comportamiento", art: "/imgs/habitos-removebg-preview.png", color: "lc-red", rate: 1.0,
                 audio: "Welcome to Mind Matters, the podcast where we explore the science of human behavior. Today's topic is procrastination, the tendency to delay tasks despite knowing the negative consequences. Researchers have found that procrastination is not primarily a time management problem, as it was long believed, but rather an emotional regulation issue. People avoid tasks that generate anxiety, boredom, or self-doubt, seeking immediate relief through distracting activities. A study from the University of Sheffield found that chronic procrastinators reported higher levels of stress and lower well-being compared to non-procrastinators, even though they initially felt better by avoiding tasks. Practical strategies include breaking large tasks into small steps, setting implementation intentions such as 'I will do this task at nine o'clock tomorrow morning', and practising self-compassion rather than self-criticism after a delay.",
                 questions: [
                     { type:"mc", prompt:"¿Cuál era la creencia tradicional sobre la procrastinación que los investigadores han refutado?", options:["Que era un problema de falta de motivación","Que era principalmente un problema de gestión del tiempo","Que estaba relacionada con baja inteligencia"], correct:1 },
@@ -1545,7 +1608,7 @@
                 ]
             },
             {
-                topic: "Historia y sociedad", icon: "🏛️", color: "lc-teal", rate: 1.0,
+                topic: "Historia y sociedad", art: "/imgs/familia-removebg-preview.png", color: "lc-teal", rate: 1.0,
                 audio: "In this week's history feature, we examine the long-term consequences of the Industrial Revolution on urban society in nineteenth-century Britain. As factories expanded rapidly, millions of rural workers migrated to cities like Manchester and Birmingham in search of employment. This dramatic urbanization created severe overcrowding, poor sanitation, and widespread child labor. However, it also gave rise to a powerful labor movement that successfully campaigned for workers' rights, including the ten-hour workday and the abolition of child labor in factories. Historians argue that while the Industrial Revolution generated unprecedented economic growth, its social costs were immense and fell disproportionately on the working class. The reforms it ultimately triggered, however, laid the foundation for the modern welfare state.",
                 questions: [
                     { type:"mc", prompt:"¿A qué ciudades migraron principalmente los trabajadores rurales durante la Revolución Industrial en Gran Bretaña?", options:["Londres y Edimburgo","Manchester y Birmingham","Liverpool y Leeds"], correct:1 },
@@ -1588,6 +1651,7 @@
         try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* almacenamiento no disponible */ }
     }
     STATE.xp = loadStat('egglish_xp', 0);
+    STATE.conPuntos = true; // se recalcula al empezar cada audio (ver startLessonAt)
 
     // ── Referencias DOM ───────────────────────────────────────
     const audioBtn          = document.getElementById('audioBtn');
@@ -1604,16 +1668,6 @@
     const feedbackIcon      = document.getElementById('feedbackIcon');
     const feedbackTitle     = document.getElementById('feedbackTitle');
     const feedbackExplain   = document.getElementById('feedbackExplain');
-    const xpValue           = document.getElementById('xpValue');
-    const streakValue       = document.getElementById('streakValue');
-    const accuracyValue     = document.getElementById('accuracyValue');
-    const xpValue2           = document.getElementById('xpValue2');
-    const streakValue2       = document.getElementById('streakValue2');
-    const accuracyValue2     = document.getElementById('accuracyValue2');
-    const xpPill             = document.getElementById('xpPill');
-    const streakPill         = document.getElementById('streakPill');
-    const xpPill2             = document.getElementById('xpPill2');
-    const streakPill2         = document.getElementById('streakPill2');
     const lessonCard         = document.getElementById('lessonCard');
 
     // Pantallas / biblioteca
@@ -1655,8 +1709,8 @@
             const data = JSON.parse(localStorage.getItem(ESCUCHA_STORAGE_KEY)) || {};
             // 'done' = ya respondió las 5 preguntas sin ningún error (check ✓).
             // 'intentado' = ya lo hizo pero le quedó algo mal (aviso en la tarjeta).
-            return { done: data.done || {}, intentado: data.intentado || {} };
-        } catch (e) { return { done: {}, intentado: {} }; }
+            return { done: data.done || {}, intentado: data.intentado || {}, plays: data.plays || {} };
+        } catch (e) { return { done: {}, intentado: {}, plays: {} }; }
     }
     function saveEscuchaProgress() {
         try { localStorage.setItem(ESCUCHA_STORAGE_KEY, JSON.stringify(escuchaProgress)); } catch (e) {}
@@ -1664,6 +1718,12 @@
     const escuchaProgress = loadEscuchaProgress();
 
     function escuchaCardKey(level, cardIndex) { return `${level}::${cardIndex}`; }
+
+    // ── PUNTOS: solo la 1.ª vez que se hace cada audio suma puntos (igual que en Juegos) ──
+    // La partida se cuenta al EMPEZAR, así no se puede abandonar para repetir con puntos.
+    // Después puede repetirlo todas las veces que quiera, pero ya no suma (se avisa en la tarjeta).
+    const POINT_PLAYS = 1;
+    function escuchaPlaysOf(level, cardIndex) { return escuchaProgress.plays[escuchaCardKey(level, cardIndex)] || 0; }
 
     /** Los niveles POR DEBAJO del nivel obtenido en el placement test se dan
      *  por superados: se marcan TODAS sus tarjetas de audio como completadas
@@ -1754,12 +1814,14 @@
     //  CONFETI (celebración visual)
     // ─────────────────────────────────────────────────────────
     function celebrate(big) {
-        const emojis = ['🎉','⭐','✨','🎊','🥳'];
+        const pieces = [IMG_STAR, IMG_STAR_ALT];
         const count = big ? 18 : 8;
         for (let i = 0; i < count; i++) {
-            const piece = document.createElement('span');
+            const piece = document.createElement('img');
             piece.className = 'confetti-piece';
-            piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            piece.alt = '';
+            piece.src = pieces[Math.floor(Math.random() * pieces.length)];
+            piece.onerror = () => piece.remove();
             const dx = (Math.random() - 0.5) * 260;
             const dy = (Math.random() - 0.9) * 260;
             const rot = (Math.random() - 0.5) * 360;
@@ -1770,29 +1832,22 @@
             setTimeout(() => piece.remove(), 950);
         }
     }
-    function bump(el) {
-        el.classList.remove('bump');
-        void el.offsetWidth; // reinicia animación
-        el.classList.add('bump');
-    }
 
     // ─────────────────────────────────────────────────────────
-    //  ICONOS COMO IMÁGENES REALES (no emojis de fuente del sistema)
-    //  Convertimos cada emoji a su imagen PNG equivalente (Twemoji).
-    //  Si la imagen no carga, se muestra automáticamente el emoji
-    //  de respaldo para que nunca quede un espacio roto.
+    //  ICONOS: imágenes del sitio (las mismas rutas del menú de Juegos).
+    //  Ya no se usan emojis ni Twemoji en la interfaz.
     // ─────────────────────────────────────────────────────────
-    function emojiToImageUrl(emoji) {
-        const codePoints = Array.from(emoji)
-            .map(ch => ch.codePointAt(0).toString(16))
-            .filter(cp => cp !== 'fe0f');
-        return `https://cdn.jsdelivr.net/npm/twemoji@14.0.2/assets/72x72/${codePoints.join('-')}.png`;
-    }
-    function iconImgHtml(emoji, cssClass, fallbackClass) {
-        const url = emojiToImageUrl(emoji);
-        return `<img src="${url}" alt="" class="${cssClass}" loading="lazy" ` +
-               `onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">` +
-               `<span class="${fallbackClass}" style="display:none;">${emoji}</span>`;
+    const IMG_ONERROR = "this.style.visibility='hidden'";
+    const IMG_STAR = '/imgs/estrella.png';
+    const IMG_STAR_ALT = '/imgs/star-removebg-preview.png';
+    const ICON_OK  = '<svg viewBox="0 0 24 24" fill="none" stroke="#46a302" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#e5f6d3"></circle><path d="M7 12.5l3.2 3.2L17 9"></path></svg>';
+    const ICON_BAD = '<svg viewBox="0 0 24 24" fill="none" stroke="#d33131" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#ffdfe0"></circle><path d="M8 8l8 8M16 8l-8 8"></path></svg>';
+    function starsHtml(filled) {
+        let out = '';
+        for (let i = 0; i < 3; i++) {
+            out += `<img src="${IMG_STAR}" alt="" class="${i < filled ? '' : 'star-off'}" onerror="${IMG_ONERROR}">`;
+        }
+        return out;
     }
 
     // ─────────────────────────────────────────────────────────
@@ -1853,7 +1908,7 @@
             audioProgressBar.style.width = '100%';
             audioBtn.classList.remove('playing');
             audioWrapper.classList.remove('playing');
-            audioStatus.textContent = 'Ya escuchaste el audio ✅ (puedes repetirlo)';
+            audioStatus.textContent = 'Ya escuchaste el audio (puedes repetirlo)';
             audioStatus.className = 'audio-status is-ready';
             unlockExerciseControls();
             return;
@@ -1925,7 +1980,7 @@
             audioBtn.classList.remove('playing');
             audioWrapper.classList.remove('playing');
             audioProgressBar.style.width = '100%';
-            audioStatus.textContent = 'Listo para responder ✅';
+            audioStatus.textContent = 'Listo para responder';
             audioStatus.className = 'audio-status is-ready';
             unlockExerciseControls();
         };
@@ -2022,7 +2077,7 @@
             btn.disabled = true;
             if (isImage) {
                 btn.className = 'img-card';
-                btn.innerHTML = `${iconImgHtml(optRaw.emoji, 'card-img', 'emoji-fallback')}<span class="label">${optRaw.label}</span>`;
+                btn.innerHTML = `<img src="${optRaw.img || ''}" alt="" class="card-img" onerror="${IMG_ONERROR}"><span class="label">${optRaw.label}</span>`;
             } else {
                 btn.className = 'option';
                 btn.innerText = optRaw;
@@ -2042,7 +2097,7 @@
         stmt.textContent = ex.statement;
         exerciseArea.appendChild(stmt);
 
-        const labels = ['✅ Verdadero', '❌ Falso'];
+        const labels = ['Verdadero', 'Falso'];
         labels.forEach((label, index) => {
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -2198,18 +2253,24 @@
 
         if (ready) {
             actionBtn.disabled = false;
-            actionBtn.className = 'btn-action active';
-            actionBtn.innerText = 'Comprobar';
+            actionBtn.className = 'btn-action hover-circle-btn active';
+            setActionLabel('Comprobar');
         } else {
             actionBtn.disabled = true;
-            actionBtn.className = 'btn-action';
-            actionBtn.innerText = 'Comprobar';
+            actionBtn.className = 'btn-action hover-circle-btn';
+            setActionLabel('Comprobar');
         }
     }
 
+    // El botón lleva <span class="hover-circle"> + <span class="btn-label">: solo se cambia el texto del label.
+    function setActionLabel(text) {
+        const label = actionBtn.querySelector('.btn-label');
+        if (label) label.textContent = text; else actionBtn.textContent = text;
+    }
+
     function resetActionBtn(disabled) {
-        actionBtn.className = 'btn-action';
-        actionBtn.innerText = 'Comprobar';
+        actionBtn.className = 'btn-action hover-circle-btn';
+        setActionLabel('Comprobar');
         actionBtn.disabled = !!disabled;
     }
 
@@ -2280,8 +2341,10 @@
         if (isCorrect) {
             STATE.correctInLevel++;
             STATE.streak++;
-            STATE.xp += 10;
-            saveStat('egglish_xp', STATE.xp);
+            if (STATE.conPuntos) {
+                STATE.xp += 10;
+                saveStat('egglish_xp', STATE.xp);
+            }
             playSuccessSound();
             celebrate(false);
             showFeedback(true, pickPositiveMessage(), '');
@@ -2294,8 +2357,8 @@
         updateStatsUI();
 
         actionBtn.disabled = false;
-        actionBtn.className = 'btn-action active continue';
-        actionBtn.innerText = 'Continuar';
+        actionBtn.className = 'btn-action hover-circle-btn active continue';
+        setActionLabel('Continuar');
     }
 
     function pickPositiveMessage() {
@@ -2306,7 +2369,7 @@
     function showFeedback(isCorrect, title, explain) {
         feedbackBanner.classList.remove('correct', 'wrong');
         feedbackBanner.classList.add('show', isCorrect ? 'correct' : 'wrong');
-        feedbackIcon.textContent = isCorrect ? '✅' : '❌';
+        feedbackIcon.innerHTML = isCorrect ? ICON_OK : ICON_BAD;
         feedbackTitle.textContent = title;
         feedbackExplain.textContent = explain;
     }
@@ -2329,24 +2392,9 @@
         progressBar.style.width = `${percentage}%`;
     }
 
-    function updateStatsUI() {
-        const acc = STATE.totalInLevel > 0 ? Math.round((STATE.correctInLevel / STATE.totalInLevel) * 100) : 0;
-
-        xpValue.textContent = STATE.xp;
-        streakValue.textContent = STATE.streak;
-        accuracyValue.textContent = acc + '%';
-
-        if (xpValue2) xpValue2.textContent = STATE.xp;
-        if (streakValue2) streakValue2.textContent = STATE.streak;
-        if (accuracyValue2) accuracyValue2.textContent = acc + '%';
-
-        bump(xpPill);
-        if (xpPill2) bump(xpPill2);
-        if (STATE.streak > 0) {
-            bump(streakPill);
-            if (streakPill2) bump(streakPill2);
-        }
-    }
+    // Las barras de XP / racha / precisión se eliminaron de la interfaz.
+    // Se conserva la función porque otras partes del flujo la llaman.
+    function updateStatsUI() { /* sin indicadores en pantalla */ }
 
     // ─────────────────────────────────────────────────────────
     //  BIBLIOTECA DE LISTENINGS
@@ -2359,30 +2407,25 @@
             const key = escuchaCardKey(libraryLevel, i);
             const completado = !!escuchaProgress.done[key];
             const pendientePorErrores = !completado && !!escuchaProgress.intentado[key];
+            // Ya lo hizo al menos una vez: puede repetirlo, pero ya no suma puntos (tarjeta en rojo)
+            const sinPuntos = escuchaPlaysOf(libraryLevel, i) >= POINT_PLAYS;
 
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'listening-card'
+            btn.className = 'listening-card ' + card.color
                 + (completado ? ' listening-card-done' : '')
-                + (pendientePorErrores ? ' listening-card-retry' : '');
-            btn.style.position = 'relative';
-            if (pendientePorErrores) {
-                btn.style.background = '#fff4e5';
-                btn.style.border = '2px solid #ff9600';
-            } else if (completado) {
-                btn.style.border = '2px solid #2ecc71';
-            }
-
+                + (pendientePorErrores ? ' listening-card-retry' : '')
+                + (sinPuntos ? ' listening-card-nopoints' : '');
             btn.innerHTML = `
-                ${completado ? `<span class="listening-check-badge" title="Ya completaste este audio sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">✓</span>` : ''}
-                ${pendientePorErrores ? `<span class="listening-retry-badge" title="Todavía no lo completaste sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ff9600;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">!</span>` : ''}
-                <div class="listening-card-icon ${card.color}">
-                    ${iconImgHtml(card.icon, 'card-img', 'emoji-fallback')}
-                    <span class="listening-card-badge">${iconImgHtml('🎧', 'badge-img', 'emoji-fallback')}</span>
-                </div>
-                <span class="listening-card-title">${card.topic}</span>
-                <span class="listening-card-progress">${libraryLevel} · ${card.questions.length} preguntas</span>
-                ${pendientePorErrores ? `<span style="display:block;margin-top:6px;padding:6px 8px;border-radius:8px;background:#ffe8c2;color:#9a5b00;font-size:0.72rem;font-weight:700;text-align:center;">Debes completar este audio sin errores para poder avanzar</span>` : ''}
+                ${card.art ? `<img class="listening-card-art${i === 0 ? ' listening-card-art--compact' : ''}" src="${card.art}" alt="" aria-hidden="true" onerror="this.style.display='none'"/>` : ''}
+                ${completado ? `<span class="listening-check-badge" title="Ya completaste este audio sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:3;">✓</span>` : ''}
+                ${pendientePorErrores ? `<span class="listening-retry-badge" title="Todavía no lo completaste sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ff9600;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:3;">!</span>` : ''}
+                <span class="listening-card-content">
+                    <span class="listening-card-title">${card.topic}</span>
+                    <span class="listening-card-progress">${libraryLevel} · ${card.questions.length} preguntas</span>
+                    ${pendientePorErrores ? `<span class="listening-card-note retry">Debes completar este audio sin errores para poder avanzar</span>` : ''}
+                    ${sinPuntos ? `<span class="listening-card-note nopoints">Si haces este audio no te sumará más puntos</span>` : ''}
+                </span>
             `;
             btn.addEventListener('click', () => startLessonAt(libraryLevel, i));
             listeningGrid.appendChild(btn);
@@ -2398,6 +2441,10 @@
     function startLessonAt(level, cardIndex) {
         STATE.level    = level;
         STATE.cardIndex = cardIndex;
+        // Cuenta la partida y decide si esta vez suma puntos (solo la primera).
+        escuchaProgress.plays[escuchaCardKey(level, cardIndex)] = escuchaPlaysOf(level, cardIndex) + 1;
+        STATE.conPuntos = escuchaPlaysOf(level, cardIndex) <= POINT_PLAYS;
+        saveEscuchaProgress();
         if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
         document.querySelector('.audio-panel').style.display = 'flex';
         const bottomSection = document.querySelector('.bottom-section');
@@ -2439,33 +2486,44 @@
     });
     refreshEscuchaLevelTabsLockUI();
 
-    // Pequeño aviso flotante para cuando el alumno toca un nivel bloqueado
-    // (no hay un sistema de toasts en esta página, así que se crea uno).
-    function showLevelLockToast(msg) {
-        let toast = document.getElementById('level-lock-toast');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'level-lock-toast';
-            toast.style.cssText = `
-                position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(12px);
-                background:#1f2937; color:#fff; padding:12px 20px; border-radius:999px;
-                font-weight:700; font-size:0.92rem; z-index:99999; box-shadow:0 8px 20px rgba(0,0,0,.3);
-                opacity:0; transition:opacity .25s ease, transform .25s ease; pointer-events:none;
-                white-space:nowrap;
-            `;
-            document.body.appendChild(toast);
-        }
-        toast.textContent = msg;
-        requestAnimationFrame(() => {
-            toast.style.opacity = '1';
-            toast.style.transform = 'translateX(-50%) translateY(0)';
-        });
-        clearTimeout(toast._hideTimer);
-        toast._hideTimer = setTimeout(() => {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateX(-50%) translateY(12px)';
-        }, 2200);
+    // Aviso de nivel bloqueado / desbloqueado: mismo modal que la sección de Juegos.
+    /** Modal de aviso para niveles bloqueados y niveles recién desbloqueados. */
+    function showLevelNoticeModal(msg) {
+      const modal = document.getElementById('level-lock-modal');
+      const message = document.getElementById('level-lock-message');
+      const closeButton = document.getElementById('level-lock-close');
+      const icon = document.getElementById('level-lock-icon');
+      if (!modal || !message || !closeButton || !icon) return;
+
+      const unlocked = msg.toLowerCase().includes('desbloqueado');
+      icon.classList.toggle('is-unlocked', unlocked);
+      icon.innerHTML = unlocked
+        ? '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="8" y="21" width="32" height="23" rx="5" stroke="currentColor" stroke-width="3.5"/><path d="M15 21v-7a9 9 0 0 1 17.7-2" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="31" r="2.5" fill="currentColor"/><path d="M24 33.5V37" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>'
+        : '<svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><rect x="8" y="21" width="32" height="23" rx="5" stroke="currentColor" stroke-width="3.5"/><path d="M15 21v-7a9 9 0 0 1 18 0v7" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="24" cy="31" r="2.5" fill="currentColor"/><path d="M24 33.5V37" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+      message.textContent = msg;
+      modal.hidden = false;
+      document.body.classList.add('level-lock-modal-open');
+      closeButton.focus();
     }
+
+    function closeLevelLockModal() {
+      const modal = document.getElementById('level-lock-modal');
+      if (!modal || modal.hidden) return;
+      modal.hidden = true;
+      document.body.classList.remove('level-lock-modal-open');
+    }
+
+    // Cierre del modal: botón ×, clic en el fondo y tecla Escape (igual que en Juegos.js)
+    (function initLevelLockModal() {
+        const lockModal = document.getElementById('level-lock-modal');
+        document.getElementById('level-lock-close')?.addEventListener('click', closeLevelLockModal);
+        lockModal?.addEventListener('click', event => {
+            if (event.target === lockModal) closeLevelLockModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeLevelLockModal();
+        });
+    })();
 
     levelTabs.addEventListener('click', (e) => {
         const tab = e.target.closest('.level-tab');
@@ -2473,7 +2531,7 @@
         const idx = LEVEL_ORDER.indexOf(tab.dataset.level);
         if (idx > getUnlockedEscuchaLevelIdx()) {
             playErrorSound();
-            showLevelLockToast('🔒 Completa todos los audios del nivel actual, sin errores, para desbloquear este.');
+            showLevelNoticeModal('Completa todos los audios del nivel actual para desbloquear este.');
             return;
         }
         libraryLevel = tab.dataset.level;
@@ -2520,15 +2578,15 @@
                 badge: 'score-great',
                 title: isAdvanced ? '¡Comprensión auditiva sobresaliente!' : '¡Excelente comprensión auditiva!',
                 message: isAdvanced
-                    ? 'Captaste los detalles clave de un audio de nivel ' + level + ' con gran precisión. ¡Dominas el inglés hablado! 🏆'
-                    : 'Entendiste casi todo el audio a la perfección. ¡Sigue así! 🎧'
+                    ? 'Captaste los detalles clave de un audio de nivel ' + level + ' con gran precisión. ¡Dominas el inglés hablado!'
+                    : 'Entendiste casi todo el audio a la perfección. ¡Sigue así!'
             };
         } else if (acc >= 70) {
             return {
                 badge: 'score-good',
                 title: isAdvanced ? '¡Muy sólida comprensión!' : '¡Muy buen oído!',
                 message: isAdvanced
-                    ? 'Comprendiste la mayor parte del audio ' + level + '. Repasa los detalles que se te escaparon y estarás listo/a para el siguiente nivel. 💪'
+                    ? 'Comprendiste la mayor parte del audio ' + level + '. Repasa los detalles que se te escaparon y estarás listo/a para el siguiente nivel.'
                     : 'Vas muy bien comprendiendo el inglés hablado. ¡Un esfuerzo más!'
             };
         } else if (acc >= 50) {
@@ -2536,7 +2594,7 @@
                 badge: 'score-ok',
                 title: isAdvanced ? '¡Buen intento en nivel ' + level + '!' : '¡Vas por buen camino!',
                 message: isAdvanced
-                    ? 'Los audios de nivel ' + level + ' son desafiantes. Vuelve a escucharlo con atención y fíjate en las expresiones clave. 🎯'
+                    ? 'Los audios de nivel ' + level + ' son desafiantes. Vuelve a escucharlo con atención y fíjate en las expresiones clave.'
                     : 'Sigue practicando tu oído, cada vez entenderás más.'
             };
         }
@@ -2544,17 +2602,17 @@
             badge: 'score-low',
             title: isAdvanced ? '¡El nivel ' + level + ' es un reto!' : '¡Sigue practicando tu oído!',
             message: isAdvanced
-                ? 'No te desanimes: los audios de nivel ' + level + ' requieren práctica constante. Escúchalo otra vez, prestando atención al contexto y al vocabulario. 🔁'
+                ? 'No te desanimes: los audios de nivel ' + level + ' requieren práctica constante. Escúchalo otra vez, prestando atención al contexto y al vocabulario.'
                 : 'Escucha el audio otra vez con calma. La práctica mejora tu comprensión.'
         };
     }
 
     function openCompletionModal(acc, expGanado, perfecto, yaTeniaCheck) {
         const total = STATE.totalInLevel || 1;
-        const stars = acc >= 90 ? '⭐⭐⭐' : acc >= 70 ? '⭐⭐' : acc >= 50 ? '⭐' : '☆';
+        const starCount = acc >= 90 ? 3 : acc >= 70 ? 2 : acc >= 50 ? 1 : 0;
         const fb = completionFeedbackFor(acc);
 
-        completionStars.textContent = stars;
+        completionStars.innerHTML = starsHtml(starCount);
         completionTitle.textContent = fb.title;
         let mensaje = fb.message;
         if (!yaTeniaCheck) {
@@ -2562,11 +2620,17 @@
                 ? ' ¡Ganaste el check ✓ de este audio!'
                 : ' Para ganar el check ✓ de este audio debes responder las 5 preguntas sin ningún error.';
         }
+        // Aviso de puntos (igual que en Juegos): en la 1.ª vez se advierte; en las repeticiones se informa.
+        mensaje += STATE.conPuntos
+            ? ' Ojo: si vuelves a hacer este audio ya no sumará puntos.'
+            : ' Como ya hiciste este audio antes, esta vez no suma puntos.';
         completionMessage.textContent = mensaje;
         completionPercent.textContent = acc + '%';
         completionRing.className = 'completion-ring ' + fb.badge;
         completionCorrect.textContent = `${STATE.correctInLevel}/${total}`;
         completionXp.textContent = `+${expGanado} XP`;
+        const xpMetric = completionXp.closest('.completion-score-metric');
+        if (xpMetric) xpMetric.style.display = STATE.conPuntos ? '' : 'none';
 
         completionOverlay.classList.add('show');
         completionOverlay.setAttribute('aria-hidden', 'false');
@@ -2605,7 +2669,7 @@
         progressBar.style.width = '100%';
         const card = currentCard();
         topicChip.textContent = card.topic;
-        questionText.innerText = '¡Audio completado! 🎉';
+        questionText.innerText = '¡Audio completado!';
         audioStatus.textContent = '';
         document.querySelector('.audio-panel').style.display = 'none';
         exerciseArea.innerHTML = '';
@@ -2617,8 +2681,10 @@
         const total = STATE.totalInLevel || 1;
         const acc = Math.round((STATE.correctInLevel / total) * 100);
         const bonus = 20;
-        STATE.xp += bonus;
-        saveStat('egglish_xp', STATE.xp);
+        if (STATE.conPuntos) {
+            STATE.xp += bonus;
+            saveStat('egglish_xp', STATE.xp);
+        }
         updateStatsUI();
 
         // El check ✓ (y el desbloqueo del siguiente nivel) solo cuenta si
@@ -2639,7 +2705,7 @@
         refreshEscuchaLevelTabsLockUI();
 
         // Puntaje/porcentaje y mensaje de felicitación en la ventana modal.
-        const expGanado = STATE.correctInLevel * 10 + bonus;
+        const expGanado = STATE.conPuntos ? (STATE.correctInLevel * 10 + bonus) : 0;
         openCompletionModal(acc, expGanado, perfecto, yaTeniaCheck);
 
         celebrate(true);
@@ -2649,7 +2715,7 @@
         // desbloquear el siguiente: se lo avisamos al alumno.
         const unlockedIdxDespues = getUnlockedEscuchaLevelIdx();
         if (unlockedIdxDespues > unlockedIdxAntes) {
-            showLevelLockToast(`🎉 ¡Nivel ${LEVEL_ORDER[unlockedIdxDespues]} desbloqueado!`);
+            showLevelNoticeModal(`¡Nivel ${LEVEL_ORDER[unlockedIdxDespues]} desbloqueado!`);
         }
 
         // Sincroniza el progreso REAL (puntos y ejercicios de escucha completados)
@@ -2658,8 +2724,8 @@
         window._egglishProgresoPendiente = import('/Secciones/Js/egglish-progreso.js')
             .then(({ registrarProgreso }) => registrarProgreso({
                 exp: expGanado,
-                campo: 'escuchaCompletados',
-                incremento: 1,
+                campo: STATE.conPuntos ? 'escuchaCompletados' : null,
+                incremento: STATE.conPuntos ? 1 : 0,
             }))
             .catch((e) => console.warn('No se pudo sincronizar el progreso con Firebase:', e));
     }
@@ -2707,29 +2773,6 @@
         });
     }
 
-    // ── Modo oscuro ─────────────────────────────────────────────
-    function setupDarkMode() {
-        const toggleBtn = document.getElementById('dark-mode-toggle');
-        const moonIcon  = document.getElementById('icon-moon');
-        const sunIcon   = document.getElementById('icon-sun');
-        if (!toggleBtn) return;
-
-        function applyIcons() {
-            const isDark = document.documentElement.classList.contains('dark');
-            toggleBtn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-            if (moonIcon) moonIcon.classList.toggle('hidden', isDark);
-            if (sunIcon) sunIcon.classList.toggle('hidden', !isDark);
-        }
-
-        applyIcons();
-
-        toggleBtn.addEventListener('click', () => {
-            const isDark = document.documentElement.classList.toggle('dark');
-            try { localStorage.setItem('egglish-theme', isDark ? 'dark' : 'light'); } catch (e) {}
-            applyIcons();
-        });
-    }
-
     // ── Cerrar sesión: bloquea la pantalla al instante y cierra la sesión
     // real de Firebase. NO navega solo — se queda en la pantalla de
     // bloqueo y es el usuario quien elige "Iniciar sesión" o "Ir al inicio".
@@ -2749,7 +2792,6 @@
     }
 
     setupHamburgerMenu();
-    setupDarkMode();
     setupLogoutButtons();
 
     // Iniciar en la biblioteca
@@ -2758,12 +2800,12 @@
     renderLibrary();
     showScreen('library');
 </script>
-<!-- ★ EGGLISH AUTH ★ -->
+<!-- EGGLISH AUTH -->
 <script type="module">
   import { initIndexGuards } from '/Secciones/Js/guards.js';
   initIndexGuards();
 </script>
-<!-- ★ EGGLISH — Bloqueo de sesión (mismo patrón que perfil.html) ★
+<!-- EGGLISH — Bloqueo de sesión (mismo patrón que perfil.html)
      IMPORTANTE: guards.js ya es el único responsable de vigilar el estado
      de auth en vivo y redirigir si hace falta — este bloque NO agrega un
      segundo onAuthStateChanged (tenerlo duplicado corría el riesgo de que,
@@ -2809,7 +2851,7 @@
   }
 </script>
 <script>
-  // 🩹 Espera a que termine de sincronizar el progreso (exp, racha, logros)
+  // Espera a que termine de sincronizar el progreso (exp, racha, logros)
   // ANTES de navegar a perfil.html, para evitar que la lectura de Firestore
   // en perfil.html llegue antes que la escritura de esta página y muestre 0.
   document.addEventListener('click', function (e) {
@@ -2826,294 +2868,24 @@
   }, true);
 </script>
 
-<!-- ══════════════ CHATBOT FLOTANTE (CHATBASE) ══════════════ -->
-<style>
-  #egg-chat-bubble {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: #1cb0f6;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10000;
-    border: none;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  #egg-chat-bubble:hover {
-    transform: scale(1.06);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  }
-  #egg-chat-bubble svg {
-    width: 28px;
-    height: 28px;
-    stroke: #fff;
-  }
-  /* Botón rojo "Salir" centrado en la parte superior del chat */
-  #egg-chat-close-top {
-    position: absolute;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10001;
-    background: #ef4444;
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    padding: 6px 24px;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 800;
-    font-size: 13px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-    transition: background 0.15s ease, transform 0.15s ease;
-    display: none;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-  }
-  #egg-chat-close-top:hover {
-    background: #dc2626;
-    transform: translateX(-50%) scale(1.04);
-  }
-  /* En móvil: ocultar el botón flotante cuando el chat está abierto,
-     para que no tape el ícono de grabar audio de Chatbase */
-  @media (max-width: 480px) {
-    #egg-chat-bubble.chat-open {
-      display: none !important;
-    }
-  }
-  #egg-chat-window {
-    position: fixed;
-    bottom: 96px;
-    right: 24px;
-    width: 340px;
-    max-width: calc(100vw - 32px);
-    /* Ventana más compacta que antes. Usamos --vvh (altura real visible,
-       actualizada por JS con la Visual Viewport API) en vez de 100vh: así,
-       si el teclado del móvil se abre, la ventana se encoge en vez de
-       quedar "tapada" y esconder el input de texto/audio en la parte de
-       abajo. --vvh cae a 100dvh si el navegador no soporta esa API. */
-    height: min(560px, calc(var(--vvh, 100dvh) - 120px));
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    z-index: 9999;
-    display: none;
-    background: #fff;
-    opacity: 0;
-    transform: translateY(20px) scale(0.96);
-    transition: opacity 0.2s ease, transform 0.2s ease;
-  }
-  /* Pantalla realmente angosta (teléfono en vertical): ahí sí el chat se abre
-     a pantalla completa para garantizar que el campo de texto siempre sea
-     visible. OJO: esto se basa solo en el ANCHO, no en el alto — una ventana
-     de escritorio corta (pero ancha) NO debe activar el modo pantalla completa,
-     solo debe encogerse verticalmente (ver height arriba, con margen de 120px). */
-  @media (max-width: 480px) {
-    #egg-chat-window {
-      top: 12px;
-      left: 12px;
-      right: 12px;
-      bottom: auto;
-      width: auto;
-      height: calc(var(--vvh, 100dvh) - 24px);
-      max-width: none;
-    }
-    #egg-chat-bubble {
-      right: 16px;
-      bottom: 16px;
-    }
-  }
-  #egg-chat-window.open {
-    display: block;
-  }
-  #egg-chat-window.show {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  /* Contenedor interno: el iframe se ajusta EXACTO a este tamaño, sin min-height,
-     así nunca se recorta el encabezado del bot ni ninguna parte del contenido. */
-  #egg-chat-body {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  #egg-chat-body iframe {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-  }
-  #egg-chat-body iframe.loaded {
-    opacity: 1;
-  }
-  #egg-chat-loading {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: #fff;
-    transition: opacity 0.25s ease;
-  }
-  #egg-chat-loading.hidden-loading {
-    opacity: 0;
-    pointer-events: none;
-  }
-  #egg-chat-spinner {
-    width: 34px;
-    height: 34px;
-    border: 4px solid #e5e7eb;
-    border-top-color: #1cb0f6;
-    border-radius: 50%;
-    animation: egg-spin 0.8s linear infinite;
-  }
-  @keyframes egg-spin {
-    to { transform: rotate(360deg); }
-  }
-  #egg-chat-loading span {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 13px;
-    color: #6b7280;
-  }
-</style>
-
-<button id="egg-chat-bubble" type="button" aria-label="Abrir chat de ayuda" aria-expanded="false" aria-controls="egg-chat-window">
-  <svg id="egg-chat-icon-open" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-  </svg>
-  <svg id="egg-chat-icon-close" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-</button>
-
-<div id="egg-chat-window" role="dialog" aria-label="Chat de ayuda">
-  <!-- Botón rojo Salir en la parte superior del chat, junto al encabezado "Eggy" -->
-  <button id="egg-chat-close-top" type="button" aria-label="Cerrar chat de ayuda">Salir</button>
-  <div id="egg-chat-body">
-    <div id="egg-chat-loading">
-      <div id="egg-chat-spinner"></div>
-      <span>Cargando chat…</span>
-    </div>
-    <!-- El iframe se inserta con JS solo cuando el usuario abre el chat por -->
-    <!-- primera vez (lazy-load), así la página principal carga más rápido -->
-    <!-- y el chat no se "reinicia" cada vez que se abre y cierra. -->
-  </div>
-</div>
-
 <script>
+  // Hover "círculo que nace donde entra el cursor" (index.html), en vanilla JS y delegado
+  // para que también funcione con los botones que Juegos.js crea dinámicamente.
   (function () {
-    const bubble = document.getElementById('egg-chat-bubble');
-    const win = document.getElementById('egg-chat-window');
-    const body = document.getElementById('egg-chat-body');
-    const loading = document.getElementById('egg-chat-loading');
-    const iconOpen = document.getElementById('egg-chat-icon-open');
-    const iconClose = document.getElementById('egg-chat-icon-close');
-    const closeTopBtn = document.getElementById('egg-chat-close-top');
-    if (!bubble || !win || !body || !loading) return;
-
-    let isOpen = false;
-    let iframeCreated = false;
-    let iframeLoaded = false;
-
-    // Mantiene --vvh = altura real visible de la pantalla (excluye el
-    // teclado del móvil cuando está abierto). Sin esto, en iOS/Android
-    // la ventana del chat puede quedar más alta que el área visible y el
-    // input de texto/audio de Chatbase queda tapado por el teclado.
-    function syncViewportHeight() {
-      const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-      document.documentElement.style.setProperty('--vvh', vh + 'px');
+    function place(e) {
+      var b = e.target.closest && e.target.closest('.hover-circle-btn');
+      if (!b || (e.relatedTarget && b.contains(e.relatedTarget))) return;
+      var c = b.querySelector('.hover-circle'), r = b.getBoundingClientRect();
+      if (c) { c.style.top = (e.clientY - r.top) + 'px'; c.style.left = (e.clientX - r.left) + 'px'; }
     }
-    syncViewportHeight();
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', syncViewportHeight);
-      window.visualViewport.addEventListener('scroll', syncViewportHeight);
-    } else {
-      window.addEventListener('resize', syncViewportHeight);
-    }
-
-    function ensureIframe() {
-      if (iframeCreated) return;
-      iframeCreated = true;
-      const iframe = document.createElement('iframe');
-      iframe.src = 'https://www.chatbase.co/chatbot-iframe/-Wg5knMaJ19dwVd0Kr9x9';
-      iframe.setAttribute('allow', 'microphone');
-      iframe.setAttribute('frameborder', '0');
-      iframe.addEventListener('load', () => {
-        // Pequeño margen para que el bot termine de pintar su interfaz
-        // antes de esconder el spinner y evitar el "flash" en blanco.
-        setTimeout(() => {
-          iframe.classList.add('loaded');
-          loading.classList.add('hidden-loading');
-          // El botón "Salir" aparece SOLO cuando el chat ya terminó de cargar
-          iframeLoaded = true;
-          if (isOpen) {
-            if (closeTopBtn) closeTopBtn.style.display = 'block';
-            bubble.classList.add('chat-open');
-          }
-        }, 300);
-      });
-      body.appendChild(iframe);
-    }
-
-    function openChat() {
-      isOpen = true;
-      ensureIframe();
-      win.classList.add('open');
-      requestAnimationFrame(() => win.classList.add('show'));
-      iconOpen.classList.add('hidden');
-      iconClose.classList.remove('hidden');
-      bubble.setAttribute('aria-expanded', 'true');
-      bubble.setAttribute('aria-label', 'Cerrar chat de ayuda');
-      // Ocultar la burbuja INMEDIATAMENTE en móvil para que la X no
-      // tape el botón de enviar mientras el iframe todavía está cargando.
-      bubble.classList.add('chat-open');
-      // El botón "Salir" solo aparece cuando el iframe termina de cargar.
-      // En reaperturas (iframeLoaded ya es true) aparece de inmediato.
-      if (iframeLoaded) {
-        if (closeTopBtn) closeTopBtn.style.display = 'block';
-      }
-    }
-
-    function closeChat() {
-      isOpen = false;
-      win.classList.remove('show');
-      iconOpen.classList.remove('hidden');
-      iconClose.classList.add('hidden');
-      bubble.setAttribute('aria-expanded', 'false');
-      bubble.setAttribute('aria-label', 'Abrir chat de ayuda');
-      // Ocultar botón "Salir" y restaurar burbuja flotante
-      if (closeTopBtn) closeTopBtn.style.display = 'none';
-      bubble.classList.remove('chat-open');
-      setTimeout(() => {
-        if (!isOpen) win.classList.remove('open');
-      }, 200);
-    }
-
-    bubble.addEventListener('click', () => {
-      isOpen ? closeChat() : openChat();
-    });
-
-    // Botón rojo "Salir" en la cabecera del chat
-    if (closeTopBtn) {
-      closeTopBtn.addEventListener('click', closeChat);
-    }
+    document.addEventListener('mouseover', place);
+    document.addEventListener('mouseout', place);
   })();
 </script>
-
+<!-- ══════════════ CHATBASE (script de embed oficial) ══════════════ -->
+<script>
+(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...args)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(args)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="tsTu0jiI2QFUFPkTBF5fJ";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+</script>
 
 </body>
 </html>

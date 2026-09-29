@@ -637,28 +637,23 @@ function buildGrid(level) {
     const completado = !!gamesProgress.done[key];
     const pendientePorErrores = !completado && !!gamesProgress.intentado[key];
 
-    const card = document.createElement('div');
-    card.className = 'game-card-sel'
-      + (completado ? ' game-card-done' : '')
-      + (pendientePorErrores ? ' game-card-retry' : '');
-    card.style.position = 'relative';
-    if (pendientePorErrores) {
-      card.style.background = '#fff4e5';
-      card.style.border = '2px solid #ff9600';
-    } else if (completado) {
-      card.style.border = '2px solid #2ecc71';
-    }
+    const item = document.createElement('div');
+    item.className = 'game-card-item';
 
     const plays = playsOf(level, g.id);
     // Cuando ya jugó la partida que da puntos, se avisa (tarjeta en rojo) pero puede seguir jugando
     const sinPuntos = plays >= POINT_PLAYS;
-    if (sinPuntos) card.classList.add('game-card-nopoints');
     const playInfo = sinPuntos ? 'Si haces esta lección no te sumará más puntos' : '';
 
-    card.innerHTML = `
+    item.innerHTML = `
+      <div class="game-card-mobile-heading" aria-hidden="true">
+        <span class="game-card-title">${g.title}</span>
+        <span class="game-card-badge badge-${level}">${level}</span>
+      </div>
+      <div class="game-card-sel${completado ? ' game-card-done' : ''}${pendientePorErrores ? ' game-card-retry' : ''}${sinPuntos ? ' game-card-nopoints' : ''}" style="position:relative;${pendientePorErrores ? 'background:#fff4e5;border:2px solid #ff9600;' : completado ? 'border:2px solid #2ecc71;' : ''}">
       ${completado ? `<span class="game-check-badge" title="Ya completaste este juego" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#2ecc71;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">✓</span>` : ''}
       ${pendientePorErrores ? `<span class="game-retry-badge" title="Todavía no lo completaste sin errores" style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ff9600;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,.3);z-index:2;">!</span>` : ''}
-      <div class="game-card-icon"><img src="${gameImg(g.id)}" alt="" style="width:112px;height:112px;object-fit:contain" onerror="this.style.visibility='hidden'"/></div>
+      <div class="game-card-icon"><img src="${gameImg(g.id)}" alt="" style="width:96px;height:96px;object-fit:contain" onerror="this.style.visibility='hidden'"/></div>
       <div>
         <div class="game-card-title">${g.title}</div>
         <span class="game-card-badge badge-${level}">${level}</span>
@@ -667,8 +662,9 @@ function buildGrid(level) {
       ${pendientePorErrores ? `<div class="game-card-warning" style="margin:6px 0 4px;padding:6px 8px;border-radius:8px;background:#ffe8c2;color:#9a5b00;font-size:0.78rem;font-weight:700;text-align:center;">Debes completar esta sin errores para poder avanzar</div>` : ''}
       ${playInfo ? `<div class="game-card-plays" style="font-size:.85rem;font-weight:800;margin:6px 0;text-align:center;color:#ef4444;">${playInfo}</div>` : ''}
       <button class="btn-play btn-${level} hover-circle-btn" onclick="startGame('${g.id}','${level}')"><span class="hover-circle"></span><span class="btn-label">${completado ? 'Repasar' : (pendientePorErrores ? 'Reintentar' : 'Jugar')}</span></button>
+      </div>
     `;
-    grid.appendChild(card);
+    grid.appendChild(item);
   });
 }
 

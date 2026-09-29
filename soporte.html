@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -72,6 +73,257 @@
     .accordion-btn[aria-expanded="true"] .accordion-icon {
       transform: rotate(180deg);
     }
+
+    /* =====================================================
+       EFECTOS PORTADOS DESDE index.html (mismo CSS, sin cambios)
+       ===================================================== */
+    /* =====================================================
+       EFECTO BEAM — borde giratorio de luz alrededor de
+       contenedores de texto (features + pasos del camino)
+       ===================================================== */
+    @property --beam {
+      syntax: '<angle>';
+      inherits: false;
+      initial-value: 0deg;
+    }
+    .beam {
+      position: relative;
+      border-radius: 12px;
+      isolation: isolate;
+    }
+    .beam::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: conic-gradient(from var(--beam), transparent 0 70%, #38bdf8 85%, #818cf8 100%);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: beam-spin 4s linear infinite;
+    }
+    @keyframes beam-spin { to { --beam: 360deg; } }
+
+    /* =====================================================
+       EFECTO GLOWING — SOLO para la sección final "¿Qué esperas?"
+       Resplandor pulsante alrededor del recuadro del CTA.
+       ===================================================== */
+    .glow-frame {
+      animation: glow-pulse 2.6s ease-in-out infinite;
+    }
+    @keyframes glow-pulse {
+      0%, 100% {
+        box-shadow: 0 12px 0 #0090d9, 0 0 25px 4px rgba(56,189,248,0.45);
+      }
+      50% {
+        box-shadow: 0 12px 0 #0090d9, 0 0 50px 14px rgba(56,189,248,0.75);
+      }
+    }
+
+
+    /* =====================================================
+       HERO BANNER — Fondo con ondas + detalles decorativos
+       ===================================================== */
+    #hero-visual-clip,
+    .hero-banner-bg {
+      position: relative;
+      overflow: hidden;
+      background-color: #1b75ff;
+    }
+    .dark #hero-visual-clip,
+    .dark .hero-banner-bg {
+      background-color: #0b172a;
+    }
+
+    /* SVG de ondas: se intercambia vía display en dark mode */
+    .hero-banner-bg .waves-light { display: block; }
+    .hero-banner-bg .waves-dark  { display: none;  }
+    .dark .hero-banner-bg .waves-light { display: none;  }
+    .dark .hero-banner-bg .waves-dark  { display: block; }
+
+    .hero-banner-bg svg.hero-waves {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Estrellas de 4 puntas flotantes (light) */
+    @keyframes star-float {
+      0%, 100% { transform: translateY(0) scale(1);   opacity: .9; }
+      50%       { transform: translateY(-6px) scale(1.15); opacity: 1; }
+    }
+    .hero-star {
+      position: absolute;
+      pointer-events: none;
+      animation: star-float 3s ease-in-out infinite;
+    }
+    .hero-star:nth-child(2) { animation-delay: .6s;  }
+    .hero-star:nth-child(3) { animation-delay: 1.2s; }
+    .hero-star:nth-child(4) { animation-delay: 1.8s; }
+    .hero-star:nth-child(5) { animation-delay: 2.4s; }
+
+    /* Círculos flotantes */
+    @keyframes circle-float {
+      0%, 100% { transform: translateY(0);   opacity: .85; }
+      50%       { transform: translateY(-8px); opacity: 1;  }
+    }
+    .hero-circle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: circle-float 4s ease-in-out infinite;
+    }
+    .hero-circle:nth-of-type(2) { animation-delay: 1s;  }
+    .hero-circle:nth-of-type(3) { animation-delay: 2s;  }
+
+    /* Pastillas amarillas */
+    @keyframes pill-float {
+      0%, 100% { transform: rotate(-30deg) translateY(0);   }
+      50%       { transform: rotate(-30deg) translateY(-5px);}
+    }
+    .hero-pill {
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+      animation: pill-float 3.5s ease-in-out infinite;
+    }
+    .hero-pill:nth-of-type(2) { animation-delay: .8s; }
+    .hero-pill:nth-of-type(3) { animation-delay: 1.6s;}
+
+    /* El contenido del banner siempre por encima de los decorativos */
+    .hero-banner-bg > .hero-content {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* =====================================================
+       EFECTO DE CLICK (ripple) — se aplica a cualquier botón
+       que tenga la clase .click-effect. Adaptado del efecto
+       "effect_dylan" que pediste: un círculo se expande y se
+       desvanece desde el centro del botón al hacer click.
+       ===================================================== */
+    .click-effect {
+      position: relative;
+      overflow: hidden;
+    }
+    .click-effect:before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      display: block;
+      border-radius: inherit;
+      background-color: rgba(255, 255, 255, 0.55);
+      transform: scale(0.001, 0.001);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .click-effect.is-clicked:before {
+      animation: click-ripple 0.7s ease-out;
+    }
+    @keyframes click-ripple {
+      50% {
+        transform: scale(1.4, 1.4);
+        opacity: 0;
+      }
+      99% {
+        transform: scale(0.001, 0.001);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(0.001, 0.001);
+        opacity: 0.55;
+      }
+    }
+
+    /* =====================================================
+       EFECTO DE HOVER — círculo que "nace" desde el punto
+       exacto donde entra el cursor (estilo .btn-6 del SCSS
+       que compartiste). Reemplaza los hovers de color simples
+       que tenían "Empezar a Jugar" y "Crear cuenta gratis".
+       El JS (al final del body) mueve el círculo con jQuery
+       usando la posición del mouse, igual que tu snippet.
+       ===================================================== */
+    .hover-circle-btn {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .hover-circle-btn .btn-label {
+      position: relative;
+      z-index: 2;
+      transition: color 0.3s ease-in-out;
+    }
+    .hover-circle-btn .hover-circle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: block;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.4s ease-in-out, height 0.4s ease-in-out;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .hover-circle-btn:hover .hover-circle {
+      width: 250%;
+      height: 250%;
+    }
+
+    /* =====================================================
+       HERO "FEATURE" FIJO — efecto tipo Nike (zoom-out + blur
+       + fade al hacer scroll), aplicado a #hero-feature y,
+       con el mismo cálculo, al menú fijo (#site-nav).
+       Se activa en TODOS los dispositivos, incluido celular.
+       ===================================================== */
+    #hero-feature {
+      position: fixed;
+      top: 68px;                      /* alto del navbar */
+      left: 0;
+      width: 100%;
+      height: calc(100vh - 68px);
+      height: calc(100svh - 68px);
+      z-index: 1;
+      overflow: hidden;
+      will-change: opacity, filter, transform;
+    }
+    #hero-spacer {
+      width: 100%;
+      height: 100vh;                  /* reserva el alto del hero fijo (una pantalla) */
+      height: 100svh;
+    }
+    #hero-visual {
+      transform-origin: center center;
+      will-change: transform;
+    }
+    #site-nav {
+      will-change: opacity;
+    }
+
+    /* =====================================================
+       SCROLL REVEAL — cada sección (Features, Camino, CTA)
+       aparece cuando entra en pantalla y se desvanece cuando
+       sale, una por una, en vez de quedar siempre visible.
+       ===================================================== */
+    .scroll-reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+    .scroll-reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Botones circulares con posición absoluta (flechas del carrusel):
+       .click-effect fuerza position:relative; esto conserva su posición original. */
+    .click-effect.absolute { position: absolute; }
+
   </style>
   <script>
     /* Aplica el modo oscuro ANTES de pintar la página para evitar parpadeo */
@@ -89,9 +341,9 @@
     ============================================================
   -->
   <header>
-    <nav class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
+    <nav id="site-nav" class="flex items-center justify-between bg-white dark:bg-gray-900 px-4 md:px-8 h-[68px] border-b-2 border-gray-200 dark:border-gray-800 fixed top-0 left-0 w-full z-[200]">
       <a href="/index.html" class="flex items-center gap-2 sm:gap-2.5 no-underline shrink-0 min-w-0">
-        <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
+        <img src="/imgs/eggy.png" alt="logo" class="w-8 h-8 sm:w-10 sm:h-10 object-contain shrink-0"/>
         <span class="text-base sm:text-xl font-black text-[#1a1a2e] dark:text-white whitespace-nowrap truncate">Egglish</span>
       </a>
 
@@ -104,23 +356,6 @@
         <a href="#contacto" class="text-sm font-bold text-[#1a1a2e] dark:text-white hover:text-egg-blue no-underline">Contáctanos</a>
       </div>
 
-      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <button
-          id="dark-mode-toggle"
-          type="button"
-          aria-label="Cambiar modo oscuro"
-          aria-pressed="false"
-          class="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 text-lg hover:bg-gray-100 dark:hover:bg-gray-800 shrink-0"
-        >
-          <svg id="dark-mode-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 sm:w-5 sm:h-5 text-[#1a1a2e] dark:text-white">
-            <path id="icon-moon" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-            <g id="icon-sun" class="hidden">
-              <circle cx="12" cy="12" r="4"></circle>
-              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
-            </g>
-          </svg>
-        </button>
-      </div>
     </nav>
   </header>
 
@@ -131,61 +366,136 @@
       1. MISIÓN (HERO)
       ============================================================
     -->
-    <section id="mision" class="w-full flex flex-col md:flex-row items-center bg-white dark:bg-gray-950 scroll-mt-[68px]">
+    <!-- Ancla #mision: al ir a "Misión" la página sube al inicio (el hero es position:fixed) -->
+    <div id="mision" class="block scroll-mt-[68px]"></div>
 
-      <div class="w-full md:w-1/2 min-h-[40vh] md:min-h-[70vh] flex items-center justify-center bg-egg-blue dark:bg-blue-950 px-4 md:px-12 py-12 md:py-0 order-1">
-        <div class="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 flex items-center justify-center">
-          <img
-            src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png"
-            alt="Pollito de Egglish"
-            class="relative z-10 animate-bounce-chick w-36 h-36 sm:w-48 sm:h-48 md:w-64 md:h-64 object-contain drop-shadow-2xl"
-          />
+    <section id="hero-feature" class="w-full flex flex-col md:flex-row items-stretch bg-white dark:bg-gray-950">
+
+      <!-- Columna Izquierda: Pollito (único protagonista, mascotas adicionales removidas a pedido) -->
+      <!-- #hero-visual-clip recorta el zoom para que NUNCA invada la columna de texto -->
+      <!-- Altura fija (no crece): así siempre le deja espacio a la columna de texto/botones -->
+      <div id="hero-visual-clip" class="w-full md:w-1/2 h-[30vh] md:h-full shrink-0 order-1 relative overflow-hidden">
+        <div id="hero-visual" class="hero-banner-bg w-full h-full flex items-center justify-center px-4 md:px-12 py-4 md:py-0">
+
+        <!-- ── Ondas SVG LIGHT MODE ── -->
+        <svg class="hero-waves waves-light" viewBox="0 0 500 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <path d="M-60 120 Q80 60 200 140 Q320 220 460 130 Q540 80 600 110 L600 0 L-60 0 Z" fill="#4c9cff" opacity=".55"/>
+          <path d="M-60 260 Q60 190 180 270 Q310 360 460 255 Q530 210 600 240 L600 120 Q540 90 460 140 Q310 230 180 150 Q60 70 -60 130 Z" fill="#4c9cff" opacity=".35"/>
+          <path d="M-60 580 Q100 490 240 560 Q370 630 500 530 Q560 490 600 510 L600 700 L-60 700 Z" fill="#4c9cff" opacity=".45"/>
+          <path d="M-60 650 Q120 580 270 640 Q390 690 520 620 Q570 595 600 610 L600 700 L-60 700 Z" fill="#4c9cff" opacity=".25"/>
+        </svg>
+
+        <!-- ── Ondas SVG DARK MODE ── -->
+        <svg class="hero-waves waves-dark" viewBox="0 0 500 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+          <path d="M-60 120 Q80 60 200 140 Q320 220 460 130 Q540 80 600 110 L600 0 L-60 0 Z" fill="#172554" opacity=".7"/>
+          <path d="M-60 260 Q60 190 180 270 Q310 360 460 255 Q530 210 600 240 L600 120 Q540 90 460 140 Q310 230 180 150 Q60 70 -60 130 Z" fill="#1e293b" opacity=".6"/>
+          <path d="M-60 580 Q100 490 240 560 Q370 630 500 530 Q560 490 600 510 L600 700 L-60 700 Z" fill="#172554" opacity=".65"/>
+          <path d="M-60 650 Q120 580 270 640 Q390 690 520 620 Q570 595 600 610 L600 700 L-60 700 Z" fill="#1e293b" opacity=".4"/>
+        </svg>
+
+        <!-- ── Estrellas de 4 puntas (blancas, visibles en light y dark) ── -->
+        <svg class="hero-star" style="top:8%;left:12%;width:18px;height:18px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+        <svg class="hero-star" style="top:15%;right:14%;width:14px;height:14px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+        <svg class="hero-star" style="top:68%;left:8%;width:22px;height:22px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+        <svg class="hero-star" style="bottom:12%;right:10%;width:16px;height:16px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+        <svg class="hero-star" style="top:42%;left:4%;width:12px;height:12px" viewBox="0 0 24 24" fill="white"><path d="M12 2 L13.5 10.5 L22 12 L13.5 13.5 L12 22 L10.5 13.5 L2 12 L10.5 10.5 Z"/></svg>
+
+        <!-- ── Círculos cyan (light) / azul-grisáceo (dark) ── -->
+        <div class="hero-circle" style="width:14px;height:14px;background:#22d3ee;top:22%;left:6%;opacity:.9;box-shadow:0 0 8px #22d3ee88"></div>
+        <div class="hero-circle" style="width:10px;height:10px;background:#22d3ee;bottom:20%;left:18%;opacity:.8;box-shadow:0 0 6px #22d3ee66"></div>
+        <div class="hero-circle" style="width:12px;height:12px;background:#22d3ee;top:55%;right:8%;opacity:.85;box-shadow:0 0 7px #22d3ee77"></div>
+
+        <!-- ── Pastillas amarillas ── -->
+        <div class="hero-pill" style="width:28px;height:10px;background:#f5a623;top:30%;left:5%;transform:rotate(-30deg);opacity:.9"></div>
+        <div class="hero-pill" style="width:22px;height:8px;background:#f5a623;top:35%;right:6%;transform:rotate(30deg);opacity:.85"></div>
+        <div class="hero-pill" style="width:24px;height:9px;background:#f5a623;bottom:28%;left:12%;transform:rotate(-20deg);opacity:.8"></div>
+        <div class="hero-pill" style="width:20px;height:8px;background:#f5a623;bottom:22%;right:14%;transform:rotate(25deg);opacity:.75"></div>
+
+        <!-- ── Contenido: pollito ── -->
+        <div class="hero-content relative w-64 h-64 sm:w-[26rem] sm:h-[26rem] md:w-[32rem] md:h-[32rem] lg:w-[38rem] lg:h-[38rem] flex items-center justify-center md:-translate-y-10 lg:-translate-y-12">
+          <!-- SVG sustituido: se usa el archivo SVG real del pollito Egglish -->
+          <svg
+            class="relative z-10 animate-bounce-chick w-48 h-48 sm:w-80 sm:h-80 md:w-[26rem] md:h-[26rem] lg:w-[30rem] lg:h-[30rem]"
+            viewBox="0 0 320 340"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-label="Pollito de Egglish"
+            role="img"
+          >
+            <defs>
+              <!-- Halo de luz blanca difusa alrededor del pollito real -->
+              <radialGradient id="haloGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="white" stop-opacity="0.6"/>
+                <stop offset="50%"  stop-color="white" stop-opacity="0.2"/>
+                <stop offset="100%" stop-color="white" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="8" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- Halo blanco brillante detrás del pollito -->
+            <ellipse cx="160" cy="165" rx="128" ry="125" fill="url(#haloGlow)"/>
+
+            <!-- Pollito SVG real centrado en el viewBox 320×340 -->
+            <image href="/imgs/eggy.png" x="10" y="10" width="300" height="300"/>
+
+            <!-- Destellos de luz alrededor (rayos blancos con glow) -->
+          </svg>
         </div>
       </div>
+      </div>
 
-      <div class="w-full md:w-1/2 flex flex-col justify-center px-4 md:px-12 py-14 md:py-0 order-2 max-w-screen-md mx-auto md:mx-0 text-center md:text-left bg-white dark:bg-gray-950">
+      <!-- Columna Derecha: contenido actual de Soporte (misión) -->
+      <div id="hero-text" class="w-full md:w-1/2 flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col justify-start md:justify-center px-4 md:px-12 pt-4 pb-3 md:py-0 order-2 max-w-screen-md mx-auto md:mx-0 text-center md:text-left bg-white dark:bg-gray-950 md:-translate-y-10 lg:-translate-y-12">
         <span class="inline-block self-center md:self-start mb-4 px-4 py-1.5 rounded-full bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-200 dark:border-yellow-800 text-egg-yellow-d dark:text-egg-yellow text-xs font-black uppercase tracking-wide">Nuestra misión</span>
-        <h1 class="text-4xl md:text-5xl font-black leading-tight mb-4 text-[#1a1a2e] dark:text-white">
+        <h1 class="animate__animated animate__pulse animate__infinite text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-2 md:mb-4 text-[#1a1a2e] dark:text-white">
           Creemos que aprender inglés debería sentirse como un juego, no como una tarea.
         </h1>
-        <p class="text-lg font-semibold text-gray-500 dark:text-gray-400 max-w-md mx-auto md:mx-0">
+        <p class="text-base md:text-lg font-semibold text-gray-500 dark:text-gray-400 max-w-md mx-auto md:mx-0">
           En Egglish combinamos gamificación, ciencia del aprendizaje y mucho cariño por los detalles para que millones de personas ganen confianza hablando inglés, un pasito a la vez — como un pollito que aprende a volar.
         </p>
       </div>
     </section>
+
+    <!-- Reserva el alto del hero fijo para que el resto del contenido empiece debajo -->
+    <div id="hero-spacer"></div>
 
     <!--
       ============================================================
       2. MÉTODO DE ENSEÑANZA
       ============================================================
     -->
-    <section id="metodo" class="bg-gray-50 dark:bg-gray-900 px-4 md:px-12 py-20 border-t border-gray-200 dark:border-gray-800 scroll-mt-[68px]">
+    <section id="metodo" class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14 scroll-mt-[68px] pointer-events-none">
+      <div class="max-w-screen-xl mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 bg-gray-50/45 dark:bg-gray-900/45 backdrop-blur-sm pointer-events-auto">
       <div class="max-w-screen-xl mx-auto text-center mb-14">
         <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">Cómo funciona nuestro método</h2>
         <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold">Ciencia, juego y constancia trabajando juntos.</p>
       </div>
 
       <div class="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div class="bg-white dark:bg-gray-950 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center">
-          <div class="w-[64px] h-[64px] rounded-2xl flex items-center justify-center mb-5 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800 text-3xl">🧠</div>
+        <div class="beam bg-white/40 dark:bg-gray-950/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center">
+          <div class="w-[64px] h-[64px] rounded-2xl flex items-center justify-center mb-5 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-egg-blue"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg></div>
           <h3 class="text-lg font-extrabold mb-2 text-[#1a1a2e] dark:text-white">Repetición espaciada</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Repasamos el vocabulario justo antes de que lo olvides, para que se quede en tu memoria a largo plazo.</p>
         </div>
-        <div class="bg-white dark:bg-gray-950 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center">
-          <div class="w-[64px] h-[64px] rounded-2xl flex items-center justify-center mb-5 bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800 text-3xl">🎮</div>
+        <div class="beam bg-white/40 dark:bg-gray-950/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center">
+          <div class="w-[64px] h-[64px] rounded-2xl flex items-center justify-center mb-5 bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-800"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-egg-green"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg></div>
           <h3 class="text-lg font-extrabold mb-2 text-[#1a1a2e] dark:text-white">Gamificación real</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Rachas, plumas, niveles y logros que te motivan a volver todos los días sin darte cuenta.</p>
         </div>
-        <div class="bg-white dark:bg-gray-950 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center">
-          <div class="w-[64px] h-[64px] rounded-2xl flex items-center justify-center mb-5 bg-orange-50 dark:bg-orange-900/30 border-2 border-orange-200 dark:border-orange-800 text-3xl">🗣️</div>
+        <div class="beam bg-white/40 dark:bg-gray-950/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center">
+          <div class="w-[64px] h-[64px] rounded-2xl flex items-center justify-center mb-5 bg-orange-50 dark:bg-orange-900/30 border-2 border-orange-200 dark:border-orange-800"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-orange-500"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg></div>
           <h3 class="text-lg font-extrabold mb-2 text-[#1a1a2e] dark:text-white">Práctica activa</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">Escucha, escribe y habla desde la primera lección. Aprender haciendo, no solo memorizando.</p>
         </div>
-        <div class="bg-white dark:bg-gray-950 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center">
-          <div class="w-[64px] h-[64px] rounded-2xl flex items-center justify-center mb-5 bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-200 dark:border-yellow-800 text-3xl">📈</div>
+        <div class="beam bg-white/40 dark:bg-gray-950/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center">
+          <div class="w-[64px] h-[64px] rounded-2xl flex items-center justify-center mb-5 bg-yellow-50 dark:bg-yellow-900/30 border-2 border-yellow-200 dark:border-yellow-800"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-egg-yellow-d dark:text-egg-yellow"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
           <h3 class="text-lg font-extrabold mb-2 text-[#1a1a2e] dark:text-white">Progreso adaptativo</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400 font-semibold leading-relaxed">La dificultad se ajusta a tu ritmo, así siempre estás en el punto justo entre reto y diversión.</p>
         </div>
+      </div>
       </div>
     </section>
 
@@ -194,7 +504,8 @@
       3. CREADORES (CARRUSEL — Vanilla JS)
       ============================================================
     -->
-    <section id="creadores" class="bg-white dark:bg-gray-950 px-4 md:px-12 py-20 border-t border-gray-200 dark:border-gray-800 scroll-mt-[68px]">
+    <section id="creadores" class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14 scroll-mt-[68px] pointer-events-none">
+      <div class="max-w-screen-xl mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 bg-white/45 dark:bg-gray-950/45 backdrop-blur-sm pointer-events-auto">
       <div class="max-w-screen-xl mx-auto text-center mb-14">
         <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">Las personas detrás de Egglish</h2>
         <p class="text-lg text-gray-500 dark:text-gray-400 font-semibold">Un equipo pequeño con ganas grandes de enseñar.</p>
@@ -219,7 +530,7 @@
 
             <!-- Tarjeta creador 1 -->
             <div class="w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
-              <div class="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
+              <div class="beam bg-gray-50/40 dark:bg-gray-900/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-egg-blue mb-4 bg-gray-200 dark:bg-gray-800">
                   <img src="/imgs/yoimar.png" alt="Foto de Serrano Cruz Yoimar Joseph" class="w-full h-full object-cover"/>
                 </div>
@@ -231,7 +542,7 @@
 
             <!-- Tarjeta creador 2 -->
             <div class="w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
-              <div class="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
+              <div class="beam bg-gray-50/40 dark:bg-gray-900/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-egg-green mb-4 bg-gray-200 dark:bg-gray-800">
                   <img src="/imgs/Mari.png" alt="Foto de Hernández Minorta Mariangel" class="w-full h-full object-cover"/>
                 </div>
@@ -243,7 +554,7 @@
 
             <!-- Tarjeta creador 3 -->
             <div class="w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
-              <div class="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
+              <div class="beam bg-gray-50/40 dark:bg-gray-900/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-egg-yellow mb-4 bg-gray-200 dark:bg-gray-800">
                   <img src="/imgs/eve.jpeg" alt="Foto de Granados Vargas Evelyn Gissell" class="w-full h-full object-cover"/>
                 </div>
@@ -255,7 +566,7 @@
 
             <!-- Tarjeta creador 4 -->
             <div class="w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
-              <div class="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
+              <div class="beam bg-gray-50/40 dark:bg-gray-900/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-orange-300 mb-4 bg-gray-200 dark:bg-gray-800">
                   <img src="/imgs/galvis.png" alt="Foto de Galvis Santander Luis Santiago" class="w-full h-full object-cover"/>
                 </div>
@@ -267,7 +578,7 @@
 
             <!-- Tarjeta creador 5 -->
             <div class="w-full sm:w-1/2 lg:w-1/3 shrink-0 px-3">
-              <div class="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
+              <div class="beam bg-gray-50/40 dark:bg-gray-900/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-8 flex flex-col items-center text-center h-full">
                 <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-pink-300 mb-4 bg-gray-200 dark:bg-gray-800">
                   <img src="/imgs/karoll.jpg" alt="Foto de Contreras Ortega Karoll Nicoll" class="w-full h-full object-cover"/>
                 </div>
@@ -285,18 +596,19 @@
           id="carousel-prev"
           type="button"
           aria-label="Creador anterior"
-          class="absolute top-1/2 -translate-y-1/2 -left-2 sm:-left-5 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-hard-soft flex items-center justify-center text-xl font-black text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+          class="click-effect absolute top-1/2 -translate-y-1/2 -left-2 sm:-left-5 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-hard-soft flex items-center justify-center text-xl font-black text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
         >‹</button>
         <button
           id="carousel-next"
           type="button"
           aria-label="Siguiente creador"
-          class="absolute top-1/2 -translate-y-1/2 -right-2 sm:-right-5 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-hard-soft flex items-center justify-center text-xl font-black text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+          class="click-effect absolute top-1/2 -translate-y-1/2 -right-2 sm:-right-5 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 shadow-hard-soft flex items-center justify-center text-xl font-black text-[#1a1a2e] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
         >›</button>
       </div>
 
       <!-- Indicadores (dots) -->
       <div id="carousel-dots" class="flex items-center justify-center gap-2 mt-8"></div>
+      </div>
     </section>
 
     <!--
@@ -304,7 +616,8 @@
       4. CENTRO DE AYUDA (FORMULARIO — Formspree)
       ============================================================
     -->
-    <section id="ayuda" class="bg-white dark:bg-gray-950 px-4 md:px-12 py-20 border-t border-gray-200 dark:border-gray-800 scroll-mt-[68px]">
+    <section id="ayuda" class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14 scroll-mt-[68px] pointer-events-none">
+      <div class="max-w-screen-md mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 bg-white/45 dark:bg-gray-950/45 backdrop-blur-sm pointer-events-auto">
       <div class="max-w-screen-md mx-auto">
         <div class="text-center mb-10">
           <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">Centro de ayuda</h2>
@@ -317,7 +630,7 @@
         <form
           action="https://formspree.io/f/xzebanvl"
           method="POST"
-          class="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-6 md:p-10 flex flex-col gap-5"
+          class="beam bg-gray-50/40 dark:bg-gray-900/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl p-6 md:p-10 flex flex-col gap-5"
         >
           <div>
             <label for="nombre" class="block text-sm font-black mb-2 text-[#1a1a2e] dark:text-white">Nombre</label>
@@ -347,16 +660,18 @@
           </div>
 
           <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold">
-            💛 ¿Encontraste un error o algo se ve raro? Descríbelo con el mayor detalle posible (qué esperabas que pasara y qué pasó en realidad) para que nuestro equipo pueda solucionarlo más rápido.
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block w-4 h-4 -mt-0.5 mr-1 text-egg-yellow"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> ¿Encontraste un error o algo se ve raro? Descríbelo con el mayor detalle posible (qué esperabas que pasara y qué pasó en realidad) para que nuestro equipo pueda solucionarlo más rápido.
           </p>
 
           <button
             type="submit"
-            class="w-full sm:w-auto self-center sm:self-start rounded-full px-8 py-3 font-bold text-white bg-egg-blue hover:bg-egg-blue-d transition-colors shadow-hard-soft"
+            class="hover-circle-btn click-effect w-full sm:w-auto self-center sm:self-start rounded-full px-8 py-3 font-bold text-white bg-egg-blue shadow-hard-soft"
           >
-            Enviar mensaje
+            <span class="hover-circle" style="background-color:#0090d9"></span>
+            <span class="btn-label">Enviar mensaje</span>
           </button>
         </form>
+      </div>
       </div>
     </section>
 
@@ -365,9 +680,9 @@
       6. CONTÁCTANOS (CTA WHATSAPP)
       ============================================================
     -->
-    <section id="contacto" class="px-4 md:px-12 py-20 flex justify-center bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 scroll-mt-[68px]">
-      <div class="bg-cta-dots relative bg-egg-green rounded-[32px] px-6 md:px-10 py-16 text-center w-full max-w-screen-md shadow-hard-blue overflow-hidden">
-        <div class="text-6xl mb-4">💬</div>
+    <section id="contacto" class="scroll-reveal relative z-10 px-4 md:px-12 py-20 flex justify-center scroll-mt-[68px]">
+      <div class="glow-frame bg-cta-dots relative bg-egg-green rounded-[32px] px-6 md:px-10 py-16 text-center w-full max-w-screen-md shadow-hard-blue overflow-hidden">
+        <div class="flex justify-center mb-4"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 text-white"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></div>
         <h2 class="text-3xl md:text-5xl font-black text-white mb-4">¿Hablamos?</h2>
         <p class="text-lg font-bold text-white/90 mb-9 max-w-lg mx-auto">Escríbenos directo por WhatsApp y te respondemos lo antes posible.</p>
 
@@ -376,13 +691,16 @@
           href="https://wa.me/573115379147"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center gap-3 rounded-full px-8 py-4 font-black text-egg-green-d bg-white hover:bg-gray-100 transition-colors shadow-hard-soft"
+          class="hover-circle-btn click-effect inline-flex items-center gap-3 rounded-full px-8 py-4 font-black text-egg-green-d bg-white shadow-hard-soft"
         >
+          <span class="hover-circle" style="background-color:#f3f4f6"></span>
+          <span class="btn-label inline-flex items-center gap-3">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 fill-egg-green">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.148-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z"/>
             <path d="M12.004 2.003c-5.514 0-9.997 4.483-9.997 9.997 0 1.762.462 3.484 1.34 4.997L2 22l5.116-1.334a9.96 9.96 0 0 0 4.888 1.284h.004c5.514 0 9.997-4.483 9.997-9.997 0-2.67-1.04-5.18-2.929-7.068a9.935 9.935 0 0 0-7.072-2.882zm5.83 15.83a8.298 8.298 0 0 1-5.83 2.4h-.003a8.29 8.29 0 0 1-4.223-1.156l-.303-.18-3.037.792.812-2.96-.198-.304a8.284 8.284 0 0 1-1.267-4.42c0-4.583 3.73-8.312 8.315-8.312a8.26 8.26 0 0 1 5.876 2.433 8.26 8.26 0 0 1 2.436 5.876 8.298 8.298 0 0 1-2.578 5.831z"/>
           </svg>
           Escríbenos por WhatsApp
+          </span>
         </a>
       </div>
     </section>
@@ -392,7 +710,8 @@
       7. TÉRMINOS Y PRIVACIDAD (ACORDEÓN — Vanilla JS)
       ============================================================
     -->
-    <section id="terminos" class="bg-white dark:bg-gray-950 px-4 md:px-12 py-20 border-t border-gray-200 dark:border-gray-800 scroll-mt-[68px]">
+    <section id="terminos" class="scroll-reveal relative z-10 px-4 md:px-8 py-8 md:py-14 scroll-mt-[68px] pointer-events-none">
+      <div class="max-w-screen-md mx-auto rounded-[32px] md:rounded-[40px] px-4 md:px-12 py-16 md:py-20 bg-white/45 dark:bg-gray-950/45 backdrop-blur-sm pointer-events-auto">
       <div class="max-w-screen-md mx-auto">
         <div class="text-center mb-10">
           <h2 class="text-3xl md:text-4xl font-black mb-2 text-[#1a1a2e] dark:text-white">Términos y privacidad</h2>
@@ -402,10 +721,10 @@
         <div class="flex flex-col gap-4">
 
           <!-- Acordeón: Términos de Servicio -->
-          <div class="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden">
+          <div class="beam bg-gray-50/40 dark:bg-gray-900/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden">
             <button
               type="button"
-              class="accordion-btn w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+              class="accordion-btn click-effect w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
               aria-expanded="false"
               aria-controls="panel-terminos"
             >
@@ -427,10 +746,10 @@
           </div>
 
           <!-- Acordeón: Política de Privacidad -->
-          <div class="bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden">
+          <div class="beam bg-gray-50/40 dark:bg-gray-900/40 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 rounded-3xl overflow-hidden">
             <button
               type="button"
-              class="accordion-btn w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+              class="accordion-btn click-effect w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
               aria-expanded="false"
               aria-controls="panel-privacidad"
             >
@@ -453,6 +772,7 @@
 
         </div>
       </div>
+      </div>
     </section>
 
   </main>
@@ -462,7 +782,7 @@
     FOOTER — idéntico al de index.html, con anclas adaptadas
     ============================================================
   -->
-  <footer class="bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
+  <footer class="relative z-10 bg-egg-blue dark:bg-blue-950 text-white pt-16 pb-8 px-4 md:px-12 border-t-2 border-egg-blue-d dark:border-blue-900">
     <div class="max-w-screen-xl mx-auto">
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-10 mb-14 text-left">
@@ -500,7 +820,7 @@
 
       <div class="border-t border-white/25 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
         <div class="flex items-center gap-2.5">
-          <img src="https://em-content.zobj.net/source/twitter/376/hatching-chick_1f423.png" class="w-9 h-9 object-contain" alt="logo"/>
+          <img src="/imgs/eggy.png" class="w-9 h-9 object-contain" alt="logo"/>
           <span class="font-black text-lg text-white">Egglish</span>
         </div>
         <p class="text-sm font-bold text-white/80">© 2026 Egglish. Todos los derechos reservados.</p>
@@ -508,33 +828,6 @@
     </div>
   </footer>
 
-  <!--
-    ============================================================
-    MODO OSCURO (idéntico a index.html)
-    ============================================================
-  -->
-  <script>
-    const darkToggle = document.getElementById('dark-mode-toggle');
-    const darkIcon = document.getElementById('dark-mode-icon');
-    const root = document.documentElement;
-
-    function syncDarkModeUI() {
-      const isDark = root.classList.contains('dark');
-      const moon = document.getElementById('icon-moon');
-      const sun = document.getElementById('icon-sun');
-      moon.classList.toggle('hidden', isDark);
-      sun.classList.toggle('hidden', !isDark);
-      darkToggle.setAttribute('aria-pressed', String(isDark));
-    }
-
-    darkToggle.addEventListener('click', () => {
-      root.classList.toggle('dark');
-      localStorage.setItem('egglish-theme', root.classList.contains('dark') ? 'dark' : 'light');
-      syncDarkModeUI();
-    });
-
-    syncDarkModeUI();
-  </script>
 
   <!--
     ============================================================
@@ -644,6 +937,115 @@
         }
       });
     });
+  </script>
+
+  <!--
+    ============================================================
+    EFECTOS PORTADOS DESDE index.html (mismo JS, sin cambios):
+    hover/click de botones, scroll del hero (blur + zoom + fade,
+    también en el menú) y scroll-reveal de secciones.
+    ============================================================
+  -->
+  <script>
+    $(function () {
+      $('.hover-circle-btn')
+        .on('mouseenter', function (e) {
+          var parentOffset = $(this).offset(),
+              relX = e.pageX - parentOffset.left,
+              relY = e.pageY - parentOffset.top;
+          $(this).find('.hover-circle').css({ top: relY, left: relX });
+        })
+        .on('mouseout', function (e) {
+          var parentOffset = $(this).offset(),
+              relX = e.pageX - parentOffset.left,
+              relY = e.pageY - parentOffset.top;
+          $(this).find('.hover-circle').css({ top: relY, left: relX });
+        });
+
+      $('.click-effect').on('click', function () {
+        var $btn = $(this);
+        $btn.removeClass('is-clicked');
+        // Forzar reflow para poder reiniciar la animación si se hace click varias veces seguidas
+        void $btn[0].offsetWidth;
+        $btn.addClass('is-clicked');
+      });
+
+      $('.click-effect').on('animationend', function () {
+        $(this).removeClass('is-clicked');
+      });
+    });
+  </script>
+
+  <script>
+    /*
+      Scroll del hero de Soporte — misma lógica que index (zoom-out + blur + fade,
+      y el mismo fade en el menú), con un ajuste para que la misión se pueda leer:
+      - El blur se aplica SOLO al banner (columna del pollito), no al texto.
+      - El texto de la misión no se difumina: solo se desvanece al final del scroll.
+      - El hero mide una pantalla (100vh), así el texto nunca queda recortado.
+    */
+    $(function () {
+      var $heroFeature = $('#hero-feature');
+      var $heroBanner = $('#hero-visual-clip');
+      var $heroVisual = $('#hero-visual');
+      var $heroText = $('#hero-text');
+      var $nav = $('#site-nav');
+
+      var HERO_MIN_OPACITY = 0.4;
+      var BLUR_START = 0.35;
+
+      function updateHeroOnScroll() {
+        var fromTop = $(window).scrollTop();
+        var vh = $(window).height();
+        var rawProgress = Math.min(fromTop / vh, 1);
+        var progress = Math.max(0, (rawProgress - BLUR_START) / (1 - BLUR_START));
+
+        var scale = 1.05 - (0.05 * progress);
+        var blurPx = progress * 18;
+        var heroOpacity = 1 - progress * (1 - HERO_MIN_OPACITY);
+        var navOpacity = 1 - progress;
+
+        $heroVisual.css({
+          '-webkit-transform': 'scale(' + scale + ')',
+          'transform': 'scale(' + scale + ')'
+        });
+
+        $heroBanner.css({
+          '-webkit-filter': 'blur(' + blurPx + 'px)',
+          'filter': 'blur(' + blurPx + 'px)'
+        });
+
+        $heroText.css('opacity', 1 - progress);
+        $heroFeature.css('opacity', heroOpacity);
+
+        $nav.css('opacity', Math.max(navOpacity, 0));
+        $nav.css('pointer-events', progress >= 0.98 ? 'none' : 'auto');
+      }
+
+      $(window).on('scroll', updateHeroOnScroll);
+      $(window).on('resize', updateHeroOnScroll);
+      updateHeroOnScroll();
+    });
+  </script>
+
+  <script>
+    if ('IntersectionObserver' in window) {
+      var revealSections = document.querySelectorAll('.scroll-reveal');
+      var revealObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          entry.target.classList.toggle('is-visible', entry.isIntersecting);
+        });
+      }, { threshold: 0.2 });
+
+      revealSections.forEach(function (section) {
+        revealObserver.observe(section);
+      });
+    } else {
+      // Respaldo para navegadores sin soporte: mostrar todo directo
+      document.querySelectorAll('.scroll-reveal').forEach(function (section) {
+        section.classList.add('is-visible');
+      });
+    }
   </script>
 
 </body>

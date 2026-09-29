@@ -146,24 +146,18 @@
      al recargar sin login, al volver con el botón "Atrás" tras cerrar
      sesión (bfcache), o si Firebase confirma que no hay usuario. Nunca
      deja ver el contenido real del perfil. -->
-<div id="session-locked-screen" class="fixed inset-0 flex-col items-center justify-center px-6 text-center" style="z-index: 450; background: transparent;">
-  <!-- Tarjeta glassmorphism: se lee bien sobre el degradado claro Y el oscuro -->
-  <div class="flex flex-col items-center gap-5 rounded-3xl px-8 py-10 max-w-sm w-full"
-       style="background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 2px solid var(--card-border); box-shadow: 0 8px 32px rgba(0,0,0,0.18);">
-    <img src="/imgs/eggy.png" alt="Egglish" class="w-16 h-16 object-contain drop-shadow-md"/>
-    <div class="w-14 h-14 rounded-full flex items-center justify-center"
-         style="background: rgba(28,176,246,0.15); color: #1cb0f6;">
+<div id="session-locked-screen" class="fixed inset-0 flex-col items-center justify-center px-6 text-center" style="z-index:450;background:transparent;">
+  <div class="flex flex-col items-center gap-5 rounded-3xl px-8 py-10 max-w-sm w-full" style="background:var(--card-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:2px solid var(--card-border);box-shadow:0 8px 32px rgba(0,0,0,.18);">
+    <img src="/imgs/eggy.png" alt="Egglish" class="w-28 h-28 object-contain drop-shadow-md"/>
+    <div class="w-14 h-14 rounded-full flex items-center justify-center" style="background:rgba(28,176,246,.15);color:#1cb0f6;">
       <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
     </div>
     <div>
-      <h1 class="text-xl sm:text-2xl font-black" style="color: var(--text);">Tu sesión ha finalizado</h1>
-      <p class="text-sm sm:text-base font-semibold mt-2" style="color: var(--mid);">
-        Debes iniciar sesión de nuevo para ver tu perfil.
-      </p>
+      <h1 class="text-xl sm:text-2xl font-black text-black dark:text-white">Tu sesión ha finalizado</h1>
+      <p class="text-sm sm:text-base font-semibold mt-2 text-slate-800 dark:text-gray-300">Debes iniciar sesión de nuevo para ver tu perfil.</p>
     </div>
     <div class="flex flex-col sm:flex-row gap-3 w-full justify-center">
-      <a href="/index.html" class="text-sm font-black px-6 py-3 rounded-full no-underline transition-colors"
-         style="background: var(--card-bg-soft); color: var(--text); border: 2px solid var(--card-border);">Ir al inicio</a>
+      <a href="/index.html" class="text-sm font-black text-white bg-egg-blue hover:bg-egg-blue-d px-6 py-3 rounded-full shadow-hard-soft no-underline">Ir a inicio</a>
     </div>
   </div>
 </div>
