@@ -27,7 +27,6 @@ import { onAuthStateChanged, signOut, updateProfile } from 'https://www.gstatic.
 import { doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const SESSION_KEY = 'egglish_session';
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 // Sesión "en memoria" del usuario actual, usada por el handler de subida de foto
 let currentSession = null;
@@ -87,8 +86,11 @@ function formatJoinDate(fechaRegistroISO) {
 }
 
 // ── Racha (Streak) ─────────────────────
-// Si pasaron más de 24h desde la última actividad registrada en Firebase
-// (campo `ultimaActividad`), la racha se reinicia a 0.
+// Se reinicia solo si pasó al menos un día calendario completo sin actividad.
+function calendarDayNumber(date) {
+  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
+}
+
 function calcularRachaValidada(session) {
   const actual = session.racha ?? 0;
   if (!session.ultimaActividad) return actual;
@@ -96,8 +98,8 @@ function calcularRachaValidada(session) {
   const ultima = new Date(session.ultimaActividad);
   if (isNaN(ultima.getTime())) return actual;
 
-  const diffMs = Date.now() - ultima.getTime();
-  return diffMs > ONE_DAY_MS ? 0 : actual;
+  const daysSinceActivity = calendarDayNumber(new Date()) - calendarDayNumber(ultima);
+  return daysSinceActivity > 1 ? 0 : actual;
 }
 
 async function validarRachaEnFirebase(session) {

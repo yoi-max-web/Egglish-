@@ -50,20 +50,22 @@ function getUid() {
   });
 }
 
-/** Calcula la nueva racha comparando fechas de calendario (no horas exactas),
- *  para que practicar en cualquier momento del "mismo día" cuente como un
- *  único día de racha, sin duplicar el conteo. */
+/** Convierte las partes locales de una fecha en un número de día estable,
+ *  independiente de las horas y de los cambios de horario estacional. */
+function calendarDayNumber(date) {
+  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000);
+}
+
+/** Suma la racha usando días calendario: ayer y hoy son consecutivos aunque
+ *  hayan pasado más de 24 horas entre las actividades. */
 function calcularNuevaRacha(prevRacha, prevUltimaActividadISO) {
   if (!prevUltimaActividadISO) return 1;
   const prevDate = new Date(prevUltimaActividadISO);
   if (isNaN(prevDate.getTime())) return 1;
 
-  const prevDay = prevDate.toDateString();
-  const todayDay = new Date().toDateString();
-  if (prevDay === todayDay) return prevRacha || 1; // ya se practicó hoy
-
-  const yesterdayDay = new Date(Date.now() - 86400000).toDateString();
-  return prevDay === yesterdayDay ? (prevRacha || 0) + 1 : 1;
+  const daysSinceActivity = calendarDayNumber(new Date()) - calendarDayNumber(prevDate);
+  if (daysSinceActivity <= 0) return prevRacha || 1; // ya se practicó hoy
+  return daysSinceActivity === 1 ? (prevRacha || 0) + 1 : 1;
 }
 
 function sincronizarCacheLocal({ exp, campo, incremento, racha }) {

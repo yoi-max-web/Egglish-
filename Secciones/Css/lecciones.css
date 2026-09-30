@@ -268,12 +268,15 @@
     .lesson-hearts { display: flex; gap: 4px; font-size: 1.2rem; }
 
     .lesson-body {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 20px; gap: 16px;
+      flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-start; padding: 20px; gap: 16px;
       background: var(--white); overflow-y: auto; z-index: 302;
     }
+    /* centrado vertical "seguro": dos espaciadores flexibles centran el contenido
+       cuando sobra espacio y se colapsan (scroll) cuando no cabe */
+    .lesson-body::before, .lesson-body::after { content: ''; flex: 1 0 0; min-height: 0; }
     .lesson-instruction { font-size: 1.1rem; font-weight: 700; color: var(--text); text-align: center; }
-    .lesson-character-row { display: flex; align-items: flex-start; gap: 16px; }
+    .lesson-character-row { display: flex; align-items: flex-start; gap: 16px; flex-shrink: 0; }
     .lesson-char-avatar { font-size: 3.2rem; display:flex; align-items:center; justify-content:center; }
     .lesson-speech-bubble {
       background: var(--bg); border: 2px solid var(--border); border-radius: 16px;
@@ -299,19 +302,19 @@
     }
     .word-hint:hover { background: var(--bg3); }
 
-    .exercise-area { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+    .exercise-area { width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; display: flex; flex-direction: column; gap: 14px; flex-shrink: 0; }
 
     /* ── EJERCICIO: ORDENAR (drag & drop) ── */
     .lesson-answer-zone {
       display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start;
-      min-height: 56px; padding: 10px; border-bottom: 2px solid var(--border);
+      min-height: 56px; padding: 10px; border-bottom: 2px solid var(--border); flex-shrink: 0;
       transition: border-color .2s;
     }
     .lesson-answer-zone.drag-over { border-color: var(--blue); }
     .drag-hint { text-align: center; font-size: 0.78rem; color: var(--text-dim); font-weight: 700; }
     .lesson-wordbank {
       display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-      min-height: 44px; padding-top: 6px;
+      min-height: 44px; padding-top: 6px; flex-shrink: 0;
     }
     button.bank-word, button.answer-word {
       display: inline-flex; align-items: center; visibility: visible; opacity: 1;
@@ -378,8 +381,11 @@
 
     /* ── FEEDBACK BANNER ── */
     .lesson-feedback {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      padding: 18px 24px 100px; z-index: 45; display: none;
+      /* ANTES: position:fixed + padding-bottom:100px -> tapaba el banco de palabras.
+         AHORA: va en el flujo del modal (entre el contenido y la barra de botones),
+         así el contenido se reduce y hace scroll en vez de superponerse. */
+      position: relative; flex-shrink: 0; width: 100%;
+      padding: 14px 24px; z-index: 301; display: none;
     }
     .lesson-feedback.correct { background: var(--green-bg); border-top: 2px solid var(--green); display: block; }
     .lesson-feedback.wrong   { background: var(--red-bg);   border-top: 2px solid var(--red);   display: block; }
@@ -392,7 +398,7 @@
     .feedback-answer { font-size: 0.9rem; font-weight: 700; color: var(--text-mid); }
 
     .lesson-bottom {
-      background: var(--white); padding: 12px 20px; border-top: 2px solid var(--border);
+      flex-shrink: 0; background: var(--white); padding: 12px 20px; border-top: 2px solid var(--border);
       z-index: 301;
     }
     .lesson-bottom-inner { display: flex; gap: 12px; max-width: 600px; margin: 0 auto; }
@@ -823,7 +829,23 @@ body.level-lock-modal-open { overflow: hidden; }
 .xp-float-img { width: 22px; height: 22px; object-fit: contain; }
 
 /* Modo oscuro: piezas que usaban blanco fijo */
-.dark .btn-skip { background: transparent; color: #cbd5e1; border-color: #475569; }
+/* OMITIR: blanco con letra negra */
+.dark .btn-skip { background: #ffffff; color: #111827; border-color: #ffffff; }
+.dark .btn-skip:hover { background: #e5e7eb; color: #111827; border-color: #e5e7eb; }
+/* COMPROBAR listo: verde con letra blanca */
+.dark .btn-check.ready { background: var(--green); color: #ffffff; }
+.dark .btn-check.ready:hover { background: var(--green-d); color: #ffffff; }
+.dark .btn-check.correct-continue { background: var(--green); color: #ffffff; }
+.dark .btn-check.correct-continue:hover { background: var(--green-d); }
+/* Respuesta incorrecta: rojo con letra blanca */
+.dark .btn-check.wrong { background: var(--red); color: #ffffff; }
+.dark .btn-check.wrong:hover { background: var(--red-d); color: #ffffff; }
+/* Banner de feedback legible en modo oscuro */
+.dark .lesson-feedback.correct { background: #0f3d1a; }
+.dark .lesson-feedback.wrong   { background: #3f1414; }
+.dark .lesson-feedback .feedback-answer { color: #e2e8f0; }
+.dark .lesson-feedback.correct .feedback-title, .dark .lesson-feedback.correct .feedback-icon { color: #86efac; }
+.dark .lesson-feedback.wrong .feedback-title, .dark .lesson-feedback.wrong .feedback-icon { color: #fca5a5; }
 .dark .toast { background: #1f2937; color: #fff; }
 .dark .completion-sub, .dark .lose-sub { color: #cbd5e1; }
 .dark .stat-box { background: rgba(255,255,255,.06); border-color: #334155; }

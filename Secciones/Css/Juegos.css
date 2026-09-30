@@ -197,6 +197,7 @@ body.level-lock-modal-open { overflow: hidden; }
   color: var(--white); cursor: pointer; transition: opacity .2s;
 }
 .btn-play:hover { opacity: .88; }
+.btn-play[aria-disabled="true"] { opacity: .62; cursor: not-allowed; }
 .btn-A1 { background: var(--green); box-shadow: 0 4px 0 var(--green-d); }
 .btn-A2 { background: var(--blue);  box-shadow: 0 4px 0 var(--blue-d); }
 .btn-B1 { background: var(--purple);box-shadow: 0 4px 0 var(--purple-d); }

@@ -282,8 +282,9 @@
         }
 
         .btn-action.continue {
-            background: var(--blue);
-            box-shadow: 0 4px 0 var(--blue-shadow);
+            background: var(--green);
+            color: #000;
+            box-shadow: 0 4px 0 var(--green-shadow);
         }
 
         /* ======================================================================
@@ -344,6 +345,7 @@
         html.dark .audio-progress-container { background: #334155; }
 
         html.dark .btn-action { background: #334155; color: #94a3b8; }
+        html.dark .btn-action.active.continue { background: var(--green); color: #000; box-shadow: 0 4px 0 var(--green-shadow); }
 
         html.dark .lock-hint { background: #3a1f24; border-color: #7f2b32; color: #fca5a5; }
 
@@ -486,6 +488,7 @@
         @keyframes beam-spin { to { --beam: 360deg; } }
         @media (prefers-reduced-motion: reduce) { .listening-card::before { animation: none; } }
         .listening-card:hover  { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,.20); }
+        .listening-card[aria-disabled="true"] { opacity: .62; cursor: not-allowed; }
         .listening-card:active { transform: translateY(1px);  box-shadow: var(--egg-shadow); }
 
         /* Texto sobre la imagen: degradado oscuro abajo para que siempre se lea */
@@ -1158,7 +1161,7 @@
         .hover-circle-btn:hover:not(:disabled) .hover-circle{width:250%;height:250%}
         /* presión al pasar el cursor (igual que .btn-check / .btn-next de Juegos) */
         .btn-action.active:hover:not(:active){transform:translateY(1px);box-shadow:0 3px 0 var(--green-shadow)}
-        .btn-action.active.continue:hover:not(:active){box-shadow:0 3px 0 var(--blue-shadow)}
+        .btn-action.active.continue:hover:not(:active){box-shadow:0 3px 0 var(--green-shadow)}
         .completion-btn-retry:hover:not(:active){transform:translateY(1px);box-shadow:0 3px 0 var(--blue-shadow)}
         @media (prefers-reduced-motion:reduce){.hover-circle-btn .hover-circle{transition:none}}
     </style>
@@ -1852,10 +1855,17 @@
     function escuchaCardKey(level, cardIndex) { return `${level}::${cardIndex}`; }
 
     // ── PUNTOS: solo la 1.ª vez que se hace cada audio suma puntos (igual que en Juegos) ──
-    // La partida se cuenta al EMPEZAR, así no se puede abandonar para repetir con puntos.
-    // Después puede repetirlo todas las veces que quiera, pero ya no suma (se avisa en la tarjeta).
+    // Solo se cuentan las partidas completas; abandonar no consume los puntos.
+    // Después de completar una, puede repetir sin sumar puntos.
     const POINT_PLAYS = 1;
-    function escuchaPlaysOf(level, cardIndex) { return escuchaProgress.plays[escuchaCardKey(level, cardIndex)] || 0; }
+    function escuchaPlaysOf(level, cardIndex) {
+        const key = escuchaCardKey(level, cardIndex);
+        // Omite conteos heredados de audios abandonados antes de completarlos.
+        return (escuchaProgress.done[key] || escuchaProgress.intentado[key]) ? (escuchaProgress.plays[key] || 0) : 0;
+    }
+    function isListeningCardUnlocked(level, cardIndex) {
+        return cardIndex <= 0 || !!escuchaProgress.done[escuchaCardKey(level, cardIndex - 1)];
+    }
 
     /** Los niveles POR DEBAJO del nivel obtenido en el placement test se dan
      *  por superados: se marcan TODAS sus tarjetas de audio como completadas
@@ -2539,11 +2549,14 @@
             const key = escuchaCardKey(libraryLevel, i);
             const completado = !!escuchaProgress.done[key];
             const pendientePorErrores = !completado && !!escuchaProgress.intentado[key];
+            const bloqueado = !isListeningCardUnlocked(libraryLevel, i);
             // Ya lo hizo al menos una vez: puede repetirlo, pero ya no suma puntos (tarjeta en rojo)
             const sinPuntos = escuchaPlaysOf(libraryLevel, i) >= POINT_PLAYS;
 
             const btn = document.createElement('button');
             btn.type = 'button';
+            btn.setAttribute('aria-disabled', bloqueado ? 'true' : 'false');
+            btn.title = bloqueado ? 'Completa la tarjeta anterior sin errores para desbloquear esta' : '';
             btn.className = 'listening-card ' + card.color
                 + (completado ? ' listening-card-done' : '')
                 + (pendientePorErrores ? ' listening-card-retry' : '')
@@ -2559,7 +2572,13 @@
                     ${sinPuntos ? `<span class="listening-card-note nopoints">Si haces este audio no te sumará más puntos</span>` : ''}
                 </span>
             `;
-            btn.addEventListener('click', () => startLessonAt(libraryLevel, i));
+            btn.addEventListener('click', () => {
+                if (bloqueado) {
+                    showLevelNoticeModal('Completa la tarjeta anterior sin errores para desbloquear esta.');
+                    return;
+                }
+                startLessonAt(libraryLevel, i);
+            });
             listeningGrid.appendChild(btn);
         });
     }
@@ -2571,12 +2590,14 @@
 
     // level: 'A1' | 'A2' | 'B1' | 'B2'  ·  cardIndex: índice de la tarjeta/tema dentro del nivel
     function startLessonAt(level, cardIndex) {
+        if (!isListeningCardUnlocked(level, cardIndex)) {
+            showLevelNoticeModal('Completa la tarjeta anterior sin errores para desbloquear esta.');
+            return;
+        }
         STATE.level    = level;
         STATE.cardIndex = cardIndex;
-        // Cuenta la partida y decide si esta vez suma puntos (solo la primera).
-        escuchaProgress.plays[escuchaCardKey(level, cardIndex)] = escuchaPlaysOf(level, cardIndex) + 1;
-        STATE.conPuntos = escuchaPlaysOf(level, cardIndex) <= POINT_PLAYS;
-        saveEscuchaProgress();
+        // Los intentos incompletos no consumen puntos ni cambian el color.
+        STATE.conPuntos = escuchaPlaysOf(level, cardIndex) < POINT_PLAYS;
         if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
         document.querySelector('.audio-panel').style.display = 'flex';
         const bottomSection = document.querySelector('.bottom-section');
@@ -2827,6 +2848,7 @@
         const key = escuchaCardKey(STATE.level, STATE.cardIndex);
         const yaTeniaCheck = !!escuchaProgress.done[key];
         const perfecto = STATE.correctInLevel === total;
+        escuchaProgress.plays[key] = escuchaPlaysOf(STATE.level, STATE.cardIndex) + 1;
         const unlockedIdxAntes = getUnlockedEscuchaLevelIdx();
         if (perfecto) {
             escuchaProgress.done[key] = true;

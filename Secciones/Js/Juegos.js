@@ -632,7 +632,18 @@ const gamesProgress = loadGamesProgress();
 // ══════════════════════════════════════════
 const LEVEL_POINTS = { A1: 20, A2: 30, B1: 40, B2: 50 };
 const POINT_PLAYS = 1;
-function playsOf(level, id) { return gamesProgress.plays[gameDoneKey(level, id)] || 0; }
+function playsOf(level, id) {
+  const key = gameDoneKey(level, id);
+  // Ignora conteos antiguos de partidas abandonadas: solo hay intento
+  // consumido si quedó guardado un resultado completo.
+  return (gamesProgress.done[key] || gamesProgress.intentado[key]) ? (gamesProgress.plays[key] || 0) : 0;
+}
+
+function isGameCardUnlocked(level, gameId) {
+  const games = GAMES.filter(g => g.levels.includes(level));
+  const index = games.findIndex(g => g.id === gameId);
+  return index <= 0 || !!gamesProgress.done[gameDoneKey(level, games[index - 1].id)];
+}
 // Puntos por respuesta correcta = puntos del nivel / preguntas (mantiene el  en vivo coherente)
 function pointsPerQ() { return Math.max(1, Math.round((LEVEL_POINTS[currentLevel] || 20) / (totalQ || 5))); }
 
@@ -763,6 +774,7 @@ function buildGrid(level) {
     const key = gameDoneKey(level, g.id);
     const completado = !!gamesProgress.done[key];
     const pendientePorErrores = !completado && !!gamesProgress.intentado[key];
+    const bloqueado = !isGameCardUnlocked(level, g.id);
 
     const item = document.createElement('div');
     item.className = 'game-card-item';
@@ -788,7 +800,7 @@ function buildGrid(level) {
       <div class="game-card-desc">${g.desc}</div>
       ${pendientePorErrores ? `<div class="game-card-warning" style="margin:6px 0 4px;padding:6px 8px;border-radius:8px;background:#ffe8c2;color:#9a5b00;font-size:0.78rem;font-weight:700;text-align:center;">Debes completar esta sin errores para poder avanzar</div>` : ''}
       ${playInfo ? `<div class="game-card-plays" style="font-size:.85rem;font-weight:800;margin:6px 0;text-align:center;color:#ef4444;">${playInfo}</div>` : ''}
-      <button class="btn-play btn-${level} hover-circle-btn" onclick="startGame('${g.id}','${level}')"><span class="hover-circle"></span><span class="btn-label">${completado ? 'Repasar' : (pendientePorErrores ? 'Reintentar' : 'Jugar')}</span></button>
+      <button class="btn-play btn-${level} hover-circle-btn" ${bloqueado ? 'aria-disabled="true" title="Completa la tarjeta anterior sin errores para desbloquear esta"' : ''} onclick="startGame('${g.id}','${level}')"><span class="hover-circle"></span><span class="btn-label">${bloqueado ? 'Bloqueado' : (completado ? 'Repasar' : (pendientePorErrores ? 'Reintentar' : 'Jugar'))}</span></button>
       </div>
     `;
     grid.appendChild(item);
@@ -898,6 +910,10 @@ if (document.readyState === 'loading') {
 // ══════════════════════════════════════════
 
 function startGame(gameId, level) {
+  if (!isGameCardUnlocked(level, gameId)) {
+    showLevelNoticeModal('Completa la tarjeta anterior sin errores para desbloquear esta.');
+    return;
+  }
   launchGame(gameId, level);
 }
 
@@ -910,10 +926,8 @@ function launchGame(gameId, level) {
   currentLevel = level;
   currentQ     = 0;
   score        = 0;
-  // La partida cuenta al empezar (así no se puede abandonar para repetir con puntos)
-  gamesProgress.plays[gameDoneKey(level, gameId)] = playsOf(level, gameId) + 1;
-  document.body.classList.toggle('game-no-points', playsOf(level, gameId) > POINT_PLAYS);
-  saveGamesProgress();
+  // Una partida solo consume el intento con puntos al llegar a resultados.
+  document.body.classList.toggle('game-no-points', playsOf(level, gameId) >= POINT_PLAYS);
 
   switch (def.engine) {
     case 'mc':     startMC(gameId, level);     break;
@@ -1438,6 +1452,8 @@ function showResults(gameName) {
 
   const perfecto = pct === 1;
   const yaTeniaCheck = !!gamesProgress.done[gameDoneKey(currentLevel, currentGame)];
+  gamesProgress.plays[gameDoneKey(currentLevel, currentGame)] = playsOf(currentLevel, currentGame) + 1;
+  saveGamesProgress();
 
   if (window.SoundManager) {
     SoundManager.playVictory();
